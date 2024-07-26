@@ -14,4 +14,16 @@ describe Graph do
       assert_includes graph.vertices, 'B'
     end
   end
+
+  describe '#add_edge' do
+    it 'adds an edge to the graph' do
+      graph = Graph.new
+      graph.add_vertex('A')
+      graph.add_vertex('B')
+      graph.add_edge('A', 'B')
+
+      assert_equal 1, graph.edges.size
+      assert_equal ['A', 'B'], graph.edges.first
+    end
+  end
 end
