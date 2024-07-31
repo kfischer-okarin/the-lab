@@ -1,0 +1,3 @@
+[submodule "2024-07-31-hammerspoon-work-setup/hammerspoon-spoons"]
+	path = 2024-07-31-hammerspoon-work-setup/hammerspoon-spoons
+	url = git@github.com:kfischer-okarin/hammerspoon-spoons.git
