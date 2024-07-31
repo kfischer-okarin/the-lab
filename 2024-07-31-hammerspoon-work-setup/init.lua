@@ -72,3 +72,8 @@ if menu then
   menu:setTitle('Shortcuts')
   menu:setMenu(openMenu)
 end
+
+-- Or you could use: hs.chooser
+-- Or hotkeys: hs.hotkey.bind
+-- Or via Stream Deck Integration: hs.streamdeck
+-- Or via command line using: hs.ipc
