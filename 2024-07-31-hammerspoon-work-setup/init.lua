@@ -3,16 +3,26 @@ hs.loadSpoon('Slack')
 
 REMOTE_CHANNEL = '1_remote'
 
+function sendToRemoteChannel(message)
+  spoon.Slack.sendMessageToChannel(REMOTE_CHANNEL, message)
+end
+
 WORK_START_MESSAGE = '・おはようございます'
-WORK_FINISH_MESSAGE = '・終了'
-LUNCHBREAK_START_MESSAGE = '・昼休憩します :bento:'
-LUNCHBREAK_FINISH_MESSAGE = '・再開'
-LUNCHBREAK_STATUS_MESSAGE = '昼休憩中'
-LUNCHBREAK_STATUS_EMOJI = ':bento:'
 
 function startWork()
   sendToRemoteChannel(WORK_START_MESSAGE)
 end
+
+WORK_FINISH_MESSAGE = '・終了'
+
+function finishWork()
+  sendToRemoteChannel(WORK_FINISH_MESSAGE)
+end
+
+LUNCHBREAK_START_MESSAGE = '・昼休憩します :bento:'
+LUNCHBREAK_FINISH_MESSAGE = '・再開'
+LUNCHBREAK_STATUS_MESSAGE = '昼休憩中'
+LUNCHBREAK_STATUS_EMOJI = ':bento:'
 
 function startLunchbreak()
   spoon.Slack.toggleAway()
@@ -39,14 +49,6 @@ function startLunchbreakCountdown()
     }
   )
   lunchbreakCountdown:start()
-end
-
-function finishWork()
-  sendToRemoteChannel(WORK_FINISH_MESSAGE)
-end
-
-function sendToRemoteChannel(message)
-  spoon.Slack.sendMessageToChannel(REMOTE_CHANNEL, message)
 end
 
 menu = hs.menubar.new()
