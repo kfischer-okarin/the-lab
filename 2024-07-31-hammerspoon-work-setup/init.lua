@@ -10,24 +10,6 @@ LUNCHBREAK_FINISH_MESSAGE = '・再開'
 LUNCHBREAK_STATUS_MESSAGE = '昼休憩中'
 LUNCHBREAK_STATUS_EMOJI = ':bento:'
 
-
-function openMenu()
-  return {
-    {
-      title = "Start Work",
-      fn = startWork
-    },
-    {
-      title = "Start Lunchbreak",
-      fn = startLunchbreak
-    },
-    {
-      title = "Finish Work",
-      fn = finishWork
-    }
-  }
-end
-
 function startWork()
   sendToRemoteChannel(WORK_START_MESSAGE)
 end
@@ -68,6 +50,23 @@ function sendToRemoteChannel(message)
 end
 
 menu = hs.menubar.new()
+
+function openMenu()
+  return {
+    {
+      title = "Start Work",
+      fn = startWork
+    },
+    {
+      title = "Start Lunchbreak",
+      fn = startLunchbreak
+    },
+    {
+      title = "Finish Work",
+      fn = finishWork
+    }
+  }
+end
 
 if menu then
   menu:setTitle('Shortcuts')
