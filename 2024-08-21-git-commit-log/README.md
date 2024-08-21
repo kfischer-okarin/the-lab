@@ -14,11 +14,11 @@ Git commits as an effective first step.
 
 ## Usage
 
-1. Make sure your Emacs Server is running (for example by adding `(server-start)` to your Emacs configuration).
+1. Ensure that your Emacs Server is running. You can do this by adding `(server-start)` to your Emacs configuration.
 
-2. Add the definitions in [`git-commit-capture.el`](./git-commit-capture.el) to your Emacs configuration.
+2. Include the definitions from [`git-commit-capture.el`](./git-commit-capture.el) in your Emacs configuration.
 
-3. Add following capture template to your `org-capture-templates` variable.
+3. Add the following capture template to your `org-capture-templates` variable:
 
    ```elisp
    ("g" "Git Commit" entry
@@ -28,9 +28,9 @@ Git commits as an effective first step.
     :empty-lines 1)
    ```
 
-   Make sure the letter of the template and the letter specified in `kf-org-capture-commit` match.
+   Ensure that the template's letter matches the letter specified in `kf-org-capture-commit`.
 
-4. Prepare a global git hook directory if necessary.
+4. If necessary, set up a global Git hook directory:
 
    Example:
    ```sh
@@ -38,10 +38,10 @@ Git commits as an effective first step.
    git config --global core.hooksPath ~/.config/git/hooks
    ```
 
-5. Store the [`org-capture-last-commit`](./org-capture-last-commit) script somewhere
+5. Store the [`org-capture-last-commit`](./org-capture-last-commit) script in a suitable location.
 
-6. Add following line to your global `post-commit` git-hook script (make sure to specify the actual path to your script
-   location).
+6. Add the following line to your global `post-commit` Git hook script, making sure to specify the correct path to your
+   `org-capture-last-commit` script:
 
    ```sh
    org-capture-last-commit || true # ignore errors
