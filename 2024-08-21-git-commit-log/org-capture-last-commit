@@ -20,3 +20,7 @@ fi
 elisp_code="(kf-org-capture-commit \"$repository\" \"$current_branch\" \"$last_commit_hash\" \"$last_commit_message\")"
 
 emacsclient -e "$elisp_code" > /dev/null
+
+# Alternatively you could also just append the information to a file
+#
+# echo "$repository $current_branch $last_commit_hash $last_commit_message" >> ~/commits.log
