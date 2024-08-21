@@ -1,0 +1,22 @@
+#!/bin/sh
+
+repository=$(git rev-parse --show-toplevel)
+current_branch=$(git branch --show-current)
+last_commit_hash=$(git log -1 --pretty=format:%h)
+last_commit_message=$(git log -1 --pretty=format:%s)
+
+
+# ignore transient commits during rebase/autosquash/fixup
+if [ -z "$current_branch" ]; then
+    exit 0
+fi
+
+# ignore when commit message contains fixup!
+if echo "$last_commit_message" | grep -q fixup!; then
+    exit 0
+fi
+
+
+elisp_code="(kf-org-capture-commit \"$repository\" \"$current_branch\" \"$last_commit_hash\" \"$last_commit_message\")"
+
+emacsclient -e "$elisp_code" > /dev/null
