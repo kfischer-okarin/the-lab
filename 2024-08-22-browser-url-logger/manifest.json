@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "URL Logger",
+  "version": "1.0",
+  "description": "Logs every URL you visit",
+  "author": "Kevin Fischer",
+  "permissions": [
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  }
+}
