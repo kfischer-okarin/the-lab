@@ -3,6 +3,12 @@ if (typeof browser == "undefined") {
   globalThis.browser = chrome;
 }
 
+const loggerPort = browser.runtime.connectNative("com.my_private_extension.url_logger");
+
+loggerPort.onMessage.addListener((message) => {
+  console.log("Received: " + message);
+});
+
 const freshlyReloadedTabIds = new Set();
 
 browser.tabs.onActivated.addListener(async (activeInfo) => {
@@ -33,6 +39,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 const logURL = (tab) => {
   const timestamp = new Date().toISOString();
 
-  // TODO Use Native Messaging to send the URL to the logging daemon
-  console.log(timestamp, tab.url, tab.title);
+  const message = { timestamp, url: tab.url, title: tab.title };
+  console.log(`Sending: ${JSON.stringify(message)}`);
+  port.postMessage(message);
 };

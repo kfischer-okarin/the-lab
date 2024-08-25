@@ -4,11 +4,16 @@
   "version": "1.0",
   "description": "Logs every URL you visit",
   "author": "Kevin Fischer",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "url_logger@my_private_extension.com"
+    }
+  },
   "permissions": [
+    "nativeMessaging",
     "tabs"
   ],
   "background": {
-    "service_worker": "background.js",
     "scripts": ["background.js"]
   }
 }
