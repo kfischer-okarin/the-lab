@@ -3,7 +3,7 @@
 require 'json'
 require 'logger'
 
-LOGGER = Logger.new('url_logger.log')
+LOGGER = Logger.new('url_logger.log', 2)
 
 def read_extension_native_message
   length = $stdin.read(4)&.unpack1('L')
