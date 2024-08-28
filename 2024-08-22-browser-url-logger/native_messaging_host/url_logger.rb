@@ -3,6 +3,8 @@
 require 'json'
 require 'logger'
 
+ENV['PATH'] += ':/opt/homebrew/bin/' # Add homebrew path to find emacsclient
+
 LOGGER = Logger.new('url_logger.log', 2)
 
 def main
