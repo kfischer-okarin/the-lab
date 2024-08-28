@@ -41,5 +41,5 @@ const logURL = (tab) => {
 
   const message = { timestamp, url: tab.url, title: tab.title };
   console.log(`Sending: ${JSON.stringify(message)}`);
-  port.postMessage(message);
+  loggerPort.postMessage(message);
 };
