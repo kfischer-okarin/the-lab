@@ -18,7 +18,7 @@ end
 
 def write_extension_native_message(message)
   message = message.to_json
-  length = [message.length].pack('L')
+  length = [message.bytesize].pack('L')
   $stdout.write(length)
   $stdout.write(message)
   LOGGER.info("written length: #{length.inspect}")
