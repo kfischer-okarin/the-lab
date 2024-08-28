@@ -28,6 +28,7 @@ end
 
 loop do
   message = read_extension_native_message
+  next unless message
 
   write_extension_native_message(message.merge('response' => 'pong'))
 end
