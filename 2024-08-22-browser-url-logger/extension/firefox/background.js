@@ -37,9 +37,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 const logURL = (tab) => {
-  const timestamp = new Date().toISOString();
-
-  const message = { timestamp, url: tab.url, title: tab.title };
+  const message = { url: tab.url, title: tab.title };
   console.log(`Sending: ${JSON.stringify(message)}`);
   loggerPort.postMessage(message);
 };
