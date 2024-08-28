@@ -5,6 +5,15 @@ require 'logger'
 
 LOGGER = Logger.new('url_logger.log', 2)
 
+def main
+  loop do
+    message = read_extension_native_message
+    next unless message
+
+    send_to_emacs(message)
+  end
+end
+
 def read_extension_native_message
   length = $stdin.read(4)&.unpack1('L')
   return nil unless length
@@ -26,9 +35,13 @@ def write_extension_native_message(message)
   $stdout.flush
 end
 
-loop do
-  message = read_extension_native_message
-  next unless message
+def send_to_emacs(message)
+  elisp_code = "(kf-org-capture-url \"#{message['url']}\" \"#{message['title']}\")"
+  command = "emacsclient -e '#{elisp_code}' > /dev/null"
 
-  write_extension_native_message(message.merge('response' => 'pong'))
+  LOGGER.info("executing command: #{command}")
+
+  system command
 end
+
+main if __FILE__ == $PROGRAM_NAME
