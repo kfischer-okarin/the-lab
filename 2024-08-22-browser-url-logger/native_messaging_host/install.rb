@@ -3,22 +3,28 @@
 require 'json'
 require 'pathname'
 
-CURRENT_DIR = Pathname.new(__FILE__).dirname
-MANIFEST_PATH = Pathname.new('~/Library/Application Support/Mozilla/NativeMessagingHosts').expand_path
+def main
+  manifest_dir = Pathname.new('~/Library/Application Support/Mozilla/NativeMessagingHosts').expand_path
+  manifest_dir.mkpath
 
-# generate ~/Library/Application Support/Mozilla/NativeMessagingHosts/com.my_private_extension.url_logger.json
-def generate_manifest
+  manifest_path = manifest_dir / 'com.my_private_extension.url_logger.json'
+  manifest_content = generate_manifest_content
+  puts "Writing manifest file to #{manifest_path}:"
+  puts JSON.pretty_generate(manifest_content)
+
+  File.write(manifest_path, JSON.pretty_generate(manifest_content))
+end
+
+def generate_manifest_content
+  current_dir = Pathname.new(__FILE__).dirname
+
   {
     name: 'com.my_private_extension.url_logger',
     description: 'Logs received URLs',
-    path: (CURRENT_DIR / 'url_logger.rb').realpath,
+    path: (current_dir / 'url_logger.rb').realpath,
     type: 'stdio',
     allowed_extensions: ['url_logger@my_private_extension.com']
   }
 end
 
-json_content = JSON.pretty_generate(generate_manifest)
-MANIFEST_PATH.mkpath
-File.write(MANIFEST_PATH / 'com.my_private_extension.url_logger.json', json_content)
-puts 'Wrote manifest file:'
-puts json_content
+main if __FILE__ == $PROGRAM_NAME
