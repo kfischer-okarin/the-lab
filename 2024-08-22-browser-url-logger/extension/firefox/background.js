@@ -6,7 +6,7 @@ if (typeof browser == "undefined") {
 const loggerPort = browser.runtime.connectNative("com.my_private_extension.url_logger");
 
 loggerPort.onMessage.addListener((message) => {
-  console.log("Received: " + message);
+  console.log("Received: " + JSON.stringify(message));
 });
 
 const freshlyReloadedTabIds = new Set();
