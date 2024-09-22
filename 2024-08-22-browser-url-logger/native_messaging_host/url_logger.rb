@@ -8,6 +8,8 @@ ENV['PATH'] += ':/opt/homebrew/bin/' # Add homebrew path to find emacsclient
 LOGGER = Logger.new('url_logger.log', 2)
 
 def main
+  LOGGER.info('Starting URL logger')
+  LOGGER.info("ENV: #{ENV.inspect}")
   loop do
     message = read_extension_native_message
     next unless message
