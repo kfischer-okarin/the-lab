@@ -16,9 +16,7 @@ browser.tabs.onActivated.addListener(async (activeInfo) => {
   if (!freshlyReloadedTabIds.has(activeInfo.tabId)) {
     const tab = await browser.tabs.get(activeInfo.tabId);
 
-    if (tab.url !== "about:newtab") {
-      logURL(tab);
-    }
+    logURL(tab);
   }
 });
 
@@ -37,6 +35,10 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 const logURL = (tab) => {
+  if (tab.url.startsWith("about:")) {
+    return;
+  }
+
   const message = { url: tab.url, title: tab.title };
   console.log(`Sending: ${JSON.stringify(message)}`);
   loggerPort.postMessage(message);
