@@ -4,7 +4,6 @@ require 'json'
 require 'pathname'
 
 def main
-  manifest_dir = Pathname.new('~/Library/Application Support/Mozilla/NativeMessagingHosts').expand_path
   manifest_dir.mkpath
 
   manifest_path = manifest_dir / 'com.my_private_extension.url_logger.json'
@@ -13,6 +12,11 @@ def main
   puts JSON.pretty_generate(manifest_content)
 
   File.write(manifest_path, JSON.pretty_generate(manifest_content))
+end
+
+def manifest_dir
+  # TODO: Support other browsers & OSes
+  Pathname.new('~/Library/Application Support/Mozilla/NativeMessagingHosts').expand_path
 end
 
 def generate_manifest_content
