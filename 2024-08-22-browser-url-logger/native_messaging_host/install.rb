@@ -4,6 +4,10 @@ require 'json'
 require 'pathname'
 
 def main
+  generate_manifest
+end
+
+def generate_manifest
   manifest_dir.mkpath
 
   manifest_path = manifest_dir / 'com.my_private_extension.url_logger.json'
