@@ -24,15 +24,18 @@ def manifest_dir
 end
 
 def generate_manifest_content
-  current_dir = Pathname.new(__FILE__).dirname
-
   {
     name: 'com.my_private_extension.url_logger',
     description: 'Logs received URLs',
-    path: (current_dir / 'url_logger.rb').realpath,
+    path: wrapper_path.realpath.to_s,
     type: 'stdio',
     allowed_extensions: ['url_logger@my_private_extension.com']
   }
+end
+
+def wrapper_path
+  current_dir = Pathname.new(__FILE__).dirname
+  current_dir / 'url_logger_wrapper.sh'
 end
 
 main if __FILE__ == $PROGRAM_NAME
