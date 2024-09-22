@@ -2,9 +2,8 @@
 
 require 'json'
 require 'logger'
-
-ENV['PATH'] += ':/opt/homebrew/bin/' # Add homebrew path to find emacsclient
 require 'open3'
+require 'shellwords'
 
 LOGGER = Logger.new('url_logger.log', 2)
 
@@ -15,7 +14,7 @@ def main
     message = read_extension_native_message
     next unless message
 
-    send_to_emacs(message)
+    send_to_logger(message)
   end
 end
 
@@ -40,10 +39,10 @@ def write_extension_native_message(message)
   $stdout.flush
 end
 
-def send_to_emacs(message)
-  elisp_code = "(kf-org-capture-url \"#{message['url']}\" \"#{message['title']}\")"
-  command = "emacsclient -e '#{elisp_code}' > /dev/null"
-
+def send_to_logger(message)
+  escaped_url = Shellwords.escape(message['url'])
+  escaped_title = Shellwords.escape(message['title'])
+  command = %Q{#{ENV['LOG_BINARY_PATH']} #{escaped_url} #{escaped_title}}
   LOGGER.info("executing command: #{command}")
 
   output, status = Open3.capture2e(command)
