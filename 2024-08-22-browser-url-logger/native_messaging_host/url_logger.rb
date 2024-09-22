@@ -4,6 +4,7 @@ require 'json'
 require 'logger'
 
 ENV['PATH'] += ':/opt/homebrew/bin/' # Add homebrew path to find emacsclient
+require 'open3'
 
 LOGGER = Logger.new('url_logger.log', 2)
 
@@ -45,7 +46,8 @@ def send_to_emacs(message)
 
   LOGGER.info("executing command: #{command}")
 
-  system command
+  output, status = Open3.capture2e(command)
+  LOGGER.info("status: #{status}, output: #{output}") unless status.success?
 end
 
 main if __FILE__ == $PROGRAM_NAME
