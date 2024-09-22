@@ -7,11 +7,11 @@ def main
   manifest_dir.mkpath
 
   manifest_path = manifest_dir / 'com.my_private_extension.url_logger.json'
-  manifest_content = generate_manifest_content
+  manifest_content_json = JSON.pretty_generate(generate_manifest_content)
   puts "Writing manifest file to #{manifest_path}:"
-  puts JSON.pretty_generate(manifest_content)
+  puts manifest_content_json
 
-  File.write(manifest_path, JSON.pretty_generate(manifest_content))
+  File.write(manifest_path, manifest_content_json)
 end
 
 def manifest_dir
