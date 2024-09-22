@@ -34,12 +34,24 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
+const lastURLAccessTimes = new Map();
+
+const ONE_HOUR = 60 * 60 * 1000;
+
 const logURL = (tab) => {
   if (tab.url.startsWith("about:")) {
+    return;
+  }
+
+  const now = Date.now();
+  const lastAccessTime = lastURLAccessTimes.get(tab.url) || 0;
+  if (now - lastAccessTime < ONE_HOUR) {
     return;
   }
 
   const message = { url: tab.url, title: tab.title };
   console.log(`Sending: ${JSON.stringify(message)}`);
   loggerPort.postMessage(message);
+
+  lastURLAccessTimes.set(tab.url, now);
 };
