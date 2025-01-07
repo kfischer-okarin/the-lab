@@ -22,28 +22,24 @@ class VM
 
     class << self
       def process(instruction)
-        instruction.strip!
-        invalid_instruction!('Missing semicolon', instruction) unless instruction.end_with? ';'
+        parser = InstructionParser.new(instruction)
 
-        instruction.chomp!(';')
-        operation, *operands = instruction.split.map!(&:upcase)
-
-        send("process_#{operation.downcase}", *operands)
+        send("process_#{parser.operation}", parser: parser)
       rescue ArgumentError
         invalid_instruction!('Wrong number of operands', instruction)
       end
 
       private
 
-      def process_add(source, destination, operand)
+      def process_add(parser:)
         result = Operations::ADD << 12
-        result |= parse_register(source) << 9
-        result |= parse_register(destination) << 6
-        if register?(operand)
-          result | parse_register(operand)
+        result |= parser.parse_register! << 9
+        result |= parser.parse_register! << 6
+        if parser.next_operand_is_register?
+          result | parser.parse_register!
         else
           result |= 1 << 5 # immediate mode flag
-          result | operand.to_i
+          result | parser.parse_immediate!
         end
       end
 
@@ -57,6 +53,49 @@ class VM
 
       def invalid_instruction!(message, instruction)
         raise InvalidInstruction, "#{message}: #{instruction}"
+      end
+    end
+
+    class InstructionParser
+      attr_reader :operation
+
+      def initialize(instruction)
+        @instruction = instruction.strip
+        invalid_instruction!('Missing semicolon') unless @instruction.end_with? ';'
+
+        @operation, *@operands = @instruction.chomp(';').split.map!(&:upcase)
+        @operation.downcase!
+        @processed_operand_count = 0
+      end
+
+      def next_operand_is_register?
+        return false unless @operands.first
+
+        @operands.first[0] == 'R'
+      end
+
+      def parse_register!
+        operand = next_operand!
+        operand[1].to_i
+      end
+
+      def parse_immediate!
+        operand = next_operand!
+        operand.to_i
+      end
+
+      private
+
+      def next_operand!
+        result = @operands.shift
+        invalid_instruction!('Wrong number of operands') unless result
+
+        @processed_operand_count += 1
+        result
+      end
+
+      def invalid_instruction!(message)
+        raise InvalidInstruction, "#{message}: '#{@instruction}'"
       end
     end
   end
