@@ -84,7 +84,10 @@ class VM
 
       def parse_immediate!
         operand = next_operand!
-        operand.to_i
+        result = operand.to_i
+        invalid_instruction!("Immediate value out of range (-15..15): #{operand}") unless (-15..15).include?(result)
+
+        result
       end
 
       private

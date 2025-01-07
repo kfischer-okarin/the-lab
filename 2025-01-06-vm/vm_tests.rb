@@ -37,7 +37,8 @@ describe VM do
     [
       ['ADD R2 R0 R1', /Missing semicolon:/],
       ['ADD R2 R0;', /Wrong number of operands/],
-      ['ADD 1 R0 R1;', /Expected register as operand 1/]
+      ['ADD 1 R0 R1;', /Expected register as operand 1/],
+      ['ADD R0 R1 16;', /Immediate value out of range \(-15..15\):/]
     ].each do |instruction, expected_message|
       it "raises an error for invalid instruction '#{instruction}'" do
         VM::Assembler.process(instruction)
