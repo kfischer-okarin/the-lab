@@ -29,6 +29,10 @@ class VM
         invalid_instruction!('Wrong number of operands', instruction)
       end
 
+      def two_complement(value, bits:)
+        (1 << (bits + 1) - 1) - value
+      end
+
       private
 
       def process_add(parser:)
@@ -87,6 +91,7 @@ class VM
         result = operand.to_i
         invalid_instruction!("Immediate value out of range (-15..15): #{operand}") unless (-15..15).include?(result)
 
+        result = VM::Assembler.two_complement(result.abs, bits: 5) if result.negative?
         result
       end
 

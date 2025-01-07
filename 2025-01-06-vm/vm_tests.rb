@@ -25,8 +25,9 @@ describe VM do
 
   describe VM::Assembler do
     [
-      ['ADD R2 R0 R1;', '0001010000000001'],
-      ['ADD R3 R4 1;',  '0001011100100001']
+      ['ADD R2 R0 R1;',   '0001010000000001'],
+      ['ADD R3 R4 1;',    '0001011100100001'],
+      ['ADD R6 R7 -12;',  '0001110111110100']
     ].each do |instruction, expected|
       it "can assemble '#{instruction}'" do
         instruction = VM::Assembler.process(instruction)
@@ -49,6 +50,11 @@ describe VM do
                      e.message,
                      "Expected error message to include: #{instruction}, but got: #{e.message}"
       end
+    end
+
+    it 'can calculate the two complement of a number' do
+      assert_equal 0b1111, VM::Assembler.two_complement(0b0001, bits: 4)
+      assert_equal 0b1111111111111111, VM::Assembler.two_complement(0b0000000000000001, bits: 16)
     end
   end
 end
