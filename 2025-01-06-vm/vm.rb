@@ -75,6 +75,9 @@ class VM
       end
 
       def parse_register!
+        unless next_operand_is_register?
+          invalid_instruction!("Expected register as operand #{@processed_operand_count + 1}")
+        end
         operand = next_operand!
         operand[1].to_i
       end
