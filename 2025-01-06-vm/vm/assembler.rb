@@ -24,7 +24,7 @@ class VM
           result | parser.parse_register!
         else
           result |= 1 << 5 # immediate mode flag
-          result | parser.parse_immediate!
+          result | parser.parse_immediate!(bits: 5)
         end
       end
     end
@@ -55,12 +55,14 @@ class VM
         operand[1].to_i
       end
 
-      def parse_immediate!
+      def parse_immediate!(bits:)
         operand = next_operand!
         result = operand.to_i
-        invalid_instruction!("Immediate value out of range (-15..15): #{operand}") unless (-15..15).include?(result)
+        max = (1 << (bits - 1)) - 1
+        range = (-max)..max
+        invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
 
-        VM::TwoComplement.encode(result, bits: 5)
+        VM::TwoComplement.encode(result, bits: bits)
       end
 
       private
