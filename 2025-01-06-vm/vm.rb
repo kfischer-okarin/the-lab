@@ -3,7 +3,7 @@ require_relative 'vm/operations'
 require_relative 'vm/two_complement'
 
 class VM
-  attr_reader :memory, :registers
+  attr_reader :memory, :registers, :condition_flag
 
   attr_accessor :pc
 
@@ -11,6 +11,7 @@ class VM
     @memory = Array.new(0xFFFF, 0)
     @registers = Array.new(8, 0)
     @pc = 0x3000
+    @condition_flag = 0
   end
 
   def execute_instruction
@@ -34,10 +35,15 @@ class VM
              end
 
     @registers[destination_register_index] = result
+    update_condition_flag(result)
   end
 
   def bits(bit, count)
     mask = (1 << count) - 1
     (@memory[@pc] >> bit) & mask
+  end
+
+  def update_condition_flag(result)
+    @condition_flag = result <=> 0
   end
 end

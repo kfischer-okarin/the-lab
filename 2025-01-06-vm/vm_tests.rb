@@ -57,5 +57,22 @@ describe VM do
 
       assert_equal(-2, vm.registers[2])
     end
+
+    [
+      ['zero', 1, -1, 0],
+      ['positive', 1, 1, 1],
+      ['negative', -1, -1, -1]
+    ].each do |description, operand1, operand2, expected|
+      it "sets the condition flag to #{expected} if the result is #{description}" do
+        vm.registers[0] = operand1
+        vm.registers[1] = operand2
+        vm.pc = 0x3000
+        vm.memory[0x3000] = VM::Assembler.process('ADD R2 R0 R1;')
+
+        vm.execute_instruction
+
+        assert_equal expected, vm.condition_flag
+      end
+    end
   end
 end
