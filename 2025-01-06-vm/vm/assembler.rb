@@ -14,7 +14,7 @@ class VM
       end
 
       def two_complement(value, bits:)
-        (1 << (bits + 1) - 1) - value
+        (2 << bits - 1) - value
       end
 
       private
