@@ -30,9 +30,4 @@ describe VM::Assembler do
                      "Expected error message to include: #{instruction}, but got: #{e.message}"
     end
   end
-
-  it 'can calculate the two complement of a number' do
-    assert_equal 0b1111, VM::Assembler.two_complement(0b0001, bits: 4)
-    assert_equal 0b1111111111111111, VM::Assembler.two_complement(0b0000000000000001, bits: 16)
-  end
 end

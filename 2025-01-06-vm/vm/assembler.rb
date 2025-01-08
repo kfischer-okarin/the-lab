@@ -1,4 +1,5 @@
 require_relative 'operations'
+require_relative 'two_complement'
 
 class VM
   module Assembler
@@ -11,10 +12,6 @@ class VM
         send("process_#{parser.operation}", parser: parser)
       rescue ArgumentError
         invalid_instruction!('Wrong number of operands', instruction)
-      end
-
-      def two_complement(value, bits:)
-        (2 << bits - 1) - value
       end
 
       private
@@ -75,8 +72,7 @@ class VM
         result = operand.to_i
         invalid_instruction!("Immediate value out of range (-15..15): #{operand}") unless (-15..15).include?(result)
 
-        result = VM::Assembler.two_complement(result.abs, bits: 5) if result.negative?
-        result
+        VM::TwoComplement.encode(result, bits: 5)
       end
 
       private
