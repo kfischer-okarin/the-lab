@@ -4,10 +4,14 @@ class VM
 
     class << self
       def operation_with_opcode(opcode)
-        case opcode
-        when ADD
-          :add
+        unless @operations
+          @operations = []
+          constants.each do |constant|
+            @operations[const_get(constant)] = constant.downcase
+          end
         end
+
+        @operations[opcode]
       end
     end
   end
