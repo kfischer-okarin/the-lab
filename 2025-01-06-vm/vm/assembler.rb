@@ -68,8 +68,7 @@ class VM
         else
           result = operand.to_i
         end
-        max = (1 << (bits - 1)) - 1
-        range = (-max)..max
+        range = TwoComplement.value_range(bits: bits)
         invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
 
         VM::TwoComplement.encode(result, bits: bits)

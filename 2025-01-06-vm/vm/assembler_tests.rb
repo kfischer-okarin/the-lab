@@ -19,8 +19,8 @@ describe VM::Assembler do
     ['ADD R2 R0 R1', /Missing semicolon:/],
     ['ADD R2 R0;', /Wrong number of operands/],
     ['ADD 1 R0 R1;', /Expected register as operand 1/],
-    ['ADD R0 R1 16;', /Immediate value out of range \(-15..15\):/],
-    ['LDI R2 256;', /Immediate value out of range \(-255..255\):/]
+    ['ADD R0 R1 16;', /Immediate value out of range \(-16..15\):/],
+    ['LDI R2 256;', /Immediate value out of range \(-256..255\):/]
   ].each do |instruction, expected_message|
     it "raises an error for invalid instruction '#{instruction}'" do
       VM::Assembler.process(instruction)

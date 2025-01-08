@@ -19,6 +19,11 @@ class VM
         end
       end
 
+      def value_range(bits:)
+        max = 1 << (bits - 1)
+        (-max)..(max - 1)
+      end
+
       private
 
       def two_complement(value, bits:)
