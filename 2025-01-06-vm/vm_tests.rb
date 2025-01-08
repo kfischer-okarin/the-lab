@@ -14,12 +14,38 @@ describe VM do
   end
 
   describe 'executing one instruction' do
+    let(:a_valid_instruction) { VM::Assembler.process('ADD R2 R0 R1;') }
+
     it 'increments the program counter' do
       vm.pc = 0x4000
+      vm.memory[0x4000] = a_valid_instruction
 
       vm.execute_instruction
 
       assert_equal 0x4001, vm.pc
+    end
+  end
+
+  describe 'instruction ADD' do
+    it 'can add two registers' do
+      vm.registers[0] = 1
+      vm.registers[1] = 2
+      vm.pc = 0x3000
+      vm.memory[0x3000] = VM::Assembler.process('ADD R2 R0 R1;')
+
+      vm.execute_instruction
+
+      assert_equal 3, vm.registers[2]
+    end
+
+    it 'can add a register and an immediate value' do
+      vm.registers[0] = 1
+      vm.pc = 0x3000
+      vm.memory[0x3000] = VM::Assembler.process('ADD R2 R0 3;')
+
+      vm.execute_instruction
+
+      assert_equal 4, vm.registers[2]
     end
   end
 end
