@@ -2,37 +2,35 @@ require_relative 'operations'
 require_relative 'two_complement'
 
 class VM
-  module Assembler
+  class Assembler
     class InvalidInstruction < StandardError; end
 
-    class << self
-      def process(instruction)
-        parser = InstructionParser.new(instruction)
+    def process(instruction)
+      parser = InstructionParser.new(instruction)
 
-        send("process_#{parser.operation}", parser: parser)
-      rescue ArgumentError
-        invalid_instruction!('Wrong number of operands', instruction)
+      send("process_#{parser.operation}", parser: parser)
+    rescue ArgumentError
+      invalid_instruction!('Wrong number of operands', instruction)
+    end
+
+    private
+
+    def process_add(parser:)
+      result = Operations::ADD << 12
+      result |= parser.parse_register! << 9
+      result |= parser.parse_register! << 6
+      if parser.next_operand_is_register?
+        result | parser.parse_register!
+      else
+        result |= 1 << 5 # immediate mode flag
+        result | parser.parse_immediate!(bits: 5)
       end
+    end
 
-      private
-
-      def process_add(parser:)
-        result = Operations::ADD << 12
-        result |= parser.parse_register! << 9
-        result |= parser.parse_register! << 6
-        if parser.next_operand_is_register?
-          result | parser.parse_register!
-        else
-          result |= 1 << 5 # immediate mode flag
-          result | parser.parse_immediate!(bits: 5)
-        end
-      end
-
-      def process_ldi(parser:)
-        result = Operations::LDI << 12
-        result |= parser.parse_register! << 9
-        result | parser.parse_immediate!(bits: 9)
-      end
+    def process_ldi(parser:)
+      result = Operations::LDI << 12
+      result |= parser.parse_register! << 9
+      result | parser.parse_immediate!(bits: 9)
     end
 
     class InstructionParser

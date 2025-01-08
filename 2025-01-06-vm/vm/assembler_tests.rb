@@ -10,7 +10,8 @@ describe VM::Assembler do
     ['LDI R1 0x010;',   '1010001000010000']
   ].each do |instruction, expected|
     it "can assemble '#{instruction}'" do
-      instruction = VM::Assembler.process(instruction)
+      assembler = VM::Assembler.new
+      instruction = assembler.process(instruction)
       assert_equal expected, format('%016b', instruction)
     end
   end
@@ -23,7 +24,8 @@ describe VM::Assembler do
     ['LDI R2 256;', /Immediate value out of range \(-256..255\):/]
   ].each do |instruction, expected_message|
     it "raises an error for invalid instruction '#{instruction}'" do
-      VM::Assembler.process(instruction)
+      assembler = VM::Assembler.new
+      assembler.process(instruction)
       assert false, "Expected error: #{expected_message}"
     rescue VM::Assembler::InvalidInstruction => e
       assert_match expected_message, e.message, "Expected error message: #{expected_message}, but got: #{e.message}"
