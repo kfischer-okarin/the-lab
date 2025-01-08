@@ -26,7 +26,7 @@ describe VM do
     end
   end
 
-  describe 'instruction ADD' do
+  describe 'ADD' do
     it 'can add two registers' do
       vm.registers[0] = 1
       vm.registers[1] = 2
@@ -68,6 +68,36 @@ describe VM do
         vm.registers[1] = operand2
         vm.pc = 0x3000
         vm.memory[0x3000] = VM::Assembler.process('ADD R2 R0 R1;')
+
+        vm.execute_instruction
+
+        assert_equal expected, vm.condition_flag
+      end
+    end
+  end
+
+  describe 'LDI' do
+    it 'loads the value stored at address stored in the relative address specified by the immediate value' do
+      vm.memory[0x3000] = VM::Assembler.process('LDI R0 0x50;')
+      vm.memory[0x3051] = 0x5000
+      vm.memory[0x5000] = 42
+      vm.pc = 0x3000
+
+      vm.execute_instruction
+
+      assert_equal 42, vm.registers[0]
+    end
+
+    [
+      ['zero', 0,  0],
+      ['positive', 1, 1],
+      ['negative', -1, -1]
+    ].each do |description, value, expected|
+      it "sets the condition flag to #{expected} if the loaded value is #{description}" do
+        vm.memory[0x3000] = VM::Assembler.process('LDI R0 1;')
+        vm.memory[0x3002] = 0x5000
+        vm.memory[0x5000] = value
+        vm.pc = 0x3000
 
         vm.execute_instruction
 

@@ -62,6 +62,15 @@ class VM
     update_condition_flag(result)
   end
 
+  def execute_ldi(instruction)
+    destination_register_index = instruction.value_at_bit(9, 3)
+    pc_offset = instruction.two_complement_value_at_bit(0, 9)
+    target_address = @memory[@pc + pc_offset]
+    result = @memory[target_address]
+    @registers[destination_register_index] = result
+    update_condition_flag(result)
+  end
+
   def update_condition_flag(result)
     @condition_flag = result <=> 0
   end
