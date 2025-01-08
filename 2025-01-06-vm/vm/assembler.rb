@@ -1,3 +1,5 @@
+require_relative 'operations'
+
 class VM
   module Assembler
     class InvalidInstruction < StandardError; end

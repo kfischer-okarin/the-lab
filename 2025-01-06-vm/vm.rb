@@ -1,4 +1,5 @@
 require_relative 'vm/assembler'
+require_relative 'vm/operations'
 
 class VM
   attr_reader :memory, :registers
@@ -13,9 +14,5 @@ class VM
 
   def execute_instruction
     @pc += 1
-  end
-
-  module Operations
-    ADD = 0b0001
   end
 end

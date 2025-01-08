@@ -1,6 +1,6 @@
 require 'minitest/autorun'
 
-require_relative '../vm'
+require_relative 'assembler'
 
 describe VM::Assembler do
   [
