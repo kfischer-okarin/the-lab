@@ -27,18 +27,6 @@ class VM
           result | parser.parse_immediate!
         end
       end
-
-      def parse_register(register)
-        register[1].to_i
-      end
-
-      def register?(value)
-        value[0] == 'R'
-      end
-
-      def invalid_instruction!(message, instruction)
-        raise InvalidInstruction, "#{message}: #{instruction}"
-      end
     end
 
     class InstructionParser
