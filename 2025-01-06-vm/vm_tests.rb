@@ -47,5 +47,15 @@ describe VM do
 
       assert_equal 4, vm.registers[2]
     end
+
+    it 'can add a register and a negative immediate value' do
+      vm.registers[0] = 1
+      vm.pc = 0x3000
+      vm.memory[0x3000] = VM::Assembler.process('ADD R2 R0 -3;')
+
+      vm.execute_instruction
+
+      assert_equal(-2, vm.registers[2])
+    end
   end
 end
