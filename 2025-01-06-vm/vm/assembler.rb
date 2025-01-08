@@ -63,7 +63,11 @@ class VM
 
       def parse_immediate!(bits:)
         operand = next_operand!
-        result = operand.to_i
+        if operand.start_with?('0X')
+          result = operand.to_i(16)
+        else
+          result = operand.to_i
+        end
         max = (1 << (bits - 1)) - 1
         range = (-max)..max
         invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
