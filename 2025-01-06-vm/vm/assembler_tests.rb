@@ -11,7 +11,7 @@ describe VM::Assembler do
   ].each do |instruction, expected|
     it "can assemble '#{instruction}'" do
       assembler = VM::Assembler.new
-      instruction = assembler.process(instruction)
+      instruction = assembler.process_line(instruction)
       assert_equal expected, format('%016b', instruction)
     end
   end
@@ -25,7 +25,7 @@ describe VM::Assembler do
   ].each do |instruction, expected_message|
     it "raises an error for invalid instruction '#{instruction}'" do
       assembler = VM::Assembler.new
-      assembler.process(instruction)
+      assembler.process_line(instruction)
       assert false, "Expected error: #{expected_message}"
     rescue VM::Assembler::InvalidInstruction => e
       assert_match expected_message, e.message, "Expected error message: #{expected_message}, but got: #{e.message}"

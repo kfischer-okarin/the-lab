@@ -5,7 +5,7 @@ class VM
   class Assembler
     class InvalidInstruction < StandardError; end
 
-    def process(instruction)
+    def process_line(instruction)
       parser = InstructionParser.new(instruction)
 
       send("process_#{parser.operation}", parser: parser)
