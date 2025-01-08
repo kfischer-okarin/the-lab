@@ -5,38 +5,46 @@ class VM
   class Assembler
     class InvalidInstruction < StandardError; end
 
-    def process_line(instruction)
-      parser = InstructionParser.new(instruction)
+    def initialize
+      @instruction_parser = InstructionParser.new
+    end
 
-      send("process_#{parser.operation}", parser: parser)
+    def process_line(instruction)
+      @instruction_parser.instruction = instruction
+
+      send("process_#{@instruction_parser.operation}")
     rescue ArgumentError
       invalid_instruction!('Wrong number of operands', instruction)
     end
 
     private
 
-    def process_add(parser:)
+    def process_add
       result = Operations::ADD << 12
-      result |= parser.parse_register! << 9
-      result |= parser.parse_register! << 6
-      if parser.next_operand_is_register?
-        result | parser.parse_register!
+      result |= @instruction_parser.parse_register! << 9
+      result |= @instruction_parser.parse_register! << 6
+      if @instruction_parser.next_operand_is_register?
+        result | @instruction_parser.parse_register!
       else
         result |= 1 << 5 # immediate mode flag
-        result | parser.parse_immediate!(bits: 5)
+        result | @instruction_parser.parse_immediate!(bits: 5)
       end
     end
 
-    def process_ldi(parser:)
+    def process_ldi
       result = Operations::LDI << 12
-      result |= parser.parse_register! << 9
-      result | parser.parse_immediate!(bits: 9)
+      result |= @instruction_parser.parse_register! << 9
+      result | @instruction_parser.parse_immediate!(bits: 9)
     end
 
     class InstructionParser
       attr_reader :operation
 
-      def initialize(instruction)
+      def initialize
+        @instruction = nil
+      end
+
+      def instruction=(instruction)
         @instruction = instruction.strip
         invalid_instruction!('Missing semicolon') unless @instruction.end_with? ';'
 
