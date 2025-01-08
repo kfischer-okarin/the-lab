@@ -23,11 +23,11 @@ describe VM::Assembler do
     it "raises an error for invalid instruction '#{instruction}'" do
       VM::Assembler.process(instruction)
       assert false, "Expected error: #{expected_message}"
-      rescue VM::Assembler::InvalidInstruction => e
-        assert_match expected_message, e.message, "Expected error message: #{expected_message}, but got: #{e.message}"
-        assert_match /#{instruction}/,
-                     e.message,
-                     "Expected error message to include: #{instruction}, but got: #{e.message}"
+    rescue VM::Assembler::InvalidInstruction => e
+      assert_match expected_message, e.message, "Expected error message: #{expected_message}, but got: #{e.message}"
+      assert_match /#{instruction}/,
+                   e.message,
+                   "Expected error message to include: #{instruction}, but got: #{e.message}"
     end
   end
 end
