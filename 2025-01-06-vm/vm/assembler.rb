@@ -27,6 +27,12 @@ class VM
           result | parser.parse_immediate!(bits: 5)
         end
       end
+
+      def process_ldi(parser:)
+        result = Operations::LDI << 12
+        result |= parser.parse_register! << 9
+        result | parser.parse_immediate!(bits: 9)
+      end
     end
 
     class InstructionParser

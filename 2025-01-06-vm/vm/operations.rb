@@ -1,6 +1,7 @@
 class VM
   module Operations
     ADD = 0b0001
+    LDI = 0b1010
 
     class << self
       def operation_with_opcode(opcode)
