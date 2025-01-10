@@ -48,7 +48,7 @@ class VM
         @line = line.strip
         invalid_instruction!('Missing semicolon') unless @line.end_with? ';'
 
-        @operation, *@operands = @line.chomp(';').split.map!(&:upcase)
+        @operation, *@operands = @line.chomp(';').split
         @operation.downcase!
         @processed_operand_count = 0
       end
@@ -69,7 +69,7 @@ class VM
 
       def parse_immediate!(bits:)
         operand = next_operand!
-        if operand.start_with?('0X')
+        if operand.start_with?('0x')
           result = operand.to_i(16)
         else
           result = operand.to_i
