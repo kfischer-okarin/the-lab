@@ -26,6 +26,7 @@ describe VM::Assembler do
     ['ADD R2, R0, R1', /Missing semicolon:/],
     ['ADD R2, R0 R1;', /Expected comma after operand 2/],
     ['ADD R2, R0;', /Wrong number of operands/],
+    ['ADD R2, R0, R1, R3;', /Wrong number of operands/],
     ['ADD 1, R0, R1;', /Expected register as operand 1/],
     ['ADD R0, R1, 16;', /Immediate value out of range \(-16..15\):/],
     ['LDI R2, 256;', /Immediate value out of range \(-256..255\):/]

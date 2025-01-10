@@ -23,17 +23,21 @@ class VM
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_register! << 6
       if @line_parser.next_operand_is_register?
-        result | @line_parser.parse_register!
+        result |= @line_parser.parse_register!
       else
         result |= 1 << 5 # immediate mode flag
-        result | @line_parser.parse_immediate!(bits: 5)
+        result |= @line_parser.parse_immediate!(bits: 5)
       end
+      @line_parser.all_operands_processed!
+      result
     end
 
     def process_ldi
       result = Operations::LDI << 12
       result |= @line_parser.parse_register! << 9
-      result | @line_parser.parse_immediate!(bits: 9)
+      result |= @line_parser.parse_immediate!(bits: 9)
+      @line_parser.all_operands_processed!
+      result
     end
 
     class LineParser
@@ -76,6 +80,10 @@ class VM
         invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
 
         VM::TwoComplement.encode(result, bits: bits)
+      end
+
+      def all_operands_processed!
+        invalid_instruction!('Wrong number of operands') if next_operand
       end
 
       private
