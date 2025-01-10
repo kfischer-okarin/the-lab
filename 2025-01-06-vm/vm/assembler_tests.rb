@@ -7,7 +7,7 @@ describe VM::Assembler do
     ['ADD R2, R0, R1;',  '0001010000000001'],
     ['ADD R3, R4, 1;',   '0001011100100001'],
     ['ADD R6, R7, -12;', '0001110111110100'],
-    ['LDI R1, 0x010;',   '1010001000010000']
+    ['LDI R1, x010;',    '1010001000010000']
   ].each do |instruction, expected|
     it "can assemble '#{instruction}'" do
       assembler = VM::Assembler.new
