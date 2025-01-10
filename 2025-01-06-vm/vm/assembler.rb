@@ -46,31 +46,29 @@ class VM
       end
 
       def line=(line)
-        @line = line.strip
-        invalid_instruction!('Missing semicolon') unless @line.include? ';'
-
-        instruction = @line.split(';', 2).first.strip
-        @operator, *@operands = instruction.split
-        @operator.downcase!
+        @line = line
+        @unprocessed = @line.strip
+        strip_comments!
+        @operator = parse_operator!
         @processed_operand_count = 0
       end
 
       def next_operand_is_register?
-        return false unless @operands.first
+        return false unless next_operand
 
-        @operands.first[0] == 'R'
+        next_operand[0] == 'R'
       end
 
       def parse_register!
         unless next_operand_is_register?
           invalid_instruction!("Expected register as operand #{@processed_operand_count + 1}")
         end
-        operand = next_operand!
+        operand = parse_operand!
         operand[1].to_i
       end
 
       def parse_immediate!(bits:)
-        operand = next_operand!
+        operand = parse_operand!
         if operand.start_with?('0x')
           result = operand.to_i(16)
         else
@@ -84,12 +82,36 @@ class VM
 
       private
 
-      def next_operand!
-        result = @operands.shift
+      def strip_comments!
+        invalid_instruction!('Missing semicolon') unless @unprocessed.include? ';'
+
+        @unprocessed, _ = @unprocessed.split(/ *; */, 2)
+      end
+
+      def parse_operator!
+        operator, @unprocessed = @unprocessed.split(' ', 2)
+        operator&.downcase!
+        operator
+      end
+
+      def parse_operand!
+        result = next_operand
         invalid_instruction!('Wrong number of operands') unless result
 
         @processed_operand_count += 1
+        @next_operand = nil
         result
+      end
+
+      def next_operand
+        unless @next_operand
+          return nil if @unprocessed.nil?
+
+          split_regex = ' '
+          @next_operand, @unprocessed = @unprocessed.split(split_regex, 2)
+        end
+
+        @next_operand
       end
 
       def invalid_instruction!(message)
