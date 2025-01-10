@@ -73,8 +73,8 @@ class VM
         operand = parse_operand!
         if operand.start_with?('x')
           result = operand[1..].to_i(16)
-        else
-          result = operand.to_i
+        elsif operand.start_with?('#')
+          result = operand[1..].to_i
         end
         range = TwoComplement.value_range(bits: bits)
         invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)

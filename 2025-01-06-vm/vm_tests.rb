@@ -45,7 +45,7 @@ describe VM do
     it 'can add a register and an immediate value' do
       vm.registers[0] = 1
       vm.pc = 0x3000
-      vm.memory[0x3000] = assemble_instruction('ADD R2, R0, 3;')
+      vm.memory[0x3000] = assemble_instruction('ADD R2, R0, #3;')
 
       vm.execute_instruction
 
@@ -55,7 +55,7 @@ describe VM do
     it 'can add a register and a negative immediate value' do
       vm.registers[0] = 1
       vm.pc = 0x3000
-      vm.memory[0x3000] = assemble_instruction('ADD R2, R0, -3;')
+      vm.memory[0x3000] = assemble_instruction('ADD R2, R0, #-3;')
 
       vm.execute_instruction
 
@@ -98,7 +98,7 @@ describe VM do
       ['negative', -1, -1]
     ].each do |description, value, expected|
       it "sets the condition flag to #{expected} if the loaded value is #{description}" do
-        vm.memory[0x3000] = assemble_instruction('LDI R0, 1;')
+        vm.memory[0x3000] = assemble_instruction('LDI R0, #1;')
         vm.memory[0x3002] = 0x5000
         vm.memory[0x5000] = value
         vm.pc = 0x3000
