@@ -11,9 +11,9 @@ class VM
 
     def process_line(line)
       @line_parser.line = line
-      return unless @line_parser.operation
+      return unless @line_parser.operator
 
-      send("process_#{@line_parser.operation}")
+      send("process_#{@line_parser.operator}")
     rescue ArgumentError
       invalid_instruction!('Wrong number of operands', instruction)
     end
@@ -39,7 +39,7 @@ class VM
     end
 
     class LineParser
-      attr_reader :operation
+      attr_reader :operator
 
       def initialize
         @line = nil
@@ -50,8 +50,8 @@ class VM
         invalid_instruction!('Missing semicolon') unless @line.include? ';'
 
         instruction = @line.split(';', 2).first.strip
-        @operation, *@operands = instruction.split
-        @operation&.downcase!
+        @operator, *@operands = instruction.split
+        @operator.downcase!
         @processed_operand_count = 0
       end
 
