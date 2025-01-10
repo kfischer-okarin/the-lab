@@ -107,8 +107,10 @@ class VM
         unless @next_operand
           return nil if @unprocessed.nil?
 
-          split_regex = ' '
-          @next_operand, @unprocessed = @unprocessed.split(split_regex, 2)
+          @next_operand, @unprocessed = @unprocessed.split(/, */, 2)
+          if @next_operand.include? ' '
+            invalid_instruction!("Expected comma after operand #{@processed_operand_count + 1}")
+          end
         end
 
         @next_operand
