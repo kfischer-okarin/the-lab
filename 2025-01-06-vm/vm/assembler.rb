@@ -6,13 +6,13 @@ class VM
     class InvalidInstruction < StandardError; end
 
     def initialize
-      @instruction_parser = InstructionParser.new
+      @line_parser = LineParser.new
     end
 
-    def process_line(instruction)
-      @instruction_parser.instruction = instruction
+    def process_line(line)
+      @line_parser.line = line
 
-      send("process_#{@instruction_parser.operation}")
+      send("process_#{@line_parser.operation}")
     rescue ArgumentError
       invalid_instruction!('Wrong number of operands', instruction)
     end
@@ -21,34 +21,34 @@ class VM
 
     def process_add
       result = Operations::ADD << 12
-      result |= @instruction_parser.parse_register! << 9
-      result |= @instruction_parser.parse_register! << 6
-      if @instruction_parser.next_operand_is_register?
-        result | @instruction_parser.parse_register!
+      result |= @line_parser.parse_register! << 9
+      result |= @line_parser.parse_register! << 6
+      if @line_parser.next_operand_is_register?
+        result | @line_parser.parse_register!
       else
         result |= 1 << 5 # immediate mode flag
-        result | @instruction_parser.parse_immediate!(bits: 5)
+        result | @line_parser.parse_immediate!(bits: 5)
       end
     end
 
     def process_ldi
       result = Operations::LDI << 12
-      result |= @instruction_parser.parse_register! << 9
-      result | @instruction_parser.parse_immediate!(bits: 9)
+      result |= @line_parser.parse_register! << 9
+      result | @line_parser.parse_immediate!(bits: 9)
     end
 
-    class InstructionParser
+    class LineParser
       attr_reader :operation
 
       def initialize
-        @instruction = nil
+        @line = nil
       end
 
-      def instruction=(instruction)
-        @instruction = instruction.strip
-        invalid_instruction!('Missing semicolon') unless @instruction.end_with? ';'
+      def line=(line)
+        @line = line.strip
+        invalid_instruction!('Missing semicolon') unless @line.end_with? ';'
 
-        @operation, *@operands = @instruction.chomp(';').split.map!(&:upcase)
+        @operation, *@operands = @line.chomp(';').split.map!(&:upcase)
         @operation.downcase!
         @processed_operand_count = 0
       end
@@ -91,7 +91,7 @@ class VM
       end
 
       def invalid_instruction!(message)
-        raise InvalidInstruction, "#{message}: '#{@instruction}'"
+        raise InvalidInstruction, "#{message}: '#{@line}'"
       end
     end
   end
