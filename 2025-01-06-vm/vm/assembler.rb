@@ -14,8 +14,6 @@ class VM
       return unless @line_parser.operator
 
       send("process_#{@line_parser.operator}")
-    rescue ArgumentError
-      invalid_instruction!('Wrong number of operands', instruction)
     end
 
     private
