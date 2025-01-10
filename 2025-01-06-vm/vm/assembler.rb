@@ -11,6 +11,7 @@ class VM
 
     def process_line(line)
       @line_parser.line = line
+      return unless @line_parser.operation
 
       send("process_#{@line_parser.operation}")
     rescue ArgumentError
@@ -46,10 +47,11 @@ class VM
 
       def line=(line)
         @line = line.strip
-        invalid_instruction!('Missing semicolon') unless @line.end_with? ';'
+        invalid_instruction!('Missing semicolon') unless @line.include? ';'
 
-        @operation, *@operands = @line.chomp(';').split
-        @operation.downcase!
+        instruction = @line.split(';', 2).first.strip
+        @operation, *@operands = instruction.split
+        @operation&.downcase!
         @processed_operand_count = 0
       end
 

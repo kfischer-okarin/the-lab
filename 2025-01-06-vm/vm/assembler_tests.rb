@@ -16,6 +16,12 @@ describe VM::Assembler do
     end
   end
 
+  it 'ignores comment lines' do
+    assembler = VM::Assembler.new
+    instruction = assembler.process_line('; This is a comment line')
+    assert_nil instruction
+  end
+
   [
     ['ADD R2 R0 R1', /Missing semicolon:/],
     ['ADD R2 R0;', /Wrong number of operands/],
