@@ -2,8 +2,6 @@ require_relative '../two_complement'
 
 class VM
   class Assembler
-    class InvalidInstruction < StandardError; end
-
     class LineParser
       attr_reader :operator
 
@@ -47,7 +45,7 @@ class VM
           result = operand[1..].to_i
         end
         range = TwoComplement.value_range(bits: bits)
-        invalid_instruction!("Immediate value #{operand} out of range (#{range})") unless range.include?(result)
+        raise InvalidInstruction, "Immediate value #{operand} out of range (#{range})" unless range.include?(result)
 
         TwoComplement.encode(result, bits: bits)
       end
@@ -58,13 +56,13 @@ class VM
       end
 
       def all_operands_processed!
-        invalid_instruction!('Wrong number of operands') if next_operand
+        raise InvalidInstruction, 'Wrong number of operands' if next_operand
       end
 
       private
 
       def strip_comments!
-        invalid_instruction!('Missing semicolon') unless @unprocessed.include? ';'
+        raise InvalidInstruction, 'Missing semicolon' unless @unprocessed.include? ';'
 
         @unprocessed, _ = @unprocessed.split(/ *; */, 2)
       end
@@ -86,10 +84,9 @@ class VM
       end
 
       def require_next_operand_type!(expected_type)
-        invalid_instruction!('Wrong number of operands') unless next_operand
+        raise InvalidInstruction, 'Wrong number of operands' unless next_operand
         return if next_operand_type == expected_type
-
-        invalid_instruction!("Expected #{expected_type} as operand #{@processed_operand_count + 1}")
+        raise InvalidInstruction, "Expected #{expected_type} as operand #{current_operand_number}"
       end
 
       def next_operand
@@ -98,15 +95,15 @@ class VM
 
           @next_operand, @unprocessed = @unprocessed.split(/, */, 2)
           if @next_operand.include? ' '
-            invalid_instruction!("Expected comma after operand #{@processed_operand_count + 1}")
+            raise InvalidInstruction, "Expected comma after operand #{current_operand_number}"
           end
         end
 
         @next_operand
       end
 
-      def invalid_instruction!(message)
-        raise InvalidInstruction, "#{message}: '#{@line}'"
+      def current_operand_number
+        @processed_operand_count + 1
       end
     end
   end

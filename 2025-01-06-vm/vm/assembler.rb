@@ -4,6 +4,8 @@ require_relative 'two_complement'
 
 class VM
   class Assembler
+    class InvalidInstruction < StandardError; end
+
     attr_reader :next_address
 
     def initialize(labels: {}, start_address: nil)
