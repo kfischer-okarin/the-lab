@@ -37,7 +37,7 @@ describe VM::Assembler do
     exception = assert_raises VM::Assembler::InvalidInstruction do
       assembler.process_line('ADD R2, R0, R1;')
     end
-    assert_match(/You must use the .ORIG directive before any other instruction/, exception.message)
+    assert_includes exception.message, 'You must use the .ORIG directive before any other instruction'
   end
 
   it 'can set the start address using the .ORIG directive' do
@@ -58,25 +58,21 @@ describe VM::Assembler do
   end
 
   [
-    ['ADD R2, R0, R1', /Missing semicolon:/],
-    ['ADD R2, R0 R1;', /Expected comma after operand 2/],
-    ['ADD R2, R0;', /Wrong number of operands/],
-    ['ADD R2, R0, R1, R3;', /Wrong number of operands/],
-    ['ADD #1, R0, R1;', /Expected register as operand 1/],
-    ['ADD R0, R1, #16;', /Immediate value #16 out of range \(-16..15\)/],
-    ['LDI R2, #256;', /Expected label as operand 2/],
+    ['ADD R2, R0, R1', 'Missing semicolon'],
+    ['ADD R2, R0 R1;', 'Expected comma after operand 2'],
+    ['ADD R2, R0;', 'Wrong number of operands'],
+    ['ADD R2, R0, R1, R3;', 'Wrong number of operands'],
+    ['ADD #1, R0, R1;', 'Expected register as operand 1'],
+    ['ADD R0, R1, #16;', 'Immediate value #16 out of range (-16..15)'],
+    ['LDI R2, #256;', 'Expected label as operand 2'],
   ].each do |instruction, expected_message|
     it "raises an error for invalid instruction '#{instruction}'" do
       assembler = VM::Assembler.new(start_address: 0x3000)
       assembler.process_line(instruction)
       assert false, "Expected error: #{expected_message}"
     rescue VM::Assembler::InvalidInstruction => e
-      assert_match expected_message, e.message, "Expected error message: #{expected_message}, but got: #{e.message}"
-      assert_match(
-        /#{instruction}/,
-        e.message,
-        "Expected error message to include: #{instruction}, but got: #{e.message}"
-      )
+      assert_includes e.message, expected_message
+      assert_includes e.message, instruction
     end
   end
 end
