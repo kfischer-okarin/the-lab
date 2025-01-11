@@ -32,7 +32,7 @@ class VM
         result |= @line_parser.parse_register!
       else
         result |= 1 << 5 # immediate mode flag
-        result |= @line_parser.parse_immediate!(bits: 5)
+        result |= @line_parser.parse_immediate_value!(bits: 5)
       end
       [result]
     end
@@ -41,14 +41,14 @@ class VM
       require_start_address!
       result = Operations::LDI << 12
       result |= @line_parser.parse_register! << 9
-      result |= @line_parser.parse_immediate!(bits: 9)
+      result |= @line_parser.parse_immediate_value!(bits: 9)
       [result]
     end
 
     def process_directive_orig
       raise InvalidInstruction, 'Start address already set' if @next_address
 
-      @next_address = @line_parser.parse_immediate!(bits: 16)
+      @next_address = @line_parser.parse_immediate_value!(bits: 16)
       []
     end
 

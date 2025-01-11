@@ -35,7 +35,7 @@ class VM
         operand[1].to_i
       end
 
-      def parse_immediate!(bits:)
+      def parse_immediate_value!(bits:)
         operand = parse_operand!
         if operand.start_with?('x')
           result = operand[1..].to_i(16)
