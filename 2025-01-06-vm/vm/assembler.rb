@@ -15,6 +15,7 @@ class VM
       return [] unless @line_parser.operator
 
       result = send("process_#{@line_parser.operator}")
+      @line_parser.all_operands_processed!
       @next_address += result.size
       result
     end
@@ -32,7 +33,6 @@ class VM
         result |= 1 << 5 # immediate mode flag
         result |= @line_parser.parse_immediate!(bits: 5)
       end
-      @line_parser.all_operands_processed!
       [result]
     end
 
@@ -41,7 +41,6 @@ class VM
       result = Operations::LDI << 12
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_immediate!(bits: 9)
-      @line_parser.all_operands_processed!
       [result]
     end
 
