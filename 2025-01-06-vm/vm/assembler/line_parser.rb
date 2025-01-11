@@ -22,8 +22,13 @@ class VM
       def next_operand_type
         return nil unless next_operand
 
-        if next_operand[0] == 'R'
+        case next_operand[0]
+        when 'R'
           :register
+        when 'x', '#'
+          :immediate_value
+        else
+          :label
         end
       end
 
@@ -44,6 +49,11 @@ class VM
         invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
 
         TwoComplement.encode(result, bits: bits)
+      end
+
+      def parse_label!
+        require_next_operand_type! :label
+        parse_operand!
       end
 
       def all_operands_processed!

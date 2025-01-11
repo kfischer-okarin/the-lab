@@ -82,7 +82,8 @@ describe VM do
 
   describe 'LDI' do
     it 'loads the value stored at address stored in the relative address specified by the immediate value' do
-      vm.memory[0x3000] = assemble_instruction('LDI R0, x50;')
+      assembler = VM::Assembler.new(start_address: 0x3000, labels: { 'data' => 0x3051 })
+      vm.memory[0x3000] = assembler.process_line('LDI R0, Data;')[0]
       vm.memory[0x3051] = 0x5000
       vm.memory[0x5000] = 42
       vm.pc = 0x3000
@@ -98,7 +99,8 @@ describe VM do
       ['negative', -1, -1]
     ].each do |description, value, expected|
       it "sets the condition flag to #{expected} if the loaded value is #{description}" do
-        vm.memory[0x3000] = assemble_instruction('LDI R0, #1;')
+        assembler = VM::Assembler.new(start_address: 0x3000, labels: { 'data' => 0x3002 })
+        vm.memory[0x3000] = assembler.process_line('LDI R0, Data;')[0]
         vm.memory[0x3002] = 0x5000
         vm.memory[0x5000] = value
         vm.pc = 0x3000

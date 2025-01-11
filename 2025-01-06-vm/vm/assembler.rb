@@ -1,12 +1,14 @@
 require_relative 'assembler/line_parser'
 require_relative 'operations'
+require_relative 'two_complement'
 
 class VM
   class Assembler
     attr_reader :next_address
 
-    def initialize(start_address: nil)
+    def initialize(labels: {}, start_address: nil)
       @line_parser = LineParser.new
+      @labels = labels
       @next_address = start_address
     end
 
@@ -41,7 +43,7 @@ class VM
       require_start_address!
       result = Operations::LDI << 12
       result |= @line_parser.parse_register! << 9
-      result |= @line_parser.parse_immediate_value!(bits: 9)
+      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
       [result]
     end
 
@@ -56,6 +58,12 @@ class VM
       return if @next_address
 
       raise InvalidInstruction, 'You must use the .ORIG directive before any other instruction'
+    end
+
+    def relative_label_address(label, bits:)
+      label_address = @labels.fetch(label.downcase) { raise InvalidInstruction, "Unknown label: #{label}" }
+      result = label_address - (@next_address + 1)
+      TwoComplement.encode(result, bits: bits)
     end
   end
 end
