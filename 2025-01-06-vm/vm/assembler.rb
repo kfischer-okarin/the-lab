@@ -14,10 +14,11 @@ class VM
 
     def process_line(line)
       @line_parser.line = line
-      return [] unless @line_parser.operator
-
-      result = send("process_#{@line_parser.operator}")
-      @line_parser.all_operands_processed!
+      result = []
+      if @line_parser.operator
+        result = send("process_#{@line_parser.operator}")
+        @line_parser.all_operands_processed!
+      end
       @next_address += result.size
       result
     end
