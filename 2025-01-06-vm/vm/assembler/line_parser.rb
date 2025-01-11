@@ -28,9 +28,7 @@ class VM
       end
 
       def parse_register!
-        unless next_operand_type == :register
-          invalid_instruction!("Expected register as operand #{@processed_operand_count + 1}")
-        end
+        require_next_operand_type! :register
         operand = parse_operand!
         operand[1].to_i
       end
@@ -76,6 +74,12 @@ class VM
         @processed_operand_count += 1
         @next_operand = nil
         result
+      end
+
+      def require_next_operand_type!(expected_type)
+        return if next_operand_type == expected_type
+
+        invalid_instruction!("Expected #{expected_type} as operand #{@processed_operand_count + 1}")
       end
 
       def next_operand
