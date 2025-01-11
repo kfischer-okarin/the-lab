@@ -45,6 +45,8 @@ class VM
     end
 
     def process_directive_orig
+      raise InvalidInstruction, 'Start address already set' if @next_address
+
       @next_address = @line_parser.parse_immediate!(bits: 16)
       []
     end

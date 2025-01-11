@@ -48,6 +48,15 @@ describe VM::Assembler do
     assert_equal 0x3000, assembler.next_address
   end
 
+  it 'cannot set the start address more than once' do
+    assembler = VM::Assembler.new(start_address: 0x3000)
+
+    exception = assert_raises VM::Assembler::InvalidInstruction do
+      assembler.process_line('.ORIG x3000;')
+    end
+    assert_match(/Start address already set/, exception.message)
+  end
+
   [
     ['ADD R2, R0, R1', /Missing semicolon:/],
     ['ADD R2, R0 R1;', /Expected comma after operand 2/],
