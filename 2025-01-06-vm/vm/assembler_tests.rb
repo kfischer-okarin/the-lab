@@ -8,10 +8,11 @@ describe VM::Assembler do
   end
 
   [
+    ['; This is a comment line', []],
     ['ADD R2, R0, R1;',   ['0001010000000001']],
     ['ADD R3, R4, #1;',   ['0001011100100001']],
     ['ADD R6, R7, #-12;', ['0001110111110100']],
-    ['LDI R1, x010;',     ['1010001000010000']]
+    ['LDI R1, x010;',     ['1010001000010000']],
   ].each do |line, expected_machine_code_instructions|
     it "can assemble '#{line}'" do
       assembler = VM::Assembler.new(start_address: 0x3000)
@@ -28,14 +29,6 @@ describe VM::Assembler do
 
       assert_equal 0x3000 + expected_machine_code_instructions.size, assembler.next_address
     end
-  end
-
-  it 'ignores comment lines' do
-    assembler = VM::Assembler.new
-
-    result = assembler.process_line('; This is a comment line')
-
-    assert_equal [], result
   end
 
   it 'cannot assemble any instruction without a start address' do
