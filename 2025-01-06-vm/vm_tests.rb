@@ -6,7 +6,7 @@ describe VM do
   let(:vm) { VM.new }
 
   def assemble_instruction(instruction)
-    VM::Assembler.new.process_line(instruction)
+    VM::Assembler.new(start_address: 0x3000).process_line(instruction)
   end
 
   it 'has a memory size of 65535' do
