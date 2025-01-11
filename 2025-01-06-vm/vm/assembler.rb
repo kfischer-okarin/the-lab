@@ -54,6 +54,44 @@ class VM
       [result]
     end
 
+    def process_brp
+      process_br(0, 0, 1)
+    end
+
+    def process_brz
+      process_br(0, 1, 0)
+    end
+
+    def process_brn
+      process_br(1, 0, 0)
+    end
+
+    def process_brzp
+      process_br(0, 1, 1)
+    end
+
+    def process_brnz
+      process_br(1, 1, 0)
+    end
+
+    def process_brnp
+      process_br(1, 0, 1)
+    end
+
+    def process_brnzp
+      process_br(1, 1, 1)
+    end
+
+    def process_br(n = 1, z = 1, p = 1)
+      require_start_address!
+      result = Operations::BR << 12
+      result |= n << 11
+      result |= z << 10
+      result |= p << 9
+      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
+      [result]
+    end
+
     def process_directive_orig
       raise InvalidInstruction, 'Start address already set' if @next_address
 

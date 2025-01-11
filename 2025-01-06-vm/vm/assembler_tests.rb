@@ -13,6 +13,14 @@ describe VM::Assembler do
     ['ADD R3, R4, #1;',   ['0001011100100001']],
     ['ADD R6, R7, #-12;', ['0001110111110100']],
     ['LDI R1, Data;',     ['1010001111101111'], { 'data' => 0x2FF0 }],
+    ['BRp Done;',         ['0000001000000001'], { 'done' => 0x3002 }],
+    ['BRz Done;',         ['0000010000000001'], { 'done' => 0x3002 }],
+    ['BRn Done;',         ['0000100000000001'], { 'done' => 0x3002 }],
+    ['BRzp Done;',        ['0000011000000001'], { 'done' => 0x3002 }],
+    ['BRnz Done;',        ['0000110000000001'], { 'done' => 0x3002 }],
+    ['BRnp Done;',        ['0000101000000001'], { 'done' => 0x3002 }],
+    ['BRnzp Done;',       ['0000111000000001'], { 'done' => 0x3002 }],
+    ['BR Done;',          ['0000111000000001'], { 'done' => 0x3002 }],
   ].each do |line, expected_machine_code_instructions, labels = {}|
     it "can assemble '#{line}'" do
       assembler = VM::Assembler.new(start_address: 0x3000, labels: labels)
