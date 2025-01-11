@@ -66,6 +66,15 @@ describe VM::Assembler do
     assert_includes exception.message, "Unknown label: 'Data'"
   end
 
+  it 'cannot use a too far label for LDI' do
+    assembler = VM::Assembler.new(start_address: 0x3000, labels: { 'data' => 0x4000 })
+
+    exception = assert_raises VM::Assembler::InvalidInstruction do
+      assembler.process_line('LDI R1, Data;')
+    end
+    assert_includes exception.message, "Label 'Data' is out of range (-256..255)"
+  end
+
   [
     ['ADD R2, R0, R1', 'Missing semicolon'],
     ['ADD R2, R0 R1;', 'Expected comma after operand 2'],

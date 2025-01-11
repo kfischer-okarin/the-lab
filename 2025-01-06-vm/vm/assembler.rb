@@ -70,6 +70,9 @@ class VM
     def relative_label_address(label, bits:)
       label_address = @labels.fetch(label.downcase) { raise InvalidInstruction, "Unknown label: '#{label}'" }
       result = label_address - (@next_address + 1)
+      range = TwoComplement.value_range(bits: bits)
+      raise InvalidInstruction, "Label '#{label}' is out of range (#{range})" unless range.include?(result)
+
       TwoComplement.encode(result, bits: bits)
     end
   end
