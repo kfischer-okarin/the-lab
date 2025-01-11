@@ -60,7 +60,10 @@ class VM
 
       def parse_operator!
         operator, @unprocessed = @unprocessed.split(' ', 2)
-        operator&.downcase!
+        if operator
+          operator.gsub!(/^\./, 'directive_') # handle .ORIG, .FILL, etc.
+          operator.downcase!
+        end
         operator
       end
 

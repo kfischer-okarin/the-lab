@@ -40,6 +40,14 @@ describe VM::Assembler do
     assert_match(/You must use the .ORIG directive before any other instruction/, exception.message)
   end
 
+  it 'can set the start address using the .ORIG directive' do
+    assembler = VM::Assembler.new
+
+    assembler.process_line('.ORIG x3000;')
+
+    assert_equal 0x3000, assembler.next_address
+  end
+
   [
     ['ADD R2, R0, R1', /Missing semicolon:/],
     ['ADD R2, R0 R1;', /Expected comma after operand 2/],

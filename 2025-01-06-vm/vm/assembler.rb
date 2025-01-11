@@ -44,6 +44,11 @@ class VM
       [result]
     end
 
+    def process_directive_orig
+      @next_address = @line_parser.parse_immediate!(bits: 16)
+      []
+    end
+
     def require_start_address!
       return if @next_address
 
