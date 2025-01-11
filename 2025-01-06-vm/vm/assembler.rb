@@ -68,7 +68,7 @@ class VM
     end
 
     def relative_label_address(label, bits:)
-      label_address = @labels.fetch(label.downcase) { raise InvalidInstruction, "Unknown label: #{label}" }
+      label_address = @labels.fetch(label.downcase) { raise InvalidInstruction, "Unknown label: '#{label}'" }
       result = label_address - (@next_address + 1)
       TwoComplement.encode(result, bits: bits)
     end

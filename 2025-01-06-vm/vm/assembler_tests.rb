@@ -57,6 +57,15 @@ describe VM::Assembler do
     assert_match(/Start address already set/, exception.message)
   end
 
+  it 'cannot use an unknown label' do
+    assembler = VM::Assembler.new(start_address: 0x3000)
+
+    exception = assert_raises VM::Assembler::InvalidInstruction do
+      assembler.process_line('LDI R1, Data;')
+    end
+    assert_includes exception.message, "Unknown label: 'Data'"
+  end
+
   [
     ['ADD R2, R0, R1', 'Missing semicolon'],
     ['ADD R2, R0 R1;', 'Expected comma after operand 2'],
