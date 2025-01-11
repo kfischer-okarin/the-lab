@@ -9,6 +9,7 @@ class VM
     def initialize(labels: {}, start_address: nil)
       @line_parser = LineParser.new
       @labels = labels
+      @line_number = 1
       @next_address = start_address
     end
 
@@ -20,7 +21,10 @@ class VM
         @line_parser.all_operands_processed!
       end
       @next_address += result.size
+      @line_number += 1
       result
+    rescue InvalidInstruction => e
+      raise InvalidInstruction, "Error on line #{@line_number}: '#{line}'\n  #{e.message}"
     end
 
     private

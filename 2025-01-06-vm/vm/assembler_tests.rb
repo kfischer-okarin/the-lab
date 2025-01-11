@@ -73,6 +73,7 @@ describe VM::Assembler do
     rescue VM::Assembler::InvalidInstruction => e
       assert_includes e.message, expected_message
       assert_includes e.message, instruction
+      assert_includes e.message, 'line 1'
     end
   end
 end
