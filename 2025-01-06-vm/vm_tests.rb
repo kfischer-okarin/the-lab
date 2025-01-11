@@ -5,8 +5,8 @@ require_relative 'vm'
 describe VM do
   let(:vm) { VM.new }
 
-  def assemble_instruction(instruction)
-    VM::Assembler.new(start_address: 0x3000).process_line(instruction)[0]
+  def assemble_instruction(instruction, labels: {})
+    VM::Assembler.new(start_address: 0x3000, labels: labels).process_line(instruction)[0]
   end
 
   it 'has a memory size of 65535' do
@@ -82,8 +82,7 @@ describe VM do
 
   describe 'LDI' do
     it 'loads the value stored at address stored in the relative address specified by the immediate value' do
-      assembler = VM::Assembler.new(start_address: 0x3000, labels: { 'data' => 0x3051 })
-      vm.memory[0x3000] = assembler.process_line('LDI R0, Data;')[0]
+      vm.memory[0x3000] = assemble_instruction('LDI R0, Data;', labels: { 'data' => 0x3051 })
       vm.memory[0x3051] = 0x5000
       vm.memory[0x5000] = 42
       vm.pc = 0x3000
