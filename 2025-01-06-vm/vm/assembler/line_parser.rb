@@ -47,7 +47,7 @@ class VM
           result = operand[1..].to_i
         end
         range = TwoComplement.value_range(bits: bits)
-        invalid_instruction!("Immediate value out of range (#{range}): #{operand}") unless range.include?(result)
+        invalid_instruction!("Immediate value #{operand} out of range (#{range})") unless range.include?(result)
 
         TwoComplement.encode(result, bits: bits)
       end
