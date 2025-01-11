@@ -39,6 +39,7 @@ class VM
       end
 
       def parse_immediate_value!(bits:)
+        require_next_operand_type! :immediate_value
         operand = parse_operand!
         if operand.start_with?('x')
           result = operand[1..].to_i(16)
@@ -79,14 +80,13 @@ class VM
 
       def parse_operand!
         result = next_operand
-        invalid_instruction!('Wrong number of operands') unless result
-
         @processed_operand_count += 1
         @next_operand = nil
         result
       end
 
       def require_next_operand_type!(expected_type)
+        invalid_instruction!('Wrong number of operands') unless next_operand
         return if next_operand_type == expected_type
 
         invalid_instruction!("Expected #{expected_type} as operand #{@processed_operand_count + 1}")
