@@ -4,15 +4,25 @@ require_relative 'assembler'
 
 describe VM::Assembler do
   [
-    ['ADD R2, R0, R1;',   '0001010000000001'],
-    ['ADD R3, R4, #1;',   '0001011100100001'],
-    ['ADD R6, R7, #-12;', '0001110111110100'],
-    ['LDI R1, x010;',     '1010001000010000']
-  ].each do |instruction, expected|
-    it "can assemble '#{instruction}'" do
+    ['ADD R2, R0, R1;',   '0001010000000001', 1],
+    ['ADD R3, R4, #1;',   '0001011100100001', 1],
+    ['ADD R6, R7, #-12;', '0001110111110100', 1],
+    ['LDI R1, x010;',     '1010001000010000', 1]
+  ].each do |line, expected_bits, address_increment|
+    it "can assemble '#{line}'" do
       assembler = VM::Assembler.new(start_address: 0x3000)
-      instruction = assembler.process_line(instruction)
-      assert_equal expected, format('%016b', instruction)
+
+      instruction = assembler.process_line(line)
+
+      assert_equal expected_bits, format('%016b', instruction)
+    end
+
+    it "increments the address by #{address_increment} after assembling '#{line}'" do
+      assembler = VM::Assembler.new(start_address: 0x3000)
+
+      assembler.process_line(line)
+
+      assert_equal 0x3000 + address_increment, assembler.next_address
     end
   end
 

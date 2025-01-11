@@ -3,6 +3,8 @@ require_relative 'operations'
 
 class VM
   class Assembler
+    attr_reader :next_address
+
     def initialize(start_address: nil)
       @line_parser = LineParser.new
       @next_address = start_address
@@ -29,6 +31,7 @@ class VM
         result |= @line_parser.parse_immediate!(bits: 5)
       end
       @line_parser.all_operands_processed!
+      @next_address += 1
       result
     end
 
@@ -38,6 +41,7 @@ class VM
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_immediate!(bits: 9)
       @line_parser.all_operands_processed!
+      @next_address += 1
       result
     end
 
