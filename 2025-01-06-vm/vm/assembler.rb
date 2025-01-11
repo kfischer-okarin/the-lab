@@ -14,7 +14,9 @@ class VM
       @line_parser.line = line
       return [] unless @line_parser.operator
 
-      send("process_#{@line_parser.operator}")
+      result = send("process_#{@line_parser.operator}")
+      @next_address += result.size
+      result
     end
 
     private
@@ -31,7 +33,6 @@ class VM
         result |= @line_parser.parse_immediate!(bits: 5)
       end
       @line_parser.all_operands_processed!
-      @next_address += 1
       [result]
     end
 
@@ -41,7 +42,6 @@ class VM
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_immediate!(bits: 9)
       @line_parser.all_operands_processed!
-      @next_address += 1
       [result]
     end
 
