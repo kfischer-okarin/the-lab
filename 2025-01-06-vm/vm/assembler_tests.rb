@@ -3,37 +3,44 @@ require 'minitest/autorun'
 require_relative 'assembler'
 
 describe VM::Assembler do
+  def format_as_16bits(value)
+    format('%016b', value)
+  end
+
   [
-    ['ADD R2, R0, R1;',   '0001010000000001', 1],
-    ['ADD R3, R4, #1;',   '0001011100100001', 1],
-    ['ADD R6, R7, #-12;', '0001110111110100', 1],
-    ['LDI R1, x010;',     '1010001000010000', 1]
-  ].each do |line, expected_bits, address_increment|
+    ['ADD R2, R0, R1;',   ['0001010000000001']],
+    ['ADD R3, R4, #1;',   ['0001011100100001']],
+    ['ADD R6, R7, #-12;', ['0001110111110100']],
+    ['LDI R1, x010;',     ['1010001000010000']]
+  ].each do |line, expected_machine_code_instructions|
     it "can assemble '#{line}'" do
       assembler = VM::Assembler.new(start_address: 0x3000)
 
-      instruction = assembler.process_line(line)
+      result = assembler.process_line(line)
 
-      assert_equal expected_bits, format('%016b', instruction)
+      assert_equal expected_machine_code_instructions, result.map { |value| format_as_16bits(value) }
     end
 
-    it "increments the address by #{address_increment} after assembling '#{line}'" do
+    it "increments the address by #{expected_machine_code_instructions.size} after assembling '#{line}'" do
       assembler = VM::Assembler.new(start_address: 0x3000)
 
       assembler.process_line(line)
 
-      assert_equal 0x3000 + address_increment, assembler.next_address
+      assert_equal 0x3000 + expected_machine_code_instructions.size, assembler.next_address
     end
   end
 
   it 'ignores comment lines' do
     assembler = VM::Assembler.new
-    instruction = assembler.process_line('; This is a comment line')
-    assert_nil instruction
+
+    result = assembler.process_line('; This is a comment line')
+
+    assert_equal [], result
   end
 
   it 'cannot assemble any instruction without a start address' do
     assembler = VM::Assembler.new
+
     exception = assert_raises VM::Assembler::InvalidInstruction do
       assembler.process_line('ADD R2, R0, R1;')
     end

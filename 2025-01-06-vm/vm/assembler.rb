@@ -12,7 +12,7 @@ class VM
 
     def process_line(line)
       @line_parser.line = line
-      return unless @line_parser.operator
+      return [] unless @line_parser.operator
 
       send("process_#{@line_parser.operator}")
     end
@@ -32,7 +32,7 @@ class VM
       end
       @line_parser.all_operands_processed!
       @next_address += 1
-      result
+      [result]
     end
 
     def process_ldi
@@ -42,7 +42,7 @@ class VM
       result |= @line_parser.parse_immediate!(bits: 9)
       @line_parser.all_operands_processed!
       @next_address += 1
-      result
+      [result]
     end
 
     def require_start_address!
