@@ -27,7 +27,8 @@ class VM
       result = Operations::ADD << 12
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_register! << 6
-      if @line_parser.next_operand_is_register?
+      case @line_parser.next_operand_type
+      when :register
         result |= @line_parser.parse_register!
       else
         result |= 1 << 5 # immediate mode flag

@@ -19,14 +19,16 @@ class VM
         @processed_operand_count = 0
       end
 
-      def next_operand_is_register?
-        return false unless next_operand
+      def next_operand_type
+        return nil unless next_operand
 
-        next_operand[0] == 'R'
+        if next_operand[0] == 'R'
+          :register
+        end
       end
 
       def parse_register!
-        unless next_operand_is_register?
+        unless next_operand_type == :register
           invalid_instruction!("Expected register as operand #{@processed_operand_count + 1}")
         end
         operand = parse_operand!
