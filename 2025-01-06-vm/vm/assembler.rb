@@ -100,6 +100,14 @@ class VM
       [result]
     end
 
+    def process_st
+      require_start_address!
+      result = Operations::ST << 12
+      result |= @line_parser.parse_register! << 9
+      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
+      [result]
+    end
+
     def process_directive_orig
       raise InvalidInstruction, 'Start address already set' if @next_address
 

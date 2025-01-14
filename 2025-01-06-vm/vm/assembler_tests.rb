@@ -21,6 +21,7 @@ describe VM::Assembler do
     ['ADD R3, R4, #1;',   ['0001011100100001']],
     ['ADD R6, R7, #-12;', ['0001110111110100']],
     ['LD R7, Done;',      ['0010111000000001'], { 'done' => 0x3002 }],
+    ['ST R5, Done;',      ['0011101000000001'], { 'done' => 0x3002 }],
     ['LDI R1, Data;',     ['1010001111101111'], { 'data' => 0x2FF0 }]
   ].each do |line, expected_machine_code_instructions, labels = {}|
     it "can assemble '#{line}'" do
