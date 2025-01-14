@@ -115,6 +115,34 @@ describe VM do
     end
   end
 
+  describe 'LD' do
+    it 'loads the value stored at specified label' do
+      vm.memory[0x3000] = assemble_instruction('LD R0, Data;', labels: { 'data' => 0x3051 })
+      vm.memory[0x3051] = 42
+      vm.pc = 0x3000
+
+      vm.execute_instruction
+
+      assert_equal 42, vm.registers[0]
+    end
+
+    [
+      ['zero', 0,  0],
+      ['positive', 1, 1],
+      ['negative', -1, -1]
+    ].each do |description, value, expected|
+      it "sets the condition flag to #{expected} if the loaded value is #{description}" do
+        vm.memory[0x3000] = assemble_instruction('LD R0, Data;', labels: { 'data' => 0x3051 })
+        vm.memory[0x3051] = value
+        vm.pc = 0x3000
+
+        vm.execute_instruction
+
+        assert_equal expected, vm.condition_flag
+      end
+    end
+  end
+
   describe 'LDI' do
     it 'loads the value stored at the address stored at the specified label' do
       vm.memory[0x3000] = assemble_instruction('LDI R0, Data;', labels: { 'data' => 0x3051 })

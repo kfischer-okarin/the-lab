@@ -72,6 +72,15 @@ class VM
     @pc += pc_offset
   end
 
+  def execute_ld(instruction)
+    destination_register_index = instruction.value_at_bit(9, 3)
+    pc_offset = instruction.two_complement_value_at_bit(0, 9)
+    target_address = @pc + pc_offset
+    result = @memory[target_address]
+    @registers[destination_register_index] = result
+    update_condition_flag(result)
+  end
+
   def execute_ldi(instruction)
     destination_register_index = instruction.value_at_bit(9, 3)
     pc_offset = instruction.two_complement_value_at_bit(0, 9)
