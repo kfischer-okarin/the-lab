@@ -90,6 +90,13 @@ class VM
     update_condition_flag(result)
   end
 
+  def execute_st(instruction)
+    source_register_index = instruction.value_at_bit(9, 3)
+    pc_offset = instruction.two_complement_value_at_bit(0, 9)
+    target_address = @pc + pc_offset
+    @memory[target_address] = @registers[source_register_index]
+  end
+
   def update_condition_flag(result)
     @condition_flag = result <=> 0
   end

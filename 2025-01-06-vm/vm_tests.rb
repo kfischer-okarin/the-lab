@@ -172,4 +172,16 @@ describe VM do
       end
     end
   end
+
+  describe 'ST' do
+    it 'stores the value of a register at the specified label' do
+      vm.registers[0] = 42
+      vm.memory[0x3000] = assemble_instruction('ST R0, Data;', labels: { 'data' => 0x3051 })
+      vm.pc = 0x3000
+
+      vm.execute_instruction
+
+      assert_equal 42, vm.memory[0x3051]
+    end
+  end
 end
