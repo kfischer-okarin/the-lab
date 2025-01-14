@@ -116,7 +116,7 @@ describe VM do
   end
 
   describe 'LDI' do
-    it 'loads the value stored at address stored in the relative address specified by the immediate value' do
+    it 'loads the value stored at the address stored at the specified label' do
       vm.memory[0x3000] = assemble_instruction('LDI R0, Data;', labels: { 'data' => 0x3051 })
       vm.memory[0x3051] = 0x5000
       vm.memory[0x5000] = 42
