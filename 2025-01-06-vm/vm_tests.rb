@@ -30,6 +30,41 @@ describe VM do
     end
   end
 
+  [
+    ['BRn', [-1]],
+    ['BRz', [0]],
+    ['BRp', [1]],
+    ['BRnz', [-1, 0]],
+    ['BRnp', [-1, 1]],
+    ['BRzp', [0, 1]],
+    ['BRnzp', [-1, 0, 1]],
+    ['BR', [-1, 0, 1]]
+  ].each do |instruction, successful_conditions|
+    [-1, 0, 1].each do |condition|
+      if successful_conditions.include?(condition)
+        it "#{instruction} branches if the condition flag is #{condition}" do
+          vm.pc = 0x3000
+          vm.memory[0x3000] = assemble_instruction("#{instruction} Done;", labels: { 'done' => 0x3002 })
+          vm.condition_flag = condition
+
+          vm.execute_instruction
+
+          assert_equal 0x3002, vm.pc
+        end
+      else
+        it "#{instruction} does not branch if the condition flag is #{condition}" do
+          vm.pc = 0x3000
+          vm.memory[0x3000] = assemble_instruction("#{instruction} Done;", labels: { 'done' => 0x3002 })
+          vm.condition_flag = condition
+
+          vm.execute_instruction
+
+          assert_equal 0x3001, vm.pc
+        end
+      end
+    end
+  end
+
   describe 'ADD' do
     it 'can add two registers' do
       vm.registers[0] = 1
@@ -98,8 +133,7 @@ describe VM do
       ['negative', -1, -1]
     ].each do |description, value, expected|
       it "sets the condition flag to #{expected} if the loaded value is #{description}" do
-        assembler = VM::Assembler.new(start_address: 0x3000, labels: { 'data' => 0x3002 })
-        vm.memory[0x3000] = assembler.process_line('LDI R0, Data;')[0]
+        vm.memory[0x3000] = assemble_instruction('LDI R0, Data;', labels: { 'data' => 0x3002 })
         vm.memory[0x3002] = 0x5000
         vm.memory[0x5000] = value
         vm.pc = 0x3000

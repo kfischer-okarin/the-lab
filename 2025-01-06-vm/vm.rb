@@ -3,9 +3,9 @@ require_relative 'vm/operations'
 require_relative 'vm/two_complement'
 
 class VM
-  attr_reader :memory, :registers, :condition_flag
+  attr_reader :memory, :registers
 
-  attr_accessor :pc
+  attr_accessor :pc, :condition_flag
 
   def initialize
     @memory = Array.new(0xFFFF, 0)
@@ -60,6 +60,16 @@ class VM
 
     @registers[destination_register_index] = result
     update_condition_flag(result)
+  end
+
+  def execute_br(instruction)
+    should_branch = (instruction.bit_flag_set?(11) && @condition_flag == -1) ||
+                    (instruction.bit_flag_set?(10) && @condition_flag == 0) ||
+                    (instruction.bit_flag_set?(9) && @condition_flag == 1)
+    return unless should_branch
+
+    pc_offset = instruction.two_complement_value_at_bit(0, 9)
+    @pc += pc_offset
   end
 
   def execute_ldi(instruction)
