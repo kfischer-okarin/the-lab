@@ -46,22 +46,6 @@ class VM
       [result]
     end
 
-    def process_ld
-      require_start_address!
-      result = Operations::LD << 12
-      result |= @line_parser.parse_register! << 9
-      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
-      [result]
-    end
-
-    def process_ldi
-      require_start_address!
-      result = Operations::LDI << 12
-      result |= @line_parser.parse_register! << 9
-      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
-      [result]
-    end
-
     def process_brp
       process_br(0, 0, 1)
     end
@@ -96,6 +80,22 @@ class VM
       result |= n << 11
       result |= z << 10
       result |= p << 9
+      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
+      [result]
+    end
+
+    def process_ld
+      require_start_address!
+      result = Operations::LD << 12
+      result |= @line_parser.parse_register! << 9
+      result |= relative_label_address(@line_parser.parse_label!, bits: 9)
+      [result]
+    end
+
+    def process_ldi
+      require_start_address!
+      result = Operations::LDI << 12
+      result |= @line_parser.parse_register! << 9
       result |= relative_label_address(@line_parser.parse_label!, bits: 9)
       [result]
     end
