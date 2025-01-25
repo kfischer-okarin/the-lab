@@ -1,9 +1,17 @@
 require 'bundler/setup'
 
+require 'logger'
+
 require_relative 'llm_client'
 require 'json-schema'
 
 class LlmJsonSchemaFixer
+  class << self
+    def logger
+      @logger ||= Logger.new(STDOUT, level: :info, progname: name)
+    end
+  end
+
   def initialize(llm_config)
     @client = LLMClient.new(llm_config)
   end
@@ -21,16 +29,16 @@ class LlmJsonSchemaFixer
         error_message = e.message
 
         prompt = fix_json_not_matching_schema_prompt(json_string, schema, error_message)
-        puts prompt
+        self.class.logger.debug(prompt)
         json_string = @client.simple_prompt(prompt, temperature: 0)
-        puts json_string
+        self.class.logger.debug(json_string)
       rescue JSON::ParserError => e
         error_message = e.message
 
         prompt = fix_invalid_json_string_prompt(json_string, error_message)
-        puts prompt
+        self.class.logger.debug(prompt)
         json_string = @client.simple_prompt(prompt, temperature: 0)
-        puts json_string
+        self.class.logger.debug(json_string)
       end
     end
   end

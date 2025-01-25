@@ -2,6 +2,8 @@ require 'minitest/autorun'
 
 require_relative 'json_fixers'
 
+# LlmJsonSchemaFixer.logger.level = :debug
+
 describe LlmJsonSchemaFixer do
   # let(:model) { 'qwen2.5-coder:0.5b' }
   # let(:model) { 'llama3.2:1b-instruct-fp16' }
