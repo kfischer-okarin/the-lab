@@ -1,46 +1,11 @@
 require 'bundler/setup'
 
-require 'httparty'
-require 'json'
-require 'json-schema'
+require_relative 'json_fixers'
+require_relative 'llm_client'
 
-class Ollama
-  include HTTParty
-  base_uri 'http://localhost:11434'
-
-  def chat_completion(body)
-    puts 'Request Body:'
-    pp body
-
-    body = {
-      model: 'llama',
-      **body
-    }
-
-    response = self.class.post(
-      '/v1/chat/completions',
-      body: body.to_json,
-      headers: {
-        'Content-Type' => 'application/json'
-      }
-    )
-
-    raise "Error: #{response.code}\n#{response}" unless response.code == 200
-
-    response
-  end
-
-  def simple_prompt(prompt, temperature: nil)
-    body = {
-      messages: [{ role: 'user', content: prompt }]
-    }
-    body[:temperature] = temperature if temperature
-
-    response = chat_completion(body)
-
-    response['choices'].first['message']['content']
-  end
-end
+LLM_BASE_URL = 'http://localhost:11434'
+MAIN_MODEL = 'chat'
+FIXER_MODEL = 'llama3.2:1b-instruct-fp16'
 
 class Tool
   attr_reader :name, :parameter_json_schema
@@ -112,7 +77,7 @@ class CompletionWithTools
       }
     ]
     @tools = tools #really_required_tools(request, tools)
-    @client = Ollama.new
+    @client = LLMClient.new(LLMClient::Config.new(LLM_BASE_URL, MAIN_MODEL))
   end
 
   def execute
@@ -156,41 +121,8 @@ class CompletionWithTools
   end
 
   def ensure_valid_arguments(arguments, schema)
-    10.times do
-      begin
-        parsed_arguments = JSON.parse(arguments)
-        JSON::Validator.validate!(schema, parsed_arguments)
-        return parsed_arguments
-      rescue JSON::ParserError
-        arguments = try_fix_invalid_json_string(arguments)
-      rescue JSON::Schema::ValidationError => e
-        arguments = try_fix_json_not_matching_schema(arguments, schema, e.message)
-      end
-    end
-
-    raise 'Too many attempts'
-  end
-
-  def try_fix_invalid_json_string(json_string)
-    prompt = <<~MESSAGE
-      The value between <value> and </value> is not a valid JSON string:
-      <value>#{json_string}</value>
-      Please respond ONLY with the correct JSON string.
-    MESSAGE
-    @client.simple_prompt(prompt, temperature: 0)
-  end
-
-  def try_fix_json_not_matching_schema(json_string, schema, error_message)
-    prompt = <<~MESSAGE
-      Given this JSON schema:
-        #{schema.to_json}
-      this JSON string between <value> and </value>:
-        <value>#{json_string}</value>
-      caused the following error:
-        '#{error_message}'
-      Please respond ONLY with the correct JSON string.
-    MESSAGE
-    @client.simple_prompt(prompt, temperature: 0)
+    fixer = LlmJsonSchemaFixer.new(LLMClient::Config.new(LLM_BASE_URL, FIXER_MODEL))
+    fixer.fix(arguments, schema)
   end
 
   def next_completion
