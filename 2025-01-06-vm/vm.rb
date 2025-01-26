@@ -72,6 +72,18 @@ class VM
     @pc += pc_offset
   end
 
+  def execute_jsr(instruction)
+    jump_to_label = instruction.bit_flag_set?(11)
+    @registers[7] = @pc
+    if jump_to_label
+      pc_offset = instruction.two_complement_value_at_bit(0, 11)
+      @pc += pc_offset
+    else
+      register_index = instruction.value_at_bit(6, 3)
+      @pc = @registers[register_index]
+    end
+  end
+
   def execute_ld(instruction)
     destination_register_index = instruction.value_at_bit(9, 3)
     pc_offset = instruction.two_complement_value_at_bit(0, 9)

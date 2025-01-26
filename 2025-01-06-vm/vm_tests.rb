@@ -115,6 +115,48 @@ describe VM do
     end
   end
 
+  describe 'JSR' do
+    it 'jumps to the specified label' do
+      vm.pc = 0x3000
+      vm.memory[0x3000] = assemble_instruction('JSR Done;', labels: { 'done' => 0x3051 })
+
+      vm.execute_instruction
+
+      assert_equal 0x3051, vm.pc
+    end
+
+    it 'stores the return address in R7' do
+      vm.pc = 0x3000
+      vm.memory[0x3000] = assemble_instruction('JSR Done;', labels: { 'done' => 0x3051 })
+
+      vm.execute_instruction
+
+      assert_equal 0x3001, vm.registers[7]
+    end
+  end
+
+  describe 'JSRR' do
+    it 'jumps to the address stored in the specified register' do
+      vm.registers[1] = 0x3051
+      vm.pc = 0x3000
+      vm.memory[0x3000] = assemble_instruction('JSRR R1;')
+
+      vm.execute_instruction
+
+      assert_equal 0x3051, vm.pc
+    end
+
+    it 'stores the return address in R7' do
+      vm.registers[1] = 0x3051
+      vm.pc = 0x3000
+      vm.memory[0x3000] = assemble_instruction('JSRR R1;')
+
+      vm.execute_instruction
+
+      assert_equal 0x3001, vm.registers[7]
+    end
+  end
+
   describe 'LD' do
     it 'loads the value stored at specified label' do
       vm.memory[0x3000] = assemble_instruction('LD R0, Data;', labels: { 'data' => 0x3051 })
