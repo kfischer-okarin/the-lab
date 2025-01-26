@@ -96,6 +96,8 @@ describe VM::Assembler do
     ['ADD R2, R0, R1, R3;', 'Wrong number of operands'],
     ['ADD #1, R0, R1;', 'Expected register as operand 1'],
     ['ADD R0, R1, #16;', 'Immediate value #16 out of range (-16..15)'],
+    ['ADD R0, R1, x20;', 'Immediate value x20 out of range (x0..x1F)'],
+    ['ADD R0, R1, b100000;', 'Immediate value b100000 out of range (b0..b11111)'],
     ['LDI R2, #256;', 'Expected label as operand 2']
   ].each do |instruction, expected_message|
     it "raises an error for invalid instruction '#{instruction}'" do

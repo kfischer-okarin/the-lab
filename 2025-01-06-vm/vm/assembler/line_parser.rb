@@ -23,7 +23,7 @@ class VM
         case next_operand[0]
         when 'R'
           :register
-        when 'x', '#'
+        when 'x', '#', 'b'
           :immediate_value
         else
           :label
@@ -39,15 +39,30 @@ class VM
       def parse_immediate_value!(bits:)
         require_next_operand_type! :immediate_value
         operand = parse_operand!
-        if operand.start_with?('x')
-          result = operand[1..].to_i(16)
-        elsif operand.start_with?('#')
+        if operand.start_with?('#')
           result = operand[1..].to_i
-        end
-        range = TwoComplement.value_range(bits: bits)
-        raise InvalidInstruction, "Immediate value #{operand} out of range (#{range})" unless range.include?(result)
+          range = TwoComplement.value_range(bits: bits)
+          raise InvalidInstruction, "Immediate value #{operand} out of range (#{range})" unless range.include?(result)
 
-        TwoComplement.encode(result, bits: bits)
+          TwoComplement.encode(result, bits: bits)
+        elsif operand.start_with?('x')
+          result = operand[1..].to_i(16)
+          max = (1 << bits) - 1
+          range = "x0..x#{max.to_s(16).upcase}"
+          raise InvalidInstruction, "Immediate value #{operand} out of range (#{range})" if result > max
+
+          result
+        elsif operand.start_with?('b')
+          result = operand[1..].to_i(2)
+          max = (1 << bits) - 1
+          range = "b0..b#{max.to_s(2)}"
+          raise InvalidInstruction, "Immediate value #{operand} out of range (#{range})" if result > max
+
+          result
+        else
+          raise InvalidInstruction, "Invalid immediate value #{operand}"
+        end
+
       end
 
       def parse_label!
