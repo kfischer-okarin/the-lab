@@ -46,6 +46,21 @@ class VM
       [result]
     end
 
+    def process_and
+      require_start_address!
+      result = Operations::AND << 12
+      result |= @line_parser.parse_register! << 9
+      result |= @line_parser.parse_register! << 6
+      case @line_parser.next_operand_type
+      when :register
+        result |= @line_parser.parse_register! << 0
+      else
+        result |= 1 << 5 # immediate mode flag
+        result |= @line_parser.parse_immediate_value!(bits: 5)
+      end
+      [result]
+    end
+
     def process_brp
       process_br(0, 0, 1)
     end

@@ -5,6 +5,7 @@ class VM
     LD  = 0b0010
     ST  = 0b0011
     JSR = 0b0100
+    AND = 0b0101
     LDI = 0b1010
 
     class << self

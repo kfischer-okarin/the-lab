@@ -24,6 +24,8 @@ describe VM::Assembler do
     ['ST R5, Done;',      ['0011101000000001'], { 'done' => 0x3002 }],
     ['JSR Done;',         ['0100100000000001'], { 'done' => 0x3002 }],
     ['JSRR R1;',          ['0100000001000000']],
+    ['AND R1, R2, R3;',   ['0101001010000011']],
+    ['AND R4, R5, #7;',   ['0101100101100111']],
     ['LDI R1, Data;',     ['1010001111101111'], { 'data' => 0x2FF0 }]
   ].each do |line, expected_machine_code_instructions, labels = {}|
     it "can assemble '#{line}'" do
