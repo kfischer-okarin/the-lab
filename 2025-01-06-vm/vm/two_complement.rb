@@ -6,7 +6,6 @@ class VM
           value
         else
           two_complement(value.abs, bits: bits)
-          (2 << bits - 1) - value.abs
         end
       end
 
