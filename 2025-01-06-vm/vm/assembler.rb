@@ -84,6 +84,21 @@ class VM
       [result]
     end
 
+    def process_jsr
+      require_start_address!
+      result = Operations::JSR << 12
+      result |= 1 << 11 # JSR flag
+      result |= relative_label_address(@line_parser.parse_label!, bits: 11)
+      [result]
+    end
+
+    def process_jsrr
+      require_start_address!
+      result = Operations::JSR << 12
+      result |= @line_parser.parse_register! << 6
+      [result]
+    end
+
     def process_ld
       require_start_address!
       result = Operations::LD << 12
