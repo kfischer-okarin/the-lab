@@ -47,23 +47,20 @@ class LlmJsonSchemaFixer
 
   def fix_json_not_matching_schema_prompt(json_string, schema, error_message)
     <<~MESSAGE
-      Given this JSON schema:
-        #{schema.to_json}
-      this JSON string between <value> and </value>:
-        <value>#{json_string}</value>
-      caused the following error:
-        '#{error_message}'
-      Please respond ONLY with the correct JSON string.
+      Correct the JSON string to conform to the given schema based on the validation error.
+      Input JSON: #{json_string}
+      Schema: #{schema.to_json}
+      Error: #{error_message}
+      Do not give any explanations but just respond the with corrected JSON in plain text without any code block markdown.
     MESSAGE
   end
 
   def fix_invalid_json_string_prompt(json_string, error_message)
     <<~MESSAGE
-      The value between <value> and </value> is not a valid JSON string:
-        <value>#{json_string}</value>
-      caused the following error:
-        '#{error_message}'
-      Please respond ONLY with the correct JSON string.
+      Correct the JSON string to be a valid JSON based on the error message.
+      Input JSON: #{json_string}
+      Error: #{error_message}
+      Do not give any explanations but just respond the with corrected JSON in plain text without any code block markdown.
     MESSAGE
   end
 end
