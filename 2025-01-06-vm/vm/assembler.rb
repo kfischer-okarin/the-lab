@@ -32,23 +32,16 @@ class VM
     private
 
     def process_add
-      require_start_address!
-      result = Operations::ADD << 12
-      result |= @line_parser.parse_register! << 9
-      result |= @line_parser.parse_register! << 6
-      case @line_parser.next_operand_type
-      when :register
-        result |= @line_parser.parse_register!
-      else
-        result |= 1 << 5 # immediate mode flag
-        result |= @line_parser.parse_immediate_value!(bits: 5)
-      end
-      [result]
+      process_two_operands_instruction(Operations::ADD)
     end
 
     def process_and
+      process_two_operands_instruction(Operations::AND)
+    end
+
+    def process_two_operands_instruction(operation)
       require_start_address!
-      result = Operations::AND << 12
+      result = operation << 12
       result |= @line_parser.parse_register! << 9
       result |= @line_parser.parse_register! << 6
       case @line_parser.next_operand_type
