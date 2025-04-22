@@ -5,10 +5,11 @@ require "bundler/setup"
 require "dotenv/load"
 require "openai"
 
-
 def main
   client = OpenAI::Client.new
-  tools = []
+  tools = [
+    READ_FILE_TOOL
+  ]
   agent = Agent.new(client: client, input_io: $stdin, tools: tools)
   agent.run
 end
@@ -29,6 +30,26 @@ Tool = Data.define(:name, :description, :parameters, :function) do
     }
   end
 end
+
+def read_file(path:)
+  File.read(path)
+end
+
+READ_FILE_TOOL = Tool.new(
+  name: "read_file",
+  description: "Read the contents of a given relative file path. Use this when you want to see what's inside a file. Do not use this with directory names.",
+  parameters: {
+    type: "object",
+    properties: {
+      path: {
+        type: "string",
+        description: "The relative path of a file in the working directory."
+      },
+    },
+    required: ["path"]
+  },
+  function: method(:read_file)
+)
 
 class Agent
   def initialize(client:, input_io:, tools: [])
