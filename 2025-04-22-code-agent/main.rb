@@ -6,14 +6,33 @@ require "openai"
 
 def main
   client = OpenAI::Client.new
-  agent = Agent.new(client: client, input_io: $stdin)
+  tools = []
+  agent = Agent.new(client: client, input_io: $stdin, tools: tools)
   agent.run
 end
 
+Tool = Data.define(:name, :description, :parameters, :function) do
+  def initialize(name:, function:, description: nil, parameters: nil)
+    super(name:, description:, parameters:, function:)
+  end
+
+  def to_tool_hash
+    {
+      type: "function",
+      function: {
+        name: name,
+        description: description,
+        parameters: parameters
+      }.compact
+    }
+  end
+end
+
 class Agent
-  def initialize(client:, input_io:)
+  def initialize(client:, input_io:, tools: [])
     @client = client
     @input_io = input_io
+    @tools = tools
     @conversation = []
   end
 
@@ -42,7 +61,8 @@ class Agent
     response = @client.chat.completions.create(
       messages: @conversation,
       model: "gpt-4.1",
-      max_completion_tokens: 1024
+      max_completion_tokens: 1024,
+      tools: @tools.map(&:to_tool_hash),
     )
     response.choices.first.message
   end
