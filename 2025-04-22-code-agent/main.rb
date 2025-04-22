@@ -10,7 +10,8 @@ def main
   client = OpenAI::Client.new
   tools = [
     READ_FILE_TOOL,
-    LIST_FILES_TOOL
+    LIST_FILES_TOOL,
+    EDIT_FILE_TOOL
   ]
   agent = Agent.new(client: client, input_io: $stdin, tools: tools)
   agent.run
@@ -83,6 +84,57 @@ LIST_FILES_TOOL = Tool.new(
     },
   },
   function: method(:list_files)
+)
+
+def edit_file(path:, old_str:, new_str:)
+  raise "old_str and new_str must be different" if old_str == new_str
+
+  file_path = Pathname.new(path)
+  if file_path.exist?
+    content = file_path.read
+    number_of_matches = content.scan(old_str).size
+    raise "old_str not found in file" if number_of_matches == 0
+    raise "old_str must match exactly one time in the file" if number_of_matches > 1
+
+    updated_content = content.gsub(old_str, new_str)
+    file_path.write(updated_content)
+    "OK"
+  elsif !file_path.exist? && old_str == ""
+    # Create missing parent directories
+    file_path.dirname.mkpath
+    file_path.write(new_str)
+    "Successfully created file #{file_path}"
+  end
+end
+
+EDIT_FILE_TOOL = Tool.new(
+  name: "edit_file",
+  description: <<~DESC,
+    Make edits to a text file.
+
+    Replaces 'old_str' with 'new_str' in the given file. 'old_str' and 'new_str' MUST be different from each other.
+
+    If the file specified with path doesn't exist, it will be created.
+  DESC
+  parameters: {
+    type: "object",
+    properties: {
+      path: {
+        type: "string",
+        description: "The path to the file"
+      },
+      old_str: {
+        type: "string",
+        description: "Text to search for - must match exactly and must only have one match exactly"
+      },
+      new_str: {
+        type: "string",
+        description: "Text to replace old_str with"
+      }
+    },
+    required: ["path", "old_str", "new_str"]
+  },
+  function: method(:edit_file)
 )
 
 class Agent
