@@ -1,0 +1,5 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "openai", github: "openai/openai-ruby", tag: "v0.1.0-alpha.5"
