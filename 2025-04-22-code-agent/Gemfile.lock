@@ -1,0 +1,24 @@
+GIT
+  remote: https://github.com/openai/openai-ruby.git
+  revision: ac3c96c6285eacd4528bd76a8b9170bbbabb63b0
+  tag: v0.1.0-alpha.5
+  specs:
+    openai (0.1.0.pre.alpha.5)
+      connection_pool
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    connection_pool (2.5.1)
+    dotenv (3.1.8)
+
+PLATFORMS
+  arm64-darwin-24
+  ruby
+
+DEPENDENCIES
+  dotenv (~> 3.1)
+  openai!
+
+BUNDLED WITH
+   2.6.6
