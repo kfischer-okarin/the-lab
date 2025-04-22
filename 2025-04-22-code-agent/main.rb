@@ -1,4 +1,5 @@
 require "json"
+require "pathname"
 
 require "bundler/setup"
 
@@ -8,7 +9,8 @@ require "openai"
 def main
   client = OpenAI::Client.new
   tools = [
-    READ_FILE_TOOL
+    READ_FILE_TOOL,
+    LIST_FILES_TOOL
   ]
   agent = Agent.new(client: client, input_io: $stdin, tools: tools)
   agent.run
@@ -49,6 +51,38 @@ READ_FILE_TOOL = Tool.new(
     required: ["path"]
   },
   function: method(:read_file)
+)
+
+def list_files(path: nil)
+  path ||= "."
+  path = Pathname.new(path)
+  if path.exist?
+    entries = path.children.map { |entry|
+      if entry.directory?
+        "#{entry.to_s}/"
+      elsif entry.file?
+        entry.to_s
+      end
+    }
+    JSON.generate(entries)
+  else
+    raise "Path does not exist."
+  end
+end
+
+LIST_FILES_TOOL = Tool.new(
+  name: "list_files",
+  description: "List files and directories at a given path. If no path is provided, lists files in the current directory.",
+  parameters: {
+	  type: "object",
+    properties: {
+      path: {
+        type: "string",
+        description: "Optional relative path to list files from. Defaults to current directory if not provided."
+      }
+    },
+  },
+  function: method(:list_files)
 )
 
 class Agent
