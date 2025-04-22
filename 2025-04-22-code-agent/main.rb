@@ -1,3 +1,5 @@
+require "json"
+
 require "bundler/setup"
 
 require "dotenv/load"
@@ -40,18 +42,42 @@ class Agent
     puts "Chat with Amadeus (use Ctrl+D to exit)"
     puts
 
+    read_user_input = true
+
     loop do
-      print "\e[92mYou\e[0m: "
-      input = @input_io.gets
-      break unless input
+      if read_user_input
+        print "\e[92mYou\e[0m: "
+        input = @input_io.gets
+        break unless input
 
-      input.chomp!
-      user_message = { role: :user, content: input }
-      @conversation << user_message
+        input.chomp!
+        user_message = { role: :user, content: input }
+        @conversation << user_message
+      end
+
       response_message = run_inference
-      @conversation << { role: :assistant, content: response_message.content }
 
-      puts "\e[96mAmadeus\e[0m: #{response_message.content}"
+      read_user_input = true
+
+      if response_message.content
+        @conversation << { role: :assistant, content: response_message.content }
+        puts "\e[96mAmadeus\e[0m: #{response_message.content}"
+      end
+
+      if response_message.tool_calls
+        @conversation << { role: :assistant, tool_calls: response_message.tool_calls }
+        tool_results = response_message.tool_calls.map do |tool_call|
+          arguments = JSON.parse(tool_call.function.arguments, symbolize_names: true)
+          result = execute_tool(name: tool_call.function.name, arguments: arguments)
+          {
+            tool_call_id: tool_call.id,
+            role: :tool,
+            content: result
+          }
+        end
+        @conversation.concat(tool_results)
+        read_user_input = false
+      end
     end
   end
 
@@ -65,6 +91,22 @@ class Agent
       tools: @tools.map(&:to_tool_hash),
     )
     response.choices.first.message
+  end
+
+  def execute_tool(name:, arguments:)
+    print "\e[93mtool\e[0m: #{name}(#{arguments})..."
+    tool = @tools.find { |t| t.name == name }
+    return "Error: Tool not found" unless tool
+
+    begin
+      result = tool.function.call(**arguments)
+      puts "Done!"
+      result
+    rescue StandardError => e
+      puts
+      puts "  Error executing tool: #{e.message}"
+      "Error: #{e.message}"
+    end
   end
 end
 
