@@ -35,6 +35,8 @@ Tool = Data.define(:name, :description, :parameters, :function) do
 end
 
 def read_file(path:)
+  ensure_inside_working_directory!(path)
+
   File.read(path)
 end
 
@@ -56,6 +58,8 @@ READ_FILE_TOOL = Tool.new(
 
 def list_files(path: nil)
   path ||= "."
+  ensure_inside_working_directory!(path)
+
   path = Pathname.new(path)
   if path.exist?
     entries = path.children.map { |entry|
@@ -87,6 +91,7 @@ LIST_FILES_TOOL = Tool.new(
 )
 
 def edit_file(path:, old_str:, new_str:)
+  ensure_inside_working_directory!(path)
   raise "old_str and new_str must be different" if old_str == new_str
 
   file_path = Pathname.new(path)
@@ -136,6 +141,14 @@ EDIT_FILE_TOOL = Tool.new(
   },
   function: method(:edit_file)
 )
+
+def ensure_inside_working_directory!(path)
+  path = Pathname.new(path).expand_path
+  cwd = Pathname.new(Dir.pwd).expand_path
+  return unless path.relative_path_from(cwd).to_s.start_with?("..")
+
+  raise "Path is outside the current working directory."
+end
 
 class Agent
   def initialize(client:, input_io:, tools: [])
