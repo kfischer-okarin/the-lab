@@ -1,0 +1,93 @@
+items:
+  - brief_an_jonas: Brief von Michael an Jonas "Nicht vor dem 4. November 22:13 Uhr öffnen"
+  - raider: Raider Verpackung
+
+episodes:
+  - season: 1
+    episode: 1
+    title: Geheimnisse
+    events:
+    - id: 1
+      date: 2019-06-21
+      title: Michael Kahnwald Selbstmord
+      persons:
+        - Mikkel Nielsen
+    - id: 2
+      date: 2019-06-21
+      title: Brief an Jonas wurde geschrieben
+      items:
+        - brief_an_jonas
+      created_items:
+        - brief_an_jonas
+    - id: 3
+      date: 2019-11-04
+      title: Jonas kommt zurück in die Schule
+      persons:
+        - Jonas Kahnwald
+    - id: 4
+      date: 2019-10-22
+      title: Erik Obendorf verschwindet
+      persons:
+        - Erik Obendorf
+    - id: 5
+      time_travel:
+         from: ???
+         to: 2019-11-04
+      title: Erwachsener Jonas kommt nach 2019
+      persons:
+        - Jonas Kahnwald
+      missing_details: true
+    - id: 6
+      date: 2019-11-04
+      get_item:
+        owner: Jana Nielsen
+        item: raider
+    - id: 7
+      date: 2019-11-04
+      title: Die Teenager gehen in den Wald zur Höhle
+      persons:
+        - Jonas Kahnwald
+        - Bartosz Tiedemann
+        - Magnus Nielsen
+        - Martha Nielsen
+        - Mikkel Nielsen
+        - Franziska Doppler
+    - id: 8
+      time_travel:
+        from: ???
+        to: 2019-11-04
+      title: Jonas kommt um Mikkel zu holen?
+      persons:
+        - Jonas Kahnwald
+      missing_details: true
+    - id: 9
+      time_travel:
+        from: 2019-11-05
+        to: 1986-11-05
+      title: Mikkel wird von Jonas durch die Höhle gebracht
+      persons:
+        - Mikkel Nielsen
+    - id: 10
+      time_travel:
+        from: 1986-11-05
+        to: 2019-11-05
+      title: Mads reist mithilfe des Stuhls und stirbt
+      deaths:
+        - Mads Nielsen
+      persons:
+        - Mads Nielsen
+    - id: 11
+      date: 2019-11-05
+      title: Mads Leiche wird gefunden
+      persons:
+        - Ulrich Nielsen
+        - Charlotte Doppler
+    - id: 12
+      time_travel:
+        from: 1986-11-05
+        to: 1953-11-05
+      title: Erik reist mithilfe des Stuhls und stirbt
+      deaths:
+        - Erik Obendorf
+      persons:
+        - Erik Obendorf
