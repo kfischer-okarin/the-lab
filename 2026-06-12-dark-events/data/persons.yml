@@ -1,0 +1,38 @@
+---
+persons:
+- id: bartosz_tiedemann
+  name: Bartosz Tiedemann
+  aliases: []
+- id: charlotte_doppler
+  name: Charlotte Doppler
+  aliases: []
+- id: erik_obendorf
+  name: Erik Obendorf
+  aliases: []
+- id: franziska_doppler
+  name: Franziska Doppler
+  aliases: []
+- id: jana_nielsen
+  name: Jana Nielsen
+  aliases: []
+- id: jonas_kahnwald
+  name: Jonas Kahnwald
+  aliases: []
+- id: mads_nielsen
+  name: Mads Nielsen
+  aliases: []
+- id: magnus_nielsen
+  name: Magnus Nielsen
+  aliases: []
+- id: martha_nielsen
+  name: Martha Nielsen
+  aliases: []
+- id: mikkel_nielsen
+  name: Mikkel Nielsen
+  aliases: []
+- id: regina_tiedemann
+  name: Regina Tiedemann
+  aliases: []
+- id: ulrich_nielsen
+  name: Ulrich Nielsen
+  aliases: []

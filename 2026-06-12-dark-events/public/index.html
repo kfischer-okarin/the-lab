@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dark — Ereignis-Editor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Dark <span class="muted">— Ereignis-Editor</span></h1>
+    <div class="header-actions">
+      <input id="search" type="search" placeholder="Ereignisse filtern…">
+      <button id="new-event">+ Ereignis</button>
+      <span id="status" class="status"></span>
+    </div>
+  </header>
+
+  <main>
+    <section id="event-list" class="pane">
+      <h2>Ereignisse <span id="event-count" class="muted"></span></h2>
+      <div id="events"></div>
+    </section>
+
+    <section id="editor" class="pane">
+      <div id="editor-empty" class="placeholder">Wähle links ein Ereignis oder lege ein neues an.</div>
+      <form id="editor-form" hidden>
+        <div class="row">
+          <label>Titel<input name="title" type="text" autocomplete="off"></label>
+        </div>
+        <div class="row split">
+          <label>Staffel<input name="season" type="number" min="1"></label>
+          <label>Episode<input name="episode" type="number" min="1"></label>
+          <label class="check">Details fehlen<input name="missing_details" type="checkbox"></label>
+        </div>
+
+        <fieldset>
+          <legend>Zeitpunkt</legend>
+          <div class="row">
+            <label>Art
+              <select name="when_kind">
+                <option value="date">Datum</option>
+                <option value="time_travel">Zeitreise</option>
+                <option value="unknown">Unbekannt</option>
+              </select>
+            </label>
+          </div>
+          <div class="row" data-when="date">
+            <label>Datum<input name="date" type="date"></label>
+          </div>
+          <div class="row split" data-when="time_travel">
+            <label>Von<input name="from" type="date"><small>leer = unbekannt</small></label>
+            <label>Nach<input name="to" type="date"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Personen</legend>
+          <div id="event-persons" class="appearances"></div>
+          <div class="add-row">
+            <select id="add-person"></select>
+            <button type="button" id="add-person-btn">Hinzufügen</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Gegenstände</legend>
+          <div id="event-items" class="appearances"></div>
+          <div class="add-row">
+            <select id="add-item"></select>
+            <button type="button" id="add-item-btn">Hinzufügen</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Todesfälle</legend>
+          <div id="event-deaths" class="chips"></div>
+          <div class="add-row">
+            <select id="add-death"></select>
+            <button type="button" id="add-death-btn">Hinzufügen</button>
+          </div>
+        </fieldset>
+
+        <div class="editor-actions">
+          <button type="submit" class="primary">Speichern</button>
+          <button type="button" id="delete-event" class="danger">Löschen</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="side" class="pane">
+      <div class="tabs">
+        <button class="tab active" data-tab="timeline">Subjektive Zeitlinie</button>
+        <button class="tab" data-tab="registry">Register</button>
+      </div>
+
+      <div id="tab-timeline" class="tab-body">
+        <label class="block">Subjekt
+          <select id="subject-select"></select>
+        </label>
+        <p class="hint">Ziehe Ereignisse, um die persönliche Reihenfolge dieses Subjekts zu ändern. Schlüssel werden automatisch vergeben.</p>
+        <ol id="subject-events" class="reorder"></ol>
+      </div>
+
+      <div id="tab-registry" class="tab-body" hidden>
+        <h3>Personen</h3>
+        <div class="add-row">
+          <input id="new-person-name" type="text" placeholder="Neue Person…">
+          <button type="button" id="add-person-registry">Anlegen</button>
+        </div>
+        <ul id="persons-registry" class="registry"></ul>
+        <h3>Gegenstände</h3>
+        <div class="add-row">
+          <input id="new-item-name" type="text" placeholder="Neuer Gegenstand…">
+          <button type="button" id="add-item-registry">Anlegen</button>
+        </div>
+        <ul id="items-registry" class="registry"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+---
+events:
+- id: ev-0001
+  season: 1
+  episode: 1
+  title: Michael Kahnwald Selbstmord
+  when:
+    kind: date
+    date: '2019-06-21'
+  persons:
+  - id: mikkel_nielsen
+    order: M
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0002
+  season: 1
+  episode: 1
+  title: Brief an Jonas wurde geschrieben
+  when:
+    kind: date
+    date: '2019-06-21'
+  persons: []
+  items:
+  - id: brief_an_jonas
+    order: V
+  deaths: []
+  missing_details: false
+- id: ev-0003
+  season: 1
+  episode: 1
+  title: Jonas kommt zurück in die Schule
+  when:
+    kind: date
+    date: '2019-11-04'
+  persons:
+  - id: jonas_kahnwald
+    order: A
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0004
+  season: 1
+  episode: 1
+  title: Erik Obendorf verschwindet
+  when:
+    kind: date
+    date: '2019-10-22'
+  persons:
+  - id: erik_obendorf
+    order: K
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0005
+  season: 1
+  episode: 1
+  title: Erwachsener Jonas kommt nach 2019
+  when:
+    kind: time_travel
+    from:
+    to: '2019-11-04'
+  persons:
+  - id: jonas_kahnwald
+    order: L
+  items: []
+  deaths: []
+  missing_details: true
+- id: ev-0006
+  season: 1
+  episode: 1
+  title: Jana Nielsen erhält raider
+  when:
+    kind: date
+    date: '2019-11-04'
+  persons:
+  - id: jana_nielsen
+    order: V
+  items:
+  - id: raider
+    order: V
+  deaths: []
+  missing_details: false
+- id: ev-0007
+  season: 1
+  episode: 1
+  title: Die Teenager gehen in den Wald zur Höhle
+  when:
+    kind: date
+    date: '2019-11-04'
+  persons:
+  - id: jonas_kahnwald
+    order: K
+  - id: bartosz_tiedemann
+    order: V
+  - id: magnus_nielsen
+    order: V
+  - id: martha_nielsen
+    order: V
+  - id: mikkel_nielsen
+    order: F
+  - id: franziska_doppler
+    order: V
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0008
+  season: 1
+  episode: 1
+  title: Jonas kommt um Mikkel zu holen?
+  when:
+    kind: time_travel
+    from:
+    to: '2019-11-04'
+  persons:
+  - id: jonas_kahnwald
+    order: KV
+  items: []
+  deaths: []
+  missing_details: true
+- id: ev-0009
+  season: 1
+  episode: 1
+  title: Mikkel wird von Jonas durch die Höhle gebracht
+  when:
+    kind: time_travel
+    from: '2019-11-05'
+    to: '1986-11-05'
+  persons:
+  - id: mikkel_nielsen
+    order: I
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0010
+  season: 1
+  episode: 1
+  title: Mads reist mithilfe des Stuhls und stirbt
+  when:
+    kind: time_travel
+    from: '1986-11-05'
+    to: '2019-11-05'
+  persons:
+  - id: mads_nielsen
+    order: K
+  items: []
+  deaths:
+  - mads_nielsen
+  missing_details: false
+- id: ev-0011
+  season: 1
+  episode: 1
+  title: Mads Leiche wird gefunden
+  when:
+    kind: date
+    date: '2019-11-05'
+  persons:
+  - id: mads_nielsen
+    order: e
+  - id: ulrich_nielsen
+    order: V
+  - id: charlotte_doppler
+    order: V
+  items: []
+  deaths: []
+  missing_details: false
+- id: ev-0012
+  season: 1
+  episode: 1
+  title: Erik reist mithilfe des Stuhls und stirbt
+  when:
+    kind: time_travel
+    from: '1986-11-05'
+    to: '1953-11-05'
+  persons:
+  - id: erik_obendorf
+    order: e
+  items: []
+  deaths:
+  - erik_obendorf
+  missing_details: false
+- id: ev-0013
+  season: 1
+  episode: 2
+  title: Der Erwachsene Jonas nimmt sich ein Hotelzimmer
+  when:
+    kind: date
+    date: '2019-11-05'
+  persons:
+  - id: jonas_kahnwald
+    order: P
+  - id: regina_tiedemann
+    order: V
+  items: []
+  deaths: []
+  missing_details: false

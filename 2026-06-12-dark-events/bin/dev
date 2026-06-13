@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Start the Dark events editor on http://127.0.0.1:4567
+set -euo pipefail
+cd "$(dirname "$0")/.."
+exec bundle exec rackup -p "${PORT:-4567}" -o 127.0.0.1 config.ru
