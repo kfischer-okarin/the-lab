@@ -10,8 +10,7 @@ const state = {
   filter: ""
 };
 
-const $ = (sel) => document.querySelector(sel);
-const el = (sel) => document.getElementById(sel);
+const el = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -39,6 +38,7 @@ function renderAll() {
 async function api(method, path, body) {
   const res = await fetch(path, {
     method,
+    cache: "no-store",
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined
   });
@@ -74,10 +74,7 @@ function renderEventList() {
   container.innerHTML = "";
   const matches = state.events.filter(matchesFilter);
   el("event-count").textContent = `(${matches.length})`;
-
-  for (const group of groupByEpisode(matches)) {
-    container.appendChild(episodeGroupNode(group));
-  }
+  for (const group of groupByEpisode(matches)) container.appendChild(episodeGroupNode(group));
 }
 
 function matchesFilter(event) {
@@ -174,51 +171,67 @@ function renderEditor() {
   empty.hidden = true;
   form.hidden = false;
 
+  // Access fields via form.elements: `form.title` collides with the built-in
+  // HTMLElement.title property and would not return the input.
+  const f = form.elements;
   const d = state.draft;
-  form.title.value = d.title || "";
-  form.season.value = d.season || "";
-  form.episode.value = d.episode || "";
-  form.missing_details.checked = !!d.missing_details;
-  form.when_kind.value = (d.when || {}).kind || "unknown";
-  form.date.value = (d.when || {}).date || "";
-  form.from.value = (d.when || {}).from || "";
-  form.to.value = (d.when || {}).to || "";
+  f.title.value = d.title || "";
+  f.season.value = d.season || "";
+  f.episode.value = d.episode || "";
+  f.missing_details.checked = !!d.missing_details;
+  f.when_kind.value = (d.when || {}).kind || "unknown";
+  f.date.value = (d.when || {}).date || "";
+  f.from.value = (d.when || {}).from || "";
+  f.to.value = (d.when || {}).to || "";
   syncWhenRows();
 
-  renderAppearances("event-persons", d.persons, personName, "persons");
-  renderAppearances("event-items", d.items, itemName, "items");
+  renderAppearances("event-persons", d.persons, "persons", personName);
+  renderAppearances("event-items", d.items, "items", itemName);
   renderDeaths();
-  populateSubjectPickers();
   el("delete-event").hidden = !d.id;
 }
 
 function syncWhenRows() {
-  const kind = el("editor-form").when_kind.value;
+  const kind = el("editor-form").elements.when_kind.value;
   document.querySelectorAll("[data-when]").forEach((row) => {
     row.style.display = row.dataset.when === kind ? "" : "none";
   });
 }
 
-function renderAppearances(containerId, appearances, nameFn, field) {
+function renderAppearances(containerId, appearances, type, nameFn) {
   const container = el(containerId);
   container.innerHTML = "";
-  for (const a of appearances) {
-    const node = document.createElement("div");
-    node.className = "appearance";
-    const label = document.createElement("span");
-    label.textContent = nameFn(a.id);
-    const order = document.createElement("span");
-    order.className = "order";
-    order.textContent = a.order || "neu";
-    label.appendChild(order);
-    node.appendChild(label);
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.textContent = "×";
-    remove.onclick = () => { removeFrom(field, a.id); };
-    node.appendChild(remove);
-    container.appendChild(node);
-  }
+  for (const a of appearances) container.appendChild(appearanceNode(a, type, nameFn));
+}
+
+function appearanceNode(a, type, nameFn) {
+  const node = document.createElement("div");
+  node.className = "appearance";
+
+  const label = document.createElement("span");
+  label.textContent = nameFn(a.id);
+  const order = document.createElement("span");
+  order.className = "order";
+  order.textContent = a.order || "neu";
+  label.appendChild(order);
+  node.appendChild(label);
+
+  const actions = document.createElement("span");
+  actions.className = "actions";
+  actions.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline(type, a.id)));
+  actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, a.id), "remove"));
+  node.appendChild(actions);
+  return node;
+}
+
+function iconButton(glyph, title, onClick, cls = "") {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "icon-btn " + cls;
+  btn.textContent = glyph;
+  btn.title = title;
+  btn.onclick = onClick;
+  return btn;
 }
 
 function renderDeaths() {
@@ -228,51 +241,37 @@ function renderDeaths() {
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.textContent = personName(id);
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.textContent = "×";
-    remove.onclick = () => { state.draft.deaths = state.draft.deaths.filter((x) => x !== id); renderDeaths(); };
-    chip.appendChild(remove);
+    chip.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline("persons", id)));
+    chip.appendChild(iconButton("×", "Entfernen", () => {
+      state.draft.deaths = state.draft.deaths.filter((x) => x !== id);
+      renderDeaths();
+    }, "remove"));
     container.appendChild(chip);
   }
 }
 
 function removeFrom(field, id) {
+  collectDraftFromForm();
   state.draft[field] = state.draft[field].filter((a) => a.id !== id);
   renderEditor();
 }
 
-function populateSubjectPickers() {
-  fillSelect("add-person", state.persons, (p) => p.name, (p) => p.id);
-  fillSelect("add-death", state.persons, (p) => p.name, (p) => p.id);
-  fillSelect("add-item", state.items, (i) => i.name, (i) => i.id);
-}
-
-function fillSelect(id, list, labelFn, valueFn) {
-  const select = el(id);
-  select.innerHTML = "";
-  for (const entry of list) {
-    const opt = document.createElement("option");
-    opt.value = valueFn(entry);
-    opt.textContent = labelFn(entry);
-    select.appendChild(opt);
-  }
-}
-
+// Pull current form field values into the draft so re-rendering the editor
+// (e.g. after adding a person) never discards unsaved edits.
 function collectDraftFromForm() {
-  const form = el("editor-form");
+  const f = el("editor-form").elements;
   const d = state.draft;
-  d.title = form.title.value.trim();
-  d.season = form.season.value ? Number(form.season.value) : null;
-  d.episode = form.episode.value ? Number(form.episode.value) : null;
-  d.missing_details = form.missing_details.checked;
-  d.when = buildWhen(form);
+  d.title = f.title.value.trim();
+  d.season = f.season.value ? Number(f.season.value) : null;
+  d.episode = f.episode.value ? Number(f.episode.value) : null;
+  d.missing_details = f.missing_details.checked;
+  d.when = buildWhen(f);
 }
 
-function buildWhen(form) {
-  const kind = form.when_kind.value;
-  if (kind === "date") return { kind, date: form.date.value || null };
-  if (kind === "time_travel") return { kind, from: form.from.value || null, to: form.to.value || null };
+function buildWhen(f) {
+  const kind = f.when_kind.value;
+  if (kind === "date") return { kind, date: f.date.value || null };
+  if (kind === "time_travel") return { kind, from: f.from.value || null, to: f.to.value || null };
   return { kind: "unknown" };
 }
 
@@ -298,7 +297,108 @@ async function deleteEvent() {
   flash("Gelöscht");
 }
 
+// --- add via dropdown buttons -----------------------------------------------
+
+function addAppearance(field, id) {
+  if (!id || !state.draft) return;
+  if (state.draft[field].some((a) => a.id === id)) return;
+  collectDraftFromForm();
+  state.draft[field].push({ id, order: "" }); // server assigns the order key on save
+  renderEditor();
+}
+
+function addDeath(id) {
+  if (!id || !state.draft || state.draft.deaths.includes(id)) return;
+  collectDraftFromForm();
+  state.draft.deaths.push(id);
+  renderEditor();
+}
+
+function availableOptions(list, alreadyIds) {
+  return list
+    .filter((entry) => !alreadyIds.includes(entry.id))
+    .map((entry) => ({ label: entry.name, value: entry.id }));
+}
+
+// --- floating dropdown menu --------------------------------------------------
+
+let activeDropdown = null;
+
+function openDropdown(anchor, options, onPick) {
+  closeDropdown();
+  const menu = document.createElement("div");
+  menu.className = "dropdown-menu";
+
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "Suchen…";
+  search.className = "dropdown-search";
+  menu.appendChild(search);
+
+  const optionsBox = document.createElement("div");
+  optionsBox.className = "dropdown-options";
+  menu.appendChild(optionsBox);
+
+  const renderOptions = (filter) => {
+    const q = filter.toLowerCase();
+    optionsBox.innerHTML = "";
+    const visible = options.filter((o) => o.label.toLowerCase().includes(q));
+    if (!visible.length) {
+      const none = document.createElement("div");
+      none.className = "dropdown-empty";
+      none.textContent = "Nichts gefunden";
+      optionsBox.appendChild(none);
+      return;
+    }
+    for (const o of visible) {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "dropdown-option";
+      item.textContent = o.label;
+      item.onclick = () => { closeDropdown(); onPick(o.value); };
+      optionsBox.appendChild(item);
+    }
+  };
+
+  renderOptions("");
+  search.addEventListener("input", () => renderOptions(search.value));
+
+  document.body.appendChild(menu);
+  positionMenu(menu, anchor);
+  search.focus();
+  setTimeout(() => document.addEventListener("mousedown", onOutsideDropdownClick), 0);
+  activeDropdown = { menu, anchor };
+}
+
+function positionMenu(menu, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  menu.style.top = `${rect.bottom + window.scrollY + 4}px`;
+  menu.style.left = `${rect.left + window.scrollX}px`;
+  menu.style.minWidth = `${rect.width}px`;
+}
+
+function onOutsideDropdownClick(e) {
+  if (!activeDropdown) return;
+  if (activeDropdown.menu.contains(e.target) || activeDropdown.anchor.contains(e.target)) return;
+  closeDropdown();
+}
+
+function closeDropdown() {
+  if (!activeDropdown) return;
+  activeDropdown.menu.remove();
+  document.removeEventListener("mousedown", onOutsideDropdownClick);
+  activeDropdown = null;
+}
+
 // --- subjective timeline (reorder) ------------------------------------------
+
+function jumpToTimeline(type, id) {
+  state.subjectKey = `${type}:${id}`;
+  switchTab("timeline");
+  renderSubjectSelect();
+  el("subject-select").value = state.subjectKey;
+  renderSubjectEvents();
+}
 
 function renderSubjectSelect() {
   const select = el("subject-select");
@@ -340,25 +440,22 @@ function subjectAppearances() {
 function renderSubjectEvents() {
   const list = el("subject-events");
   list.innerHTML = "";
-  const rows = subjectAppearances();
-  rows.forEach((row, index) => list.appendChild(subjectRowNode(row, index)));
+  subjectAppearances().forEach((row, index) => list.appendChild(subjectRowNode(row, index)));
 }
 
 function subjectRowNode(row, index) {
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
-
   li.appendChild(span("grip", "⠿"));
   li.appendChild(span("seq", String(index + 1)));
   li.appendChild(span("ev-title", row.event.title));
   li.appendChild(span("ev-when", whenLabel(row.event.when)));
-
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragover", onDragOver);
   li.addEventListener("dragleave", () => li.classList.remove("over"));
   li.addEventListener("drop", onDrop);
-  li.addEventListener("dragend", () => clearDragMarkers());
+  li.addEventListener("dragend", clearDragMarkers);
   return li;
 }
 
@@ -399,7 +496,6 @@ async function moveSubjectEvent(sourceId, targetId) {
   const [type, subjectId] = state.subjectKey.split(":");
   const ordered = subjectAppearances().filter((r) => r.event.id !== sourceId);
   const targetIndex = ordered.findIndex((r) => r.event.id === targetId);
-
   const beforeKey = targetIndex > 0 ? ordered[targetIndex - 1].order : null;
   const afterKey = ordered[targetIndex] ? ordered[targetIndex].order : null;
 
@@ -415,8 +511,7 @@ async function moveSubjectEvent(sourceId, targetId) {
 
 function applyNewOrder(type, subjectId, eventId, order) {
   const event = state.events.find((e) => e.id === eventId);
-  const appearance = event[type].find((a) => a.id === subjectId);
-  appearance.order = order;
+  event[type].find((a) => a.id === subjectId).order = order;
 }
 
 // --- registries -------------------------------------------------------------
@@ -440,14 +535,9 @@ function registryRow(entry, type) {
   name.onchange = () => api("PUT", `/api/${type}/${entry.id}`, { name: name.value }).then(loadData);
   li.appendChild(name);
   li.appendChild(span("id", entry.id));
-  const remove = document.createElement("button");
-  remove.type = "button";
-  remove.className = "danger";
-  remove.textContent = "×";
-  remove.onclick = () => {
+  li.appendChild(iconButton("×", "Löschen", () => {
     if (confirm(`"${entry.name}" löschen?`)) api("DELETE", `/api/${type}/${entry.id}`).then(loadData);
-  };
-  li.appendChild(remove);
+  }, "remove"));
   return li;
 }
 
@@ -458,11 +548,14 @@ function bindControls() {
   el("new-event").addEventListener("click", newEvent);
   el("editor-form").addEventListener("submit", saveEvent);
   el("delete-event").addEventListener("click", deleteEvent);
-  el("editor-form").when_kind.addEventListener("change", syncWhenRows);
+  el("editor-form").elements.when_kind.addEventListener("change", syncWhenRows);
 
-  el("add-person-btn").addEventListener("click", () => addAppearance("persons", el("add-person").value));
-  el("add-item-btn").addEventListener("click", () => addAppearance("items", el("add-item").value));
-  el("add-death-btn").addEventListener("click", addDeath);
+  el("add-person-btn").addEventListener("click", (e) =>
+    openDropdown(e.currentTarget, availableOptions(state.persons, draftIds("persons")), (id) => addAppearance("persons", id)));
+  el("add-item-btn").addEventListener("click", (e) =>
+    openDropdown(e.currentTarget, availableOptions(state.items, draftIds("items")), (id) => addAppearance("items", id)));
+  el("add-death-btn").addEventListener("click", (e) =>
+    openDropdown(e.currentTarget, availableOptions(state.persons, state.draft ? state.draft.deaths : []), addDeath));
 
   el("subject-select").addEventListener("change", (e) => { state.subjectKey = e.target.value; renderSubjectEvents(); });
 
@@ -472,18 +565,8 @@ function bindControls() {
   document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => switchTab(tab.dataset.tab)));
 }
 
-function addAppearance(field, id) {
-  if (!id || !state.draft) return;
-  if (state.draft[field].some((a) => a.id === id)) return;
-  state.draft[field].push({ id, order: "" });   // server assigns the order key on save
-  renderEditor();
-}
-
-function addDeath() {
-  const id = el("add-death").value;
-  if (!id || !state.draft || state.draft.deaths.includes(id)) return;
-  state.draft.deaths.push(id);
-  renderDeaths();
+function draftIds(field) {
+  return state.draft ? state.draft[field].map((a) => a.id) : [];
 }
 
 async function addRegistry(type, inputId) {

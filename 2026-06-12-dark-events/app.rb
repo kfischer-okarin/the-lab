@@ -17,8 +17,11 @@ class DarkEventsApp < Sinatra::Base
     def not_found! = halt(404, { error: "not found" }.to_json)
   end
 
-  before "/api/*" do
+  before do
+    next unless request.path_info.start_with?("/api/")
+
     content_type :json
+    headers "Cache-Control" => "no-store"
   end
 
   get "/" do
