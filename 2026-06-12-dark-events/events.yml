@@ -11,31 +11,29 @@ episodes:
       date: 2019-06-21
       title: Michael Kahnwald Selbstmord
       persons:
-        - Mikkel Nielsen
+        - Mikkel Nielsen: 1000
     - id: 2
       date: 2019-06-21
       title: Brief an Jonas wurde geschrieben
       items:
-        - brief_an_jonas
-      created_items:
-        - brief_an_jonas
+        - brief_an_jonas: 1
     - id: 3
       date: 2019-11-04
       title: Jonas kommt zurück in die Schule
       persons:
-        - Jonas Kahnwald
+        - Jonas Kahnwald: 1
     - id: 4
       date: 2019-10-22
       title: Erik Obendorf verschwindet
       persons:
-        - Erik Obendorf
+        - Erik Obendorf: 1
     - id: 5
       time_travel:
          from: ???
          to: 2019-11-04
       title: Erwachsener Jonas kommt nach 2019
       persons:
-        - Jonas Kahnwald
+        - Jonas Kahnwald: 1000
       missing_details: true
     - id: 6
       date: 2019-11-04
@@ -46,19 +44,19 @@ episodes:
       date: 2019-11-04
       title: Die Teenager gehen in den Wald zur Höhle
       persons:
-        - Jonas Kahnwald
-        - Bartosz Tiedemann
-        - Magnus Nielsen
-        - Martha Nielsen
-        - Mikkel Nielsen
-        - Franziska Doppler
+        - Jonas Kahnwald: 2
+        - Bartosz Tiedemann: 1
+        - Magnus Nielsen: 1
+        - Martha Nielsen: 1
+        - Mikkel Nielsen: 1
+        - Franziska Doppler: 1
     - id: 8
       time_travel:
         from: ???
         to: 2019-11-04
       title: Jonas kommt um Mikkel zu holen?
       persons:
-        - Jonas Kahnwald
+        - Jonas Kahnwald: 500
       missing_details: true
     - id: 9
       time_travel:
@@ -66,7 +64,7 @@ episodes:
         to: 1986-11-05
       title: Mikkel wird von Jonas durch die Höhle gebracht
       persons:
-        - Mikkel Nielsen
+        - Mikkel Nielsen: 2
     - id: 10
       time_travel:
         from: 1986-11-05
@@ -75,11 +73,12 @@ episodes:
       deaths:
         - Mads Nielsen
       persons:
-        - Mads Nielsen
+        - Mads Nielsen: 1
     - id: 11
       date: 2019-11-05
       title: Mads Leiche wird gefunden
       persons:
+        - Mads Nielsen: 10
         - Ulrich Nielsen
         - Charlotte Doppler
     - id: 12
@@ -90,4 +89,14 @@ episodes:
       deaths:
         - Erik Obendorf
       persons:
-        - Erik Obendorf
+        - Erik Obendorf: 2
+  - season: 1
+    episode: 2
+    title: Lügen
+    events:
+    - id: 13
+      date: 2019-11-05
+      title: Der Erwachsene Jonas nimmt sich ein Hotelzimmer
+      persons:
+        - Jonas Kahnwald: 1010
+        - Regina Tiedemann: 1
