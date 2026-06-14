@@ -11,7 +11,8 @@ events:
   - id: mikkel_nielsen
     order: M
   items: []
-  deaths: []
+  deaths:
+  - mikkel_nielsen
   missing_details: false
 - id: ev-0002
   season: 1
@@ -69,13 +70,15 @@ events:
 - id: ev-0006
   season: 1
   episode: 1
-  title: Jana Nielsen erhält raider
+  title: Jana Nielsen findet die Raider Verpackung
   when:
     kind: date
     date: '2019-11-04'
   persons:
   - id: jana_nielsen
     order: V
+  - id: ulrich_nielsen
+    order: F
   items:
   - id: raider
     order: V
