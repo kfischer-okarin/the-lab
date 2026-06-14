@@ -194,7 +194,7 @@ class Store
   def tidy_transfers(list)
     list.each do |event|
       (event["persons"] || []).each do |a|
-        %w[gains loses].each do |field|
+        %w[gains loses has].each do |field|
           next unless a.key?(field)
 
           a[field] = Array(a[field]).uniq
@@ -263,13 +263,13 @@ class Store
     {
       "id" => id, "season" => nil, "episode" => nil, "timestamp" => "00:00",
       "title" => "(neues Ereignis)", "when" => { "kind" => "unknown" },
-      "persons" => [], "missing_details" => false
+      "persons" => [], "implied" => false, "missing_details" => false
     }
   end
 
   def sanitize_event(attrs)
     out = {}
-    %w[season episode timestamp title when persons missing_details].each do |k|
+    %w[season episode timestamp title when persons implied missing_details].each do |k|
       out[k] = attrs[k] if attrs.key?(k)
     end
     out

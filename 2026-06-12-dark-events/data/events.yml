@@ -34,16 +34,18 @@ events:
 - id: ev-0003
   season: 1
   episode: 1
-  title: Jonas kommt zurück in die Schule
+  title: Jonas kommt zurück in die Schule nach Depression
   when:
     kind: date
     date: '2019-11-04'
-    order: x
+    order: zzV
   persons:
   - id: jonas_kahnwald
     order: A
+    confirmed_age: 16
   - id: bartosz_tiedemann
     order: F
+    confirmed_age: 16
   missing_details: false
   timestamp: '12:50'
 - id: ev-0004
@@ -67,20 +69,22 @@ events:
     kind: time_travel
     from:
     to: '2019-11-04'
-    to_order: "y"
+    to_order: zs
   persons:
   - id: jonas_kahnwald
     order: L
+    gains:
+    - zeitmaschine
   missing_details: true
   timestamp: '15:10'
 - id: ev-0006
   season: 1
   episode: 1
-  title: Jana Nielsen findet die Raider Verpackung
+  title: Jana Nielsen hat eine Raider Verpackung gefunden
   when:
     kind: date
     date: '2019-11-04'
-    order: z
+    order: zy
   persons:
   - id: jana_nielsen
     order: V
@@ -97,7 +101,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: zV
+    order: zz
   persons:
   - id: jonas_kahnwald
     order: K
@@ -105,13 +109,16 @@ events:
     order: V
   - id: magnus_nielsen
     order: V
+    confirmed_age: 18
   - id: martha_nielsen
     order: V
+    confirmed_age: 16
   - id: mikkel_nielsen
     order: F
     confirmed_age: 11
   - id: franziska_doppler
     order: V
+    confirmed_age: 16
   missing_details: false
   timestamp: '37:30'
 - id: ev-0009

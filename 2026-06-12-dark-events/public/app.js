@@ -135,7 +135,7 @@ function episodeGroupNode(group) {
 
 function eventRowNode(event) {
   const row = document.createElement("div");
-  row.className = "event-row" + (event.id === state.selectedId ? " selected" : "");
+  row.className = "event-row" + (event.id === state.selectedId ? " selected" : "") + (event.implied ? " implied" : "");
   row.dataset.eventId = event.id;
   row.onclick = () => selectEvent(event.id);
 
@@ -150,6 +150,7 @@ function eventRowNode(event) {
   if ((event.persons || []).length) meta.appendChild(badge(`${event.persons.length}P`));
   if ((event.items || []).length) meta.appendChild(badge(`${event.items.length}G`));
   if ((event.persons || []).some((p) => p.death)) meta.appendChild(badge("✝", "death"));
+  if (event.implied) meta.appendChild(badge("implizit", "implied"));
   if (event.missing_details) meta.appendChild(badge("Details fehlen", "missing"));
   row.appendChild(meta);
   return row;
@@ -176,7 +177,7 @@ function newEvent() {
   state.draft = {
     id: null, season: lastSeason(), episode: lastEpisode(), timestamp: "00:00", title: "",
     when: { kind: "date", date: "" }, persons: [],
-    missing_details: false
+    implied: false, missing_details: false
   };
   renderEditor();
 }
@@ -203,6 +204,7 @@ function renderEditor() {
   f.season.value = d.season || "";
   f.episode.value = d.episode || "";
   f.timestamp.value = d.timestamp || "00:00";
+  f.implied.checked = !!d.implied;
   f.missing_details.checked = !!d.missing_details;
   f.when_kind.value = (d.when || {}).kind || "unknown";
   f.date.value = (d.when || {}).date || "";
@@ -257,20 +259,24 @@ function appearanceNode(a, type, nameFn) {
   return node;
 }
 
-// Items this person gains/loses at this event. Ownership (and thus the item's
-// derived timeline) follows from these.
+// Items this person gains / loses / is observed to have at this event. Ownership
+// (and the item's derived timeline) follows from these; `has` acquires it too,
+// just flagged until an earlier gains explains it.
 function transfersBlock(a) {
   const wrap = document.createElement("div");
   wrap.className = "transfers";
-  (a.gains || []).forEach((id) => wrap.appendChild(transferChip(a, "gains", id, "＋")));
-  (a.loses || []).forEach((id) => wrap.appendChild(transferChip(a, "loses", id, "－")));
+  const FIELDS = [["gains", "gain", "＋"], ["loses", "lose", "－"], ["has", "has", "?"]];
+  for (const [field, cls, sign] of FIELDS) {
+    (a[field] || []).forEach((id) => wrap.appendChild(transferChip(a, field, cls, id, sign)));
+  }
   wrap.appendChild(transferAddButton(a, "gains", "+ erhält ▾"));
   wrap.appendChild(transferAddButton(a, "loses", "+ verliert ▾"));
+  wrap.appendChild(transferAddButton(a, "has", "+ hat ▾"));
   return wrap;
 }
 
-function transferChip(a, field, itemId, sign) {
-  const chip = span("transfer " + (field === "gains" ? "gain" : "lose"), `${sign} ${itemName(itemId)}`);
+function transferChip(a, field, cls, itemId, sign) {
+  const chip = span("transfer " + cls, `${sign} ${itemName(itemId)}`);
   chip.appendChild(iconButton("↗", "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", itemId)));
   chip.appendChild(iconButton("×", "Entfernen", () => removeTransfer(a, field, itemId), "remove"));
   return chip;
@@ -281,12 +287,14 @@ function transferAddButton(a, field, text) {
   btn.type = "button";
   btn.className = "dropdown-btn small";
   btn.textContent = text;
-  btn.onclick = (e) => openDropdown(e.currentTarget, transferOptions(), (id) => addTransfer(a, field, id));
+  btn.onclick = (e) => openDropdown(e.currentTarget, transferOptions(field, a), (id) => addTransfer(a, field, id));
   return btn;
 }
 
-// Items not already gained or lost by anyone in this event.
-function transferOptions() {
+// For gains/loses: items not gained/lost by anyone else in this event (ownership
+// is exclusive). For has: items this person isn't already observed with.
+function transferOptions(field, a) {
+  if (field === "has") return availableOptions(state.items, a.has || []);
   const used = new Set();
   for (const p of state.draft.persons) {
     (p.gains || []).forEach((i) => used.add(i));
@@ -368,6 +376,7 @@ function collectDraftFromForm() {
   d.season = f.season.value ? Number(f.season.value) : null;
   d.episode = f.episode.value ? Number(f.episode.value) : null;
   d.timestamp = f.timestamp.value || "00:00";
+  d.implied = f.implied.checked;
   d.missing_details = f.missing_details.checked;
   d.when = buildWhen(f);
 }
@@ -535,7 +544,10 @@ function subjectAppearances() {
   for (const event of state.events) {
     const appearance = (event[type] || []).find((a) => a.id === id);
     if (appearance) {
-      rows.push({ event, order: appearance.order, death: appearance.death === true, confirmedAge: appearance.confirmed_age });
+      rows.push({
+        event, order: appearance.order, death: appearance.death === true,
+        confirmedAge: appearance.confirmed_age, gains: appearance.gains || [], has: appearance.has || []
+      });
     }
   }
   // Sort by byte/ordinal order to match the fractional keys (and the server),
@@ -584,13 +596,25 @@ function renderPersonTimeline(list, personId, model) {
   const rows = subjectAppearances();
   const hasAnchor = rows.some((r) => Number.isInteger(r.confirmedAge));
   const ages = hasAnchor ? computeAges(rows) : null;
+
+  // Earliest order at which this person gains each item (rows are sorted asc).
+  const firstGain = {};
+  for (const r of rows) for (const it of r.gains) if (!(it in firstGain)) firstGain[it] = r.order;
+
   rows.forEach((row, index) => {
     const owned = model.ownedAt[`${personId}|${row.event.id}`] || [];
-    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, owned, personId));
+    // Items shown at this event = owned (incl. via `has` runs) ∪ observed here.
+    // An observed item warns until a gains of it exists earlier in this timeline.
+    const items = [...new Set([...owned, ...row.has])];
+    const itemTags = items.map((it) => ({
+      item: it,
+      warn: row.has.includes(it) && !(it in firstGain && byteCompare(firstGain[it], row.order) < 0)
+    }));
+    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, itemTags, personId));
   });
 }
 
-function personRowNode(row, index, age, showAge, ownedItems, personId) {
+function personRowNode(row, index, age, showAge, itemTags, personId) {
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
@@ -606,7 +630,7 @@ function personRowNode(row, index, age, showAge, ownedItems, personId) {
     death.title = "Tod";
     tags.push(death);
   }
-  for (const itemId of ownedItems) tags.push(itemTag(itemId));
+  for (const t of itemTags) tags.push(t.warn ? hasTag(t.item, true) : itemTag(t.item));
   li.appendChild(rowBody(index, row.event, tags));
 
   li.appendChild(openButton(row.event.id));
@@ -617,7 +641,7 @@ function personRowNode(row, index, age, showAge, ownedItems, personId) {
 
 function renderItemTimeline(list, itemId, model) {
   let rows = model.chains[itemId] || [];
-  if (!state.showCarried) rows = rows.filter((r) => r.kind === "gain" || r.kind === "lose");
+  if (!state.showCarried) rows = rows.filter((r) => r.kind !== "carry"); // keep gain/has/lose
   rows.forEach((row, index) => list.appendChild(itemRowNode(row, index)));
 }
 
@@ -628,6 +652,7 @@ function itemRowNode(row, index) {
 
   const tags = [];
   if (row.kind === "gain") tags.push(span("transfer-mark gain", "＋"));
+  if (row.kind === "has") tags.push(span("transfer-mark has", "＋?")); // acquisition unknown
   if (row.kind === "lose") tags.push(span("transfer-mark lose", "－"));
   tags.push(row.owner ? ownerTag(row.owner) : span("ownerless", "herrenlos"));
   li.appendChild(rowBody(index, row.event, tags));
@@ -735,24 +760,34 @@ function linkTag(cls, label, jumpTitle, onJump) {
 const itemTag = (itemId) => linkTag("item-tag", `📦 ${itemName(itemId)}`, "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", itemId));
 const ownerTag = (personId) => linkTag("owner-tag", `👤 ${personName(personId)}`, "Zur Personen-Zeitlinie", () => jumpToTimeline("persons", personId));
 
+// Observed possession; the ⚠️ flags it as unexplained (no earlier gains).
+const hasTag = (itemId, warn) => linkTag(
+  `has-tag${warn ? " warn" : ""}`,
+  `${warn ? "⚠️ " : ""}📦 ${itemName(itemId)}`,
+  "Zur Gegenstand-Zeitlinie",
+  () => jumpToTimeline("items", itemId)
+);
+
 // --- ownership derivation ---------------------------------------------------
 
 // Item timelines are derived from ownership. Returns each item's ordered chain
-// of rows and a map of which items a person owns at a given event.
+// of rows and a map of which items a person owns at a given event. Both `gains`
+// (explicit) and `has` (observed) acquire the item; only explicit gains by
+// another person counts as a transfer that ends the current owner's run.
 function ownershipModel() {
   const personEvents = personEventOrder();
-  const gainAt = {}; // eventId -> { itemId: personId }
-  const loseAt = {}; // eventId -> { itemId: personId }
+  const gainerAt = {}; // `${eventId}|${itemId}` -> personId (explicit gains only)
   const itemIds = new Set();
   for (const event of state.events) {
     for (const p of event.persons || []) {
-      for (const it of p.gains || []) { (gainAt[event.id] ||= {})[it] = p.id; itemIds.add(it); }
-      for (const it of p.loses || []) { (loseAt[event.id] ||= {})[it] = p.id; itemIds.add(it); }
+      for (const it of p.gains || []) { gainerAt[`${event.id}|${it}`] = p.id; itemIds.add(it); }
+      for (const it of p.has || []) itemIds.add(it);
+      for (const it of p.loses || []) itemIds.add(it);
     }
   }
   const ownedAt = {};
   const chains = {};
-  for (const itemId of itemIds) chains[itemId] = buildItemChain(itemId, personEvents, gainAt, loseAt, ownedAt);
+  for (const itemId of itemIds) chains[itemId] = buildItemChain(itemId, personEvents, gainerAt, ownedAt);
   return { chains, ownedAt };
 }
 
@@ -768,48 +803,59 @@ function personEventOrder() {
   return map;
 }
 
-// Stitch ownership stretches into one ordered chain, linking at transfer events.
-function buildItemChain(itemId, personEvents, gainAt, loseAt, ownedAt) {
-  const segments = {}; // gainEventId -> { rows, transferEventId }
-  for (const eid of Object.keys(gainAt)) {
-    if (gainAt[eid][itemId]) segments[eid] = buildSegment(itemId, eid, gainAt[eid][itemId], personEvents, gainAt, loseAt);
+// Collect every person's holding runs for the item, then stitch them into one
+// ordered chain, linking each run that ends in a transfer to the receiver's run.
+function buildItemChain(itemId, personEvents, gainerAt, ownedAt) {
+  const runs = [];
+  for (const personId of Object.keys(personEvents)) {
+    for (const run of buildRuns(personId, itemId, personEvents[personId], gainerAt)) runs.push(run);
   }
-  const transferTargets = new Set(Object.values(segments).map((s) => s.transferEventId).filter(Boolean));
-  const startId = Object.keys(segments).find((eid) => !transferTargets.has(eid)) || Object.keys(segments)[0];
+  const byAcquire = {};
+  for (const run of runs) byAcquire[run.acquireEventId] = run;
+  const transferTargets = new Set(runs.map((r) => r.transferEventId).filter(Boolean));
+  let startId = runs.map((r) => r.acquireEventId).find((eid) => !transferTargets.has(eid));
+  if (startId === undefined) startId = runs.length ? runs[0].acquireEventId : null;
 
   const rows = [];
   const visited = new Set();
-  for (let cur = startId; cur && segments[cur] && !visited.has(cur); cur = segments[cur].transferEventId) {
+  for (let cur = startId; cur && byAcquire[cur] && !visited.has(cur); cur = byAcquire[cur].transferEventId) {
     visited.add(cur);
-    rows.push(...segments[cur].rows);
+    rows.push(...byAcquire[cur].rows);
   }
-  for (const eid of Object.keys(segments)) {
-    if (!visited.has(eid)) rows.push(...segments[eid].rows); // disconnected fallback
+  for (const run of runs) {
+    if (!visited.has(run.acquireEventId)) { rows.push(...run.rows); visited.add(run.acquireEventId); } // disconnected
   }
   for (const r of rows) if (r.owner) (ownedAt[`${r.owner}|${r.event.id}`] ||= []).push(itemId);
   return rows;
 }
 
-// One ownership stretch: the owner's events from the gain forward, until they
-// lose it (inclusive, ownerless) or another person gains it (exclusive transfer).
-function buildSegment(itemId, gainEventId, ownerId, personEvents, gainAt, loseAt) {
-  const evs = personEvents[ownerId] || [];
-  const start = evs.findIndex((e) => e.id === gainEventId);
-  const rows = [];
-  let transferEventId = null;
-  for (let i = start; i >= 0 && i < evs.length; i++) {
-    const e = evs[i];
-    if (i > start && gainAt[e.id] && gainAt[e.id][itemId] && gainAt[e.id][itemId] !== ownerId) {
-      transferEventId = e.id; // someone else takes it here
-      break;
+// A holding run for one person: from an acquisition (explicit `gains` or observed
+// `has`) through their events until they lose it (inclusive, → ownerless) or
+// another person explicitly gains it (exclusive transfer out).
+function buildRuns(personId, itemId, evs, gainerAt) {
+  const runs = [];
+  let run = null;
+  for (const e of evs) {
+    const a = (e.persons || []).find((p) => p.id === personId) || {};
+    const gains = (a.gains || []).includes(itemId);
+    const observed = (a.has || []).includes(itemId);
+    const loses = (a.loses || []).includes(itemId);
+    const takenByOther = gainerAt[`${e.id}|${itemId}`] && gainerAt[`${e.id}|${itemId}`] !== personId;
+
+    if (run && takenByOther) {
+      run.transferEventId = e.id;
+      runs.push(run);
+      run = null;
+    } else if (!run && (gains || observed)) {
+      run = { owner: personId, acquireEventId: e.id, transferEventId: null,
+              rows: [{ event: e, owner: personId, kind: gains ? "gain" : "has" }] };
+    } else if (run) {
+      if (loses) { run.rows.push({ event: e, owner: null, kind: "lose" }); runs.push(run); run = null; }
+      else run.rows.push({ event: e, owner: personId, kind: "carry" });
     }
-    if (i > start && loseAt[e.id] && loseAt[e.id][itemId] === ownerId) {
-      rows.push({ event: e, owner: null, kind: "lose" }); // dropped → ownerless
-      break;
-    }
-    rows.push({ event: e, owner: ownerId, kind: i === start ? "gain" : "carry" });
   }
-  return { rows, transferEventId };
+  if (run) runs.push(run);
+  return runs;
 }
 
 // Opens the event in the editor and scrolls the left list to it. draggable is
