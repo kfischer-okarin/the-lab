@@ -54,7 +54,8 @@ class DarkEventsApp < Sinatra::Base
       subject_id: body["subject_id"],
       event_id: body["event_id"],
       before_key: body["before_key"],
-      after_key: body["after_key"]
+      after_key: body["after_key"],
+      current_key: body["current_key"]
     )
     key ? json_ok(order: key) : not_found!
   end

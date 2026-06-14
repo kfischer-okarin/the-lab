@@ -285,10 +285,10 @@ function syncWhenRows() {
 function renderAppearances(containerId, appearances, type, nameFn) {
   const container = el(containerId);
   container.innerHTML = "";
-  for (const a of appearances) container.appendChild(appearanceNode(a, type, nameFn));
+  appearances.forEach((a, index) => container.appendChild(appearanceNode(a, type, nameFn, index)));
 }
 
-function appearanceNode(a, type, nameFn) {
+function appearanceNode(a, type, nameFn, index) {
   const node = document.createElement("div");
   node.className = "appearance" + (type === "persons" ? " person" : "");
 
@@ -306,11 +306,14 @@ function appearanceNode(a, type, nameFn) {
   const actions = document.createElement("span");
   actions.className = "actions";
   if (type === "persons") {
-    actions.appendChild(ageInput(a));
+    actions.appendChild(ageControl(a));
     actions.appendChild(deathToggle(a));
+    // A person can appear twice in one event (e.g. their younger and older
+    // self); each appearance is its own subjective-timeline slot.
+    actions.appendChild(iconButton("⧉", "Weiteres Auftreten (z. B. anderes Ich)", () => addAppearance("persons", a.id)));
   }
   actions.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline(type, a.id)));
-  actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, a.id), "remove"));
+  actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, index), "remove"));
   main.appendChild(actions);
   node.appendChild(main);
 
@@ -377,22 +380,65 @@ function removeTransfer(a, field, itemId) {
   renderEditor();
 }
 
-// Optional confirmed age for this person at this event (at most one per person;
-// the server clears it on other events when set here). Mutates the draft.
-function ageInput(a) {
+// The appearance being age-edited inline (kept off the draft object so it never
+// leaks into the saved YAML).
+let editingAge = null;
+
+// Age control for a person appearance: a tag showing the confirmed age (amber,
+// matching the subjective timeline), the computed age (blue), or unknown; the ✎
+// switches it to an inline input.
+function ageControl(a) {
+  return editingAge === a ? ageEditor(a) : ageDisplayTag(a);
+}
+
+function ageDisplayTag(a) {
+  const { value, confirmed } = appearanceAge(a);
+  const cls = confirmed ? "age-tag confirmed" : value !== null ? "age-tag" : "age-tag unknown";
+  const tag = span(cls, confirmed ? `🔒 ${value}` : value !== null ? `${value}` : "?");
+  tag.title = confirmed ? "Bestätigtes Alter" : value !== null ? "Berechnetes Alter" : "Alter unbekannt — bei neuem Auftreten erst nach dem Speichern";
+  tag.appendChild(iconButton("✎", "Alter bearbeiten", () => { editingAge = a; renderEditor(); }));
+  return tag;
+}
+
+function ageEditor(a) {
   const input = document.createElement("input");
   input.type = "number";
   input.min = "0";
   input.className = "age-input";
   input.placeholder = "Alter";
-  input.title = "Bestätigtes Alter (max. eines pro Person)";
   input.value = Number.isInteger(a.confirmed_age) ? a.confirmed_age : "";
-  input.onchange = () => {
-    const value = parseInt(input.value, 10);
-    if (Number.isInteger(value)) a.confirmed_age = value;
-    else delete a.confirmed_age;
+  const commit = () => {
+    if (editingAge !== a) return;
+    setConfirmedAge(a, parseInt(input.value, 10));
+    editingAge = null;
+    renderEditor();
   };
+  input.onkeydown = (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commit(); }
+    else if (e.key === "Escape") { editingAge = null; renderEditor(); }
+  };
+  input.onblur = commit;
+  setTimeout(() => input.focus(), 0);
   return input;
+}
+
+// At most one explicit age per person: setting one clears this person's other
+// draft appearances (the server enforces the same across all events on save).
+function setConfirmedAge(a, value) {
+  if (!Number.isInteger(value)) { delete a.confirmed_age; return; }
+  a.confirmed_age = value;
+  for (const other of state.draft.persons) {
+    if (other !== a && other.id === a.id) delete other.confirmed_age;
+  }
+}
+
+// Age of a draft appearance for the editor: the explicit confirmed age (amber)
+// if set, else the age computed along this person's saved subjective timeline.
+// A freshly added appearance (no order yet) reads as unknown until saved.
+function appearanceAge(a) {
+  if (Number.isInteger(a.confirmed_age)) return { value: a.confirmed_age, confirmed: true };
+  if (!state.draft || !state.draft.id || !a.order) return { value: null, confirmed: false };
+  return { value: ageOnTimeline(a.id, state.draft.id, (r) => String(r.order) === String(a.order)), confirmed: false };
 }
 
 // Checkbox toggling whether this person dies in this event. Mutates the draft
@@ -420,9 +466,12 @@ function iconButton(glyph, title, onClick, cls = "") {
   return btn;
 }
 
-function removeFrom(field, id) {
+// Remove one appearance by its position, not by id — a person can appear more
+// than once, so filtering by id would drop every instance of them.
+function removeFrom(field, index) {
   collectDraftFromForm();
-  state.draft[field] = state.draft[field].filter((a) => a.id !== id);
+  const [removed] = state.draft[field].splice(index, 1);
+  if (editingAge === removed) editingAge = null;
   renderEditor();
 }
 
@@ -471,9 +520,10 @@ async function deleteEvent() {
 
 // --- add via dropdown buttons -----------------------------------------------
 
+// Duplicates are allowed: the "+ Person" dropdown already hides people who are
+// present, so a repeat only comes from the explicit "weiteres Auftreten" button.
 function addAppearance(field, id) {
   if (!id || !state.draft) return;
-  if (state.draft[field].some((a) => a.id === id)) return;
   collectDraftFromForm();
   state.draft[field].push({ id, order: "" }); // server assigns the order key on save
   renderEditor();
@@ -614,15 +664,23 @@ function byteCompare(a, b) {
 function subjectAppearances() {
   if (!state.subjectKey) return [];
   const [type, id] = state.subjectKey.split(":");
+  return appearancesFor(type, id);
+}
+
+// Every appearance of a subject across all events, one row each. A person can
+// appear more than once in an event (younger/older self), so each row also
+// carries its `index` (position in the event's persons array) to disambiguate.
+function appearancesFor(type, id) {
   const rows = [];
   for (const event of state.events) {
-    const appearance = (event[type] || []).find((a) => a.id === id);
-    if (appearance) {
+    (event[type] || []).forEach((appearance, index) => {
+      if (appearance.id !== id) return;
       rows.push({
-        event, order: appearance.order, death: appearance.death === true,
-        confirmedAge: appearance.confirmed_age, gains: appearance.gains || [], has: appearance.has || []
+        event, index, order: appearance.order, death: appearance.death === true,
+        confirmedAge: appearance.confirmed_age, gains: appearance.gains || [],
+        loses: appearance.loses || [], has: appearance.has || []
       });
-    }
+    });
   }
   // Sort by byte/ordinal order to match the fractional keys (and the server),
   // NOT localeCompare — that is case-insensitive/linguistic ("e" < "K") and
@@ -676,13 +734,18 @@ function renderPersonTimeline(list, personId, model) {
   for (const r of rows) for (const it of r.gains) if (!(it in firstGain)) firstGain[it] = r.order;
 
   rows.forEach((row, index) => {
-    const owned = model.ownedAt[`${personId}|${row.event.id}`] || [];
-    // Items shown at this event = owned (incl. via `has` runs) ∪ observed here.
-    // An observed item warns until a gains of it exists earlier in this timeline.
-    const items = [...new Set([...owned, ...row.has])];
+    const owned = model.ownedAt[`${personId}#${row.index}|${row.event.id}`] || [];
+    // Items shown at this event = owned (incl. via `has` runs) ∪ observed ∪
+    // gained/lost here. gains/loses are marked explicitly (＋/－) so a hand-off
+    // reads as lost-here and gained-here at its two slots; an observed item warns
+    // until a gains of it exists earlier in this timeline.
+    const items = [...new Set([...owned, ...row.has, ...row.gains, ...row.loses])];
     const itemTags = items.map((it) => ({
       item: it,
-      warn: row.has.includes(it) && !(it in firstGain && byteCompare(firstGain[it], row.order) < 0)
+      gain: row.gains.includes(it),
+      lose: row.loses.includes(it),
+      warn: !row.gains.includes(it) && !row.loses.includes(it) && row.has.includes(it)
+        && !(it in firstGain && byteCompare(firstGain[it], row.order) < 0)
     }));
     list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, itemTags, personId));
   });
@@ -704,7 +767,7 @@ function personRowNode(row, index, age, showAge, itemTags, personId) {
     death.title = "Tod";
     tags.push(death);
   }
-  for (const t of itemTags) tags.push(t.warn ? hasTag(t.item, true) : itemTag(t.item));
+  for (const t of itemTags) tags.push(personItemTag(t));
   li.appendChild(rowBody(index, row.event, tags));
 
   li.appendChild(openButton(row.event.id));
@@ -728,7 +791,9 @@ function itemRowNode(row, index) {
   if (row.kind === "gain") tags.push(span("transfer-mark gain", "＋"));
   if (row.kind === "has") tags.push(span("transfer-mark has", "＋?")); // acquisition unknown
   if (row.kind === "lose") tags.push(span("transfer-mark lose", "－"));
-  tags.push(row.owner ? ownerTag(row.owner) : span("ownerless", "herrenlos"));
+  tags.push(row.owner
+    ? ownerTag(row.owner, ageOnTimeline(row.owner, row.event.id, (r) => r.index === row.index))
+    : span("ownerless", "herrenlos"));
   li.appendChild(rowBody(index, row.event, tags));
 
   li.appendChild(openButton(row.event.id));
@@ -832,7 +897,32 @@ function linkTag(cls, label, jumpTitle, onJump) {
 }
 
 const itemTag = (itemId) => linkTag("item-tag", `📦 ${itemName(itemId)}`, "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", itemId));
-const ownerTag = (personId) => linkTag("owner-tag", `👤 ${personName(personId)}`, "Zur Personen-Zeitlinie", () => jumpToTimeline("persons", personId));
+
+// One item on a person row: ＋ when gained here, － when lost here, ⚠️ when
+// observed but unexplained, else a plain "carries it" tag.
+function personItemTag(t) {
+  if (t.lose) return linkTag("item-tag lose", `－ 📦 ${itemName(t.item)}`, "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", t.item));
+  if (t.gain) return linkTag("item-tag gain", `＋ 📦 ${itemName(t.item)}`, "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", t.item));
+  if (t.warn) return hasTag(t.item, true);
+  return itemTag(t.item);
+}
+
+// Owner of an item at one of its timeline rows, annotated with the owner's age
+// at that moment so younger/older selves read apart.
+function ownerTag(personId, age) {
+  const label = age === null || age === undefined ? `👤 ${personName(personId)}` : `👤 ${personName(personId)} (${age})`;
+  return linkTag("owner-tag", label, "Zur Personen-Zeitlinie", () => jumpToTimeline("persons", personId));
+}
+
+// The age a person has at the appearance matching `pick` along their subjective
+// timeline, or null when no confirmed-age anchor lets us compute one.
+function ageOnTimeline(personId, eventId, pick) {
+  const rows = appearancesFor("persons", personId);
+  if (!rows.some((r) => Number.isInteger(r.confirmedAge))) return null;
+  const ages = computeAges(rows);
+  const i = rows.findIndex((r) => r.event.id === eventId && pick(r));
+  return i >= 0 ? ages[i] : null;
+}
 
 // Observed possession; the ⚠️ flags it as unexplained (no earlier gains).
 const hasTag = (itemId, warn) => linkTag(
@@ -865,14 +955,18 @@ function ownershipModel() {
   return { chains, ownedAt };
 }
 
-// Each person's events in their own subjective order.
+// Each person's appearances in their own subjective order. A person can appear
+// twice in one event (younger/older self), so entries carry the array `index`
+// to disambiguate, and the appearance itself so its transfers read correctly.
 function personEventOrder() {
   const map = {};
   for (const event of state.events) {
-    for (const p of event.persons || []) (map[p.id] ||= []).push({ event, order: p.order });
+    (event.persons || []).forEach((appearance, index) => {
+      (map[appearance.id] ||= []).push({ event, index, appearance, order: appearance.order });
+    });
   }
   for (const id of Object.keys(map)) {
-    map[id] = map[id].sort((a, b) => byteCompare(String(a.order), String(b.order))).map((r) => r.event);
+    map[id].sort((a, b) => byteCompare(String(a.order), String(b.order)));
   }
   return map;
 }
@@ -899,18 +993,17 @@ function buildItemChain(itemId, personEvents, gainerAt, ownedAt) {
   for (const run of runs) {
     if (!visited.has(run.acquireEventId)) { rows.push(...run.rows); visited.add(run.acquireEventId); } // disconnected
   }
-  for (const r of rows) if (r.owner) (ownedAt[`${r.owner}|${r.event.id}`] ||= []).push(itemId);
+  for (const r of rows) if (r.owner) (ownedAt[`${r.owner}#${r.index}|${r.event.id}`] ||= []).push(itemId);
   return rows;
 }
 
 // A holding run for one person: from an acquisition (explicit `gains` or observed
 // `has`) through their events until they lose it (inclusive, → ownerless) or
 // another person explicitly gains it (exclusive transfer out).
-function buildRuns(personId, itemId, evs, gainerAt) {
+function buildRuns(personId, itemId, entries, gainerAt) {
   const runs = [];
   let run = null;
-  for (const e of evs) {
-    const a = (e.persons || []).find((p) => p.id === personId) || {};
+  for (const { event: e, index, appearance: a } of entries) {
     const gains = (a.gains || []).includes(itemId);
     const observed = (a.has || []).includes(itemId);
     const loses = (a.loses || []).includes(itemId);
@@ -922,10 +1015,10 @@ function buildRuns(personId, itemId, evs, gainerAt) {
       run = null;
     } else if (!run && (gains || observed)) {
       run = { owner: personId, acquireEventId: e.id, transferEventId: null,
-              rows: [{ event: e, owner: personId, kind: gains ? "gain" : "has" }] };
+              rows: [{ event: e, owner: personId, index, kind: gains ? "gain" : "has" }] };
     } else if (run) {
-      if (loses) { run.rows.push({ event: e, owner: null, kind: "lose" }); runs.push(run); run = null; }
-      else run.rows.push({ event: e, owner: personId, kind: "carry" });
+      if (loses) { run.rows.push({ event: e, owner: null, index, kind: "lose" }); runs.push(run); run = null; }
+      else run.rows.push({ event: e, owner: personId, index, kind: "carry" });
     }
   }
   if (run) runs.push(run);
@@ -1111,7 +1204,7 @@ async function commitReorder(list, draggedEl, afterEl) {
   const d = draggedEl.dataset;
   const { order } = await api("POST", "/api/reorder", {
     subject_type: d.reorderType, subject_id: d.reorderId, event_id: d.eventId,
-    before_key: beforeKey, after_key: afterKey
+    before_key: beforeKey, after_key: afterKey, current_key: d.order
   });
   applyReorderLocally(d, order);
   renderSubjectEvents();
@@ -1123,7 +1216,9 @@ function applyReorderLocally(d, newKey) {
   const event = state.events.find((e) => e.id === d.eventId);
   if (!event) return;
   if (d.reorderType === "persons") {
-    const a = (event.persons || []).find((p) => p.id === d.reorderId);
+    // Pin the dragged appearance by its current key, not just its id — the same
+    // person may hold two slots (younger/older self) in this timeline.
+    const a = (event.persons || []).find((p) => p.id === d.reorderId && String(p.order) === String(d.order));
     if (a) a.order = newKey;
   } else if (d.reorderType === "date") {
     const field = { date: "order", from: "from_order", to: "to_order" }[d.reorderId];

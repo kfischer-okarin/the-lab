@@ -55,11 +55,11 @@ class Store
   # Reorder a person's appearance (subject_type "persons", subject_id = person id)
   # or a date point (subject_type "date", subject_id = "date"|"from"|"to").
   # Item timelines are derived from ownership, so items are not reorderable.
-  def reorder(subject_type:, subject_id:, event_id:, before_key:, after_key:)
+  def reorder(subject_type:, subject_id:, event_id:, before_key:, after_key:, current_key: nil)
     new_key = Frac.key_between(before_key, after_key)
     list = events
     event = list.find { |e| e["id"] == event_id } or return nil
-    target = orderable(event, subject_type, subject_id) or return nil
+    target = orderable(event, subject_type, subject_id, current_key) or return nil
     target[0][target[1]] = new_key
     save(:events, "events", list)
     new_key
@@ -113,10 +113,14 @@ class Store
   DATE_ORDER_FIELDS = { "date" => "order", "from" => "from_order", "to" => "to_order" }.freeze
 
   # Returns [hash, key] whose hash[key] holds the fractional order to update.
-  def orderable(event, subject_type, subject_id)
+  # A person can appear more than once in an event (e.g. their younger and older
+  # self), so when +current_key+ is given the matching appearance is pinned by
+  # its present order key (unique per person), not just by person id.
+  def orderable(event, subject_type, subject_id, current_key = nil)
     if subject_type == "persons"
-      appearance = (event["persons"] || []).find { |a| a["id"] == subject_id } or return nil
-      [appearance, "order"]
+      appearances = (event["persons"] || []).select { |a| a["id"] == subject_id }
+      appearance = current_key ? appearances.find { |a| a["order"].to_s == current_key.to_s } : appearances.first
+      appearance ? [appearance, "order"] : nil
     elsif subject_type == "date"
       field = DATE_ORDER_FIELDS[subject_id] or return nil
       [(event["when"] ||= {}), field]
@@ -224,12 +228,20 @@ class Store
     end
   end
 
-  # At most one confirmed age per person. When the just-saved event sets one for
-  # a person, clear that person's confirmed_age on every other event.
+  # At most one confirmed age per person across the whole dataset. A person may
+  # appear twice in one event (younger/older self), so first keep only the last
+  # confirmed_age per person *within* the just-saved event, then clear that
+  # person's confirmed_age on every other event.
   def enforce_single_confirmed_age(list, current_id)
     current = list.find { |e| e["id"] == current_id } or return
 
-    ids = (current["persons"] || []).select { |a| a.key?("confirmed_age") }.map { |a| a["id"] }
+    last_index = {}
+    (current["persons"] || []).each_with_index { |a, i| last_index[a["id"]] = i if a.key?("confirmed_age") }
+    (current["persons"] || []).each_with_index do |a, i|
+      a.delete("confirmed_age") if a.key?("confirmed_age") && last_index[a["id"]] != i
+    end
+
+    ids = last_index.keys
     return if ids.empty?
 
     list.each do |event|
