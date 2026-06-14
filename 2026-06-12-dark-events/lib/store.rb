@@ -29,7 +29,7 @@ class Store
     list = events
     event = blank_event(next_event_id(list)).merge(sanitize_event(attrs))
     list << event
-    finalize(list)
+    finalize(list, event["id"])
     save(:events, "events", list)
     event
   end
@@ -38,7 +38,7 @@ class Store
     list = events
     index = list.index { |e| e["id"] == id } or return nil
     list[index] = list[index].merge(sanitize_event(attrs)).merge("id" => id)
-    finalize(list)
+    finalize(list, id)
     save(:events, "events", list)
     list[index]
   end
@@ -109,9 +109,11 @@ class Store
     "#{base}_#{suffix}"
   end
 
-  def finalize(list)
+  def finalize(list, current_id)
     assign_missing_orders(list)
     strip_false_death_flags(list)
+    normalize_confirmed_age(list)
+    enforce_single_confirmed_age(list, current_id)
   end
 
   # Death is a flag on a person appearance; keep only the truthy ones so the
@@ -119,6 +121,33 @@ class Store
   def strip_false_death_flags(list)
     list.each do |event|
       (event["persons"] || []).each { |a| a.delete("death") unless a["death"] == true }
+    end
+  end
+
+  # confirmed_age is an optional integer on a person appearance; drop anything
+  # non-numeric so a cleared field leaves no key behind.
+  def normalize_confirmed_age(list)
+    list.each do |event|
+      (event["persons"] || []).each do |a|
+        next unless a.key?("confirmed_age")
+
+        a["confirmed_age"].is_a?(Numeric) ? a["confirmed_age"] = a["confirmed_age"].to_i : a.delete("confirmed_age")
+      end
+    end
+  end
+
+  # At most one confirmed age per person. When the just-saved event sets one for
+  # a person, clear that person's confirmed_age on every other event.
+  def enforce_single_confirmed_age(list, current_id)
+    current = list.find { |e| e["id"] == current_id } or return
+
+    ids = (current["persons"] || []).select { |a| a.key?("confirmed_age") }.map { |a| a["id"] }
+    return if ids.empty?
+
+    list.each do |event|
+      next if event["id"] == current_id
+
+      (event["persons"] || []).each { |a| a.delete("confirmed_age") if ids.include?(a["id"]) }
     end
   end
 

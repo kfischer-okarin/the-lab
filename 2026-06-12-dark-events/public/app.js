@@ -217,11 +217,32 @@ function appearanceNode(a, type, nameFn) {
 
   const actions = document.createElement("span");
   actions.className = "actions";
-  if (type === "persons") actions.appendChild(deathToggle(a));
+  if (type === "persons") {
+    actions.appendChild(ageInput(a));
+    actions.appendChild(deathToggle(a));
+  }
   actions.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline(type, a.id)));
   actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, a.id), "remove"));
   node.appendChild(actions);
   return node;
+}
+
+// Optional confirmed age for this person at this event (at most one per person;
+// the server clears it on other events when set here). Mutates the draft.
+function ageInput(a) {
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "0";
+  input.className = "age-input";
+  input.placeholder = "Alter";
+  input.title = "Bestätigtes Alter (max. eines pro Person)";
+  input.value = Number.isInteger(a.confirmed_age) ? a.confirmed_age : "";
+  input.onchange = () => {
+    const value = parseInt(input.value, 10);
+    if (Number.isInteger(value)) a.confirmed_age = value;
+    else delete a.confirmed_age;
+  };
+  return input;
 }
 
 // Checkbox toggling whether this person dies in this event. Mutates the draft
@@ -429,7 +450,9 @@ function subjectAppearances() {
   const rows = [];
   for (const event of state.events) {
     const appearance = (event[type] || []).find((a) => a.id === id);
-    if (appearance) rows.push({ event, order: appearance.order, death: appearance.death === true });
+    if (appearance) {
+      rows.push({ event, order: appearance.order, death: appearance.death === true, confirmedAge: appearance.confirmed_age });
+    }
   }
   // Sort by byte/ordinal order to match the fractional keys (and the server),
   // NOT localeCompare — that is case-insensitive/linguistic ("e" < "K") and
@@ -440,10 +463,14 @@ function subjectAppearances() {
 function renderSubjectEvents() {
   const list = el("subject-events");
   list.innerHTML = "";
-  subjectAppearances().forEach((row, index) => list.appendChild(subjectRowNode(row, index)));
+  const [type] = (state.subjectKey || ":").split(":");
+  const rows = subjectAppearances();
+  const hasAnchor = type === "persons" && rows.some((r) => Number.isInteger(r.confirmedAge));
+  const ages = hasAnchor ? computeAges(rows) : null;
+  rows.forEach((row, index) => list.appendChild(subjectRowNode(row, index, ages ? ages[index] : null, hasAnchor)));
 }
 
-function subjectRowNode(row, index) {
+function subjectRowNode(row, index, age, showAge) {
   const [type] = (state.subjectKey || ":").split(":");
   const li = document.createElement("li");
   li.draggable = true;
@@ -451,6 +478,7 @@ function subjectRowNode(row, index) {
   li.appendChild(span("grip", "⠿"));
   li.appendChild(span("seq", String(index + 1)));
   li.appendChild(span("ev-title", row.event.title));
+  if (showAge) li.appendChild(ageBadge(row, age));
   if (type === "persons" && row.death) {
     const death = span("ev-death", "✝");
     death.title = "Tod";
@@ -460,6 +488,72 @@ function subjectRowNode(row, index) {
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragend", onDragEnd);
   return li;
+}
+
+function ageBadge(row, age) {
+  if (Number.isInteger(row.confirmedAge)) {
+    const b = span("age-badge confirmed", `🔒 ${row.confirmedAge}`);
+    b.title = "Bestätigtes Alter";
+    return b;
+  }
+  if (age !== null) {
+    const b = span("age-badge", `${age}`);
+    b.title = "Berechnetes Alter (Jahre)";
+    return b;
+  }
+  const b = span("age-badge unknown", "?");
+  b.title = "Alter unbekannt — unsicheres/fehlendes Datum";
+  return b;
+}
+
+// Biological age along the subjective timeline. Age accumulates between
+// consecutive events by their world-year difference; time travel uses the
+// event's `from` as its own timestamp and `to` as the hand-off to the next.
+function computeAges(rows) {
+  const ages = rows.map(() => null);
+  const anchor = rows.findIndex((r) => Number.isInteger(r.confirmedAge));
+  if (anchor === -1) return ages;
+
+  ages[anchor] = rows[anchor].confirmedAge;
+  for (let j = anchor + 1; j < rows.length; j++) {
+    const d = edgeDelta(rows[j - 1].event, rows[j].event);
+    if (ages[j - 1] !== null && d !== null) ages[j] = ages[j - 1] + d;
+  }
+  for (let j = anchor - 1; j >= 0; j--) {
+    const d = edgeDelta(rows[j].event, rows[j + 1].event);
+    if (ages[j + 1] !== null && d !== null) ages[j] = ages[j + 1] - d;
+  }
+  return ages;
+}
+
+// Biological years between a preceding event and the next one, or null if a
+// needed date is missing (which breaks the chain past that point).
+function edgeDelta(prevEvent, nextEvent) {
+  const out = outYear(prevEvent);
+  const inn = inYear(nextEvent);
+  return out === null || inn === null ? null : inn - out;
+}
+
+// When the person experiences an event: `from` for a time-travel event.
+function inYear(event) {
+  const w = event.when || {};
+  if (w.kind === "date") return yearOf(w.date);
+  if (w.kind === "time_travel") return yearOf(w.from);
+  return null;
+}
+
+// When the person leaves an event toward the next: `to` for a time-travel event.
+function outYear(event) {
+  const w = event.when || {};
+  if (w.kind === "date") return yearOf(w.date);
+  if (w.kind === "time_travel") return yearOf(w.to);
+  return null;
+}
+
+function yearOf(dateStr) {
+  if (!dateStr) return null;
+  const year = parseInt(String(dateStr).slice(0, 4), 10);
+  return Number.isNaN(year) ? null : year;
 }
 
 function span(cls, text) {

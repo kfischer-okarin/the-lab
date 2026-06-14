@@ -98,6 +98,7 @@ events:
     order: V
   - id: mikkel_nielsen
     order: F
+    confirmed_age: 11
   - id: franziska_doppler
     order: V
   items: []
