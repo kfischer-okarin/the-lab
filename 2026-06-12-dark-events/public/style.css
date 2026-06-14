@@ -121,6 +121,19 @@ legend { color: var(--accent); font-size: 12px; padding: 0 6px; }
 .age-input::-webkit-outer-spin-button, .age-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .dropdown-btn { margin-top: 8px; }
+.dropdown-btn.small { margin-top: 0; padding: 3px 8px; font-size: 11px; }
+
+/* person appearance becomes a small block: main row + item transfers */
+.appearance.person { flex-direction: column; align-items: stretch; gap: 6px; }
+.appearance-main { display: flex; align-items: center; justify-content: space-between; }
+.transfers { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.transfer {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; padding: 2px 6px; border-radius: 10px; border: 1px solid var(--line);
+}
+.transfer.gain { color: var(--ok); border-color: var(--ok); }
+.transfer.lose { color: var(--danger); border-color: var(--danger); }
+.transfer .icon-btn { font-size: 11px; }
 
 .add-row { display: flex; gap: 6px; margin-top: 8px; }
 .add-row select, .add-row input { flex: 1; }
@@ -184,6 +197,21 @@ button.danger:hover { border-color: var(--danger); }
 }
 .reorder .age-badge.confirmed { background: var(--accent); color: #1a1206; border-color: var(--accent); font-weight: 600; }
 .reorder .age-badge.unknown { color: var(--muted); border-color: var(--line); border-style: dashed; }
+.reorder li.item-row { cursor: default; }
+.reorder .transfer-mark { font-size: 12px; font-weight: 700; }
+.reorder .transfer-mark.gain { color: var(--ok); }
+.reorder .transfer-mark.lose { color: var(--danger); }
+.reorder .ownerless { font-size: 10px; color: var(--muted); font-style: italic; }
+.link-tag {
+  display: inline-flex; align-items: center; gap: 1px;
+  font-size: 10px; padding: 1px 4px 1px 7px; border-radius: 10px;
+  border: 1px solid var(--line); white-space: nowrap;
+}
+.link-tag.item-tag { color: var(--accent); border-color: var(--accent); }
+.link-tag.owner-tag { color: var(--accent-2); border-color: var(--accent-2); }
+.link-tag .icon-btn { font-size: 11px; padding: 0 2px; }
+
+.carry-toggle { flex-direction: row; align-items: center; gap: 6px; font-size: 12px; margin-bottom: 8px; }
 
 .registry { list-style: none; padding: 0; margin: 0; }
 .registry li { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--line); }

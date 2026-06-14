@@ -56,14 +56,9 @@
 
         <fieldset>
           <legend>Personen</legend>
+          <p class="hint">Personen können in diesem Ereignis Gegenstände erhalten oder verlieren.</p>
           <div id="event-persons" class="appearances"></div>
           <button type="button" class="dropdown-btn" id="add-person-btn">+ Person ▾</button>
-        </fieldset>
-
-        <fieldset>
-          <legend>Gegenstände</legend>
-          <div id="event-items" class="appearances"></div>
-          <button type="button" class="dropdown-btn" id="add-item-btn">+ Gegenstand ▾</button>
         </fieldset>
 
         <div class="editor-actions">
@@ -83,7 +78,8 @@
         <label class="block">Subjekt
           <select id="subject-select"></select>
         </label>
-        <p class="hint">Ziehe Ereignisse, um die persönliche Reihenfolge dieses Subjekts zu ändern. Schlüssel werden automatisch vergeben.</p>
+        <label class="check carry-toggle"><input type="checkbox" id="show-carried"> Getragene Ereignisse zeigen (Gegenstände)</label>
+        <p class="hint">Personen: ziehen ändert die persönliche Reihenfolge. Gegenstände: Zeitlinie folgt dem Besitzer (abgeleitet).</p>
         <ol id="subject-events" class="reorder"></ol>
       </div>
 

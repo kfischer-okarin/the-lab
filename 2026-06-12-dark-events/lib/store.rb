@@ -52,13 +52,15 @@ class Store
     id
   end
 
-  # Move a subject's appearance to sit between two fractional keys.
-  # subject_type is "persons" or "items".
+  # Move a person's appearance to sit between two fractional keys. Only persons
+  # carry an order; item timelines are derived from ownership.
   def reorder(subject_type:, subject_id:, event_id:, before_key:, after_key:)
+    return nil unless subject_type == "persons"
+
     new_key = Frac.key_between(before_key, after_key)
     list = events
     event = list.find { |e| e["id"] == event_id } or return nil
-    appearance = (event[subject_type] || []).find { |a| a["id"] == subject_id } or return nil
+    appearance = (event["persons"] || []).find { |a| a["id"] == subject_id } or return nil
     appearance["order"] = new_key
     save(:events, "events", list)
     new_key
@@ -114,6 +116,22 @@ class Store
     strip_false_death_flags(list)
     normalize_confirmed_age(list)
     enforce_single_confirmed_age(list, current_id)
+    tidy_transfers(list)
+  end
+
+  # gains/loses are item-id lists on a person appearance; drop empties and
+  # de-duplicate so the YAML stays clean.
+  def tidy_transfers(list)
+    list.each do |event|
+      (event["persons"] || []).each do |a|
+        %w[gains loses].each do |field|
+          next unless a.key?(field)
+
+          a[field] = Array(a[field]).uniq
+          a.delete(field) if a[field].empty?
+        end
+      end
+    end
   end
 
   # Death is a flag on a person appearance; keep only the truthy ones so the
@@ -151,23 +169,22 @@ class Store
     end
   end
 
-  # Any persons/items appearance added without an order key is appended to the
-  # end of that subject's subjective sequence, so the UI never has to mint keys.
+  # Any person appearance added without an order key is appended to the end of
+  # that person's subjective sequence, so the UI never has to mint keys. (Items
+  # have no order — their timeline is derived from ownership.)
   def assign_missing_orders(list)
-    %w[persons items].each do |field|
-      max_key = Hash.new("")
-      list.each do |event|
-        (event[field] || []).each do |a|
-          max_key[a["id"]] = a["order"] if a["order"].to_s > max_key[a["id"]]
-        end
+    max_key = Hash.new("")
+    list.each do |event|
+      (event["persons"] || []).each do |a|
+        max_key[a["id"]] = a["order"] if a["order"].to_s > max_key[a["id"]]
       end
-      list.each do |event|
-        (event[field] || []).each do |a|
-          next unless a["order"].to_s.empty?
+    end
+    list.each do |event|
+      (event["persons"] || []).each do |a|
+        next unless a["order"].to_s.empty?
 
-          a["order"] = Frac.key_between(max_key[a["id"]], nil)
-          max_key[a["id"]] = a["order"]
-        end
+        a["order"] = Frac.key_between(max_key[a["id"]], nil)
+        max_key[a["id"]] = a["order"]
       end
     end
   end
@@ -175,14 +192,13 @@ class Store
   def blank_event(id)
     {
       "id" => id, "season" => nil, "episode" => nil, "title" => "(neues Ereignis)",
-      "when" => { "kind" => "unknown" }, "persons" => [], "items" => [],
-      "missing_details" => false
+      "when" => { "kind" => "unknown" }, "persons" => [], "missing_details" => false
     }
   end
 
   def sanitize_event(attrs)
     out = {}
-    %w[season episode title when persons items missing_details].each do |k|
+    %w[season episode title when persons missing_details].each do |k|
       out[k] = attrs[k] if attrs.key?(k)
     end
     out

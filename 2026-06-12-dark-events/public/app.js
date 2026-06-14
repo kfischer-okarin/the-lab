@@ -7,7 +7,8 @@ const state = {
   selectedId: null,
   draft: null,        // working copy of the event being edited
   subjectKey: null,   // "persons:<id>" or "items:<id>"
-  filter: ""
+  filter: "",
+  showCarried: false  // item timeline: also show carried (non-transfer) events
 };
 
 const el = (id) => document.getElementById(id);
@@ -152,7 +153,7 @@ function newEvent() {
   state.selectedId = null;
   state.draft = {
     id: null, season: lastSeason(), episode: lastEpisode(), title: "",
-    when: { kind: "date", date: "" }, persons: [], items: [],
+    when: { kind: "date", date: "" }, persons: [],
     missing_details: false
   };
   renderEditor();
@@ -187,7 +188,6 @@ function renderEditor() {
   syncWhenRows();
 
   renderAppearances("event-persons", d.persons, "persons", personName);
-  renderAppearances("event-items", d.items, "items", itemName);
   el("delete-event").hidden = !d.id;
 }
 
@@ -206,7 +206,10 @@ function renderAppearances(containerId, appearances, type, nameFn) {
 
 function appearanceNode(a, type, nameFn) {
   const node = document.createElement("div");
-  node.className = "appearance";
+  node.className = "appearance" + (type === "persons" ? " person" : "");
+
+  const main = document.createElement("div");
+  main.className = "appearance-main";
 
   const label = document.createElement("span");
   label.textContent = nameFn(a.id);
@@ -214,7 +217,7 @@ function appearanceNode(a, type, nameFn) {
   order.className = "order";
   order.textContent = a.order || "neu";
   label.appendChild(order);
-  node.appendChild(label);
+  main.appendChild(label);
 
   const actions = document.createElement("span");
   actions.className = "actions";
@@ -224,8 +227,64 @@ function appearanceNode(a, type, nameFn) {
   }
   actions.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline(type, a.id)));
   actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, a.id), "remove"));
-  node.appendChild(actions);
+  main.appendChild(actions);
+  node.appendChild(main);
+
+  if (type === "persons") node.appendChild(transfersBlock(a));
   return node;
+}
+
+// Items this person gains/loses at this event. Ownership (and thus the item's
+// derived timeline) follows from these.
+function transfersBlock(a) {
+  const wrap = document.createElement("div");
+  wrap.className = "transfers";
+  (a.gains || []).forEach((id) => wrap.appendChild(transferChip(a, "gains", id, "＋")));
+  (a.loses || []).forEach((id) => wrap.appendChild(transferChip(a, "loses", id, "－")));
+  wrap.appendChild(transferAddButton(a, "gains", "+ erhält ▾"));
+  wrap.appendChild(transferAddButton(a, "loses", "+ verliert ▾"));
+  return wrap;
+}
+
+function transferChip(a, field, itemId, sign) {
+  const chip = span("transfer " + (field === "gains" ? "gain" : "lose"), `${sign} ${itemName(itemId)}`);
+  chip.appendChild(iconButton("↗", "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", itemId)));
+  chip.appendChild(iconButton("×", "Entfernen", () => removeTransfer(a, field, itemId), "remove"));
+  return chip;
+}
+
+function transferAddButton(a, field, text) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "dropdown-btn small";
+  btn.textContent = text;
+  btn.onclick = (e) => openDropdown(e.currentTarget, transferOptions(), (id) => addTransfer(a, field, id));
+  return btn;
+}
+
+// Items not already gained or lost by anyone in this event.
+function transferOptions() {
+  const used = new Set();
+  for (const p of state.draft.persons) {
+    (p.gains || []).forEach((i) => used.add(i));
+    (p.loses || []).forEach((i) => used.add(i));
+  }
+  return availableOptions(state.items, [...used]);
+}
+
+function addTransfer(a, field, itemId) {
+  if (!itemId) return;
+  a[field] = a[field] || [];
+  if (a[field].includes(itemId)) return;
+  collectDraftFromForm();
+  a[field].push(itemId);
+  renderEditor();
+}
+
+function removeTransfer(a, field, itemId) {
+  collectDraftFromForm();
+  a[field] = (a[field] || []).filter((x) => x !== itemId);
+  renderEditor();
 }
 
 // Optional confirmed age for this person at this event (at most one per person;
@@ -464,15 +523,24 @@ function subjectAppearances() {
 function renderSubjectEvents() {
   const list = el("subject-events");
   list.innerHTML = "";
-  const [type] = (state.subjectKey || ":").split(":");
-  const rows = subjectAppearances();
-  const hasAnchor = type === "persons" && rows.some((r) => Number.isInteger(r.confirmedAge));
-  const ages = hasAnchor ? computeAges(rows) : null;
-  rows.forEach((row, index) => list.appendChild(subjectRowNode(row, index, ages ? ages[index] : null, hasAnchor)));
+  if (!state.subjectKey) return;
+  const [type, id] = state.subjectKey.split(":");
+  const model = ownershipModel();
+  if (type === "persons") renderPersonTimeline(list, id, model);
+  else renderItemTimeline(list, id, model);
 }
 
-function subjectRowNode(row, index, age, showAge) {
-  const [type] = (state.subjectKey || ":").split(":");
+function renderPersonTimeline(list, personId, model) {
+  const rows = subjectAppearances();
+  const hasAnchor = rows.some((r) => Number.isInteger(r.confirmedAge));
+  const ages = hasAnchor ? computeAges(rows) : null;
+  rows.forEach((row, index) => {
+    const owned = model.ownedAt[`${personId}|${row.event.id}`] || [];
+    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, owned));
+  });
+}
+
+function personRowNode(row, index, age, showAge, ownedItems) {
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
@@ -480,16 +548,129 @@ function subjectRowNode(row, index, age, showAge) {
   li.appendChild(span("seq", String(index + 1)));
   li.appendChild(span("ev-title", row.event.title));
   if (showAge) li.appendChild(ageBadge(row, age));
-  if (type === "persons" && row.death) {
+  if (row.death) {
     const death = span("ev-death", "✝");
     death.title = "Tod";
     li.appendChild(death);
   }
+  for (const itemId of ownedItems) li.appendChild(itemTag(itemId));
   li.appendChild(span("ev-when", whenLabel(row.event.when)));
   li.appendChild(openButton(row.event.id));
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragend", onDragEnd);
   return li;
+}
+
+function renderItemTimeline(list, itemId, model) {
+  let rows = model.chains[itemId] || [];
+  if (!state.showCarried) rows = rows.filter((r) => r.kind === "gain" || r.kind === "lose");
+  rows.forEach((row, index) => list.appendChild(itemRowNode(row, index)));
+}
+
+function itemRowNode(row, index) {
+  const li = document.createElement("li");
+  li.className = "item-row";
+  li.dataset.eventId = row.event.id;
+  li.appendChild(span("seq", String(index + 1)));
+  li.appendChild(span("ev-title", row.event.title));
+  if (row.kind === "gain") li.appendChild(span("transfer-mark gain", "＋"));
+  if (row.kind === "lose") li.appendChild(span("transfer-mark lose", "－"));
+  li.appendChild(row.owner ? ownerTag(row.owner) : span("ownerless", "herrenlos"));
+  li.appendChild(span("ev-when", whenLabel(row.event.when)));
+  li.appendChild(openButton(row.event.id));
+  return li;
+}
+
+// A tag with a ↗ that jumps to the linked subject's timeline (both directions).
+function linkTag(cls, label, jumpTitle, onJump) {
+  const tag = document.createElement("span");
+  tag.className = "link-tag " + cls;
+  tag.appendChild(document.createTextNode(label));
+  const arrow = iconButton("↗", jumpTitle, (e) => { e.stopPropagation(); onJump(); });
+  arrow.draggable = false;
+  arrow.addEventListener("mousedown", (e) => e.stopPropagation());
+  tag.appendChild(arrow);
+  return tag;
+}
+
+const itemTag = (itemId) => linkTag("item-tag", `📦 ${itemName(itemId)}`, "Zur Gegenstand-Zeitlinie", () => jumpToTimeline("items", itemId));
+const ownerTag = (personId) => linkTag("owner-tag", `👤 ${personName(personId)}`, "Zur Personen-Zeitlinie", () => jumpToTimeline("persons", personId));
+
+// --- ownership derivation ---------------------------------------------------
+
+// Item timelines are derived from ownership. Returns each item's ordered chain
+// of rows and a map of which items a person owns at a given event.
+function ownershipModel() {
+  const personEvents = personEventOrder();
+  const gainAt = {}; // eventId -> { itemId: personId }
+  const loseAt = {}; // eventId -> { itemId: personId }
+  const itemIds = new Set();
+  for (const event of state.events) {
+    for (const p of event.persons || []) {
+      for (const it of p.gains || []) { (gainAt[event.id] ||= {})[it] = p.id; itemIds.add(it); }
+      for (const it of p.loses || []) { (loseAt[event.id] ||= {})[it] = p.id; itemIds.add(it); }
+    }
+  }
+  const ownedAt = {};
+  const chains = {};
+  for (const itemId of itemIds) chains[itemId] = buildItemChain(itemId, personEvents, gainAt, loseAt, ownedAt);
+  return { chains, ownedAt };
+}
+
+// Each person's events in their own subjective order.
+function personEventOrder() {
+  const map = {};
+  for (const event of state.events) {
+    for (const p of event.persons || []) (map[p.id] ||= []).push({ event, order: p.order });
+  }
+  for (const id of Object.keys(map)) {
+    map[id] = map[id].sort((a, b) => byteCompare(String(a.order), String(b.order))).map((r) => r.event);
+  }
+  return map;
+}
+
+// Stitch ownership stretches into one ordered chain, linking at transfer events.
+function buildItemChain(itemId, personEvents, gainAt, loseAt, ownedAt) {
+  const segments = {}; // gainEventId -> { rows, transferEventId }
+  for (const eid of Object.keys(gainAt)) {
+    if (gainAt[eid][itemId]) segments[eid] = buildSegment(itemId, eid, gainAt[eid][itemId], personEvents, gainAt, loseAt);
+  }
+  const transferTargets = new Set(Object.values(segments).map((s) => s.transferEventId).filter(Boolean));
+  const startId = Object.keys(segments).find((eid) => !transferTargets.has(eid)) || Object.keys(segments)[0];
+
+  const rows = [];
+  const visited = new Set();
+  for (let cur = startId; cur && segments[cur] && !visited.has(cur); cur = segments[cur].transferEventId) {
+    visited.add(cur);
+    rows.push(...segments[cur].rows);
+  }
+  for (const eid of Object.keys(segments)) {
+    if (!visited.has(eid)) rows.push(...segments[eid].rows); // disconnected fallback
+  }
+  for (const r of rows) if (r.owner) (ownedAt[`${r.owner}|${r.event.id}`] ||= []).push(itemId);
+  return rows;
+}
+
+// One ownership stretch: the owner's events from the gain forward, until they
+// lose it (inclusive, ownerless) or another person gains it (exclusive transfer).
+function buildSegment(itemId, gainEventId, ownerId, personEvents, gainAt, loseAt) {
+  const evs = personEvents[ownerId] || [];
+  const start = evs.findIndex((e) => e.id === gainEventId);
+  const rows = [];
+  let transferEventId = null;
+  for (let i = start; i >= 0 && i < evs.length; i++) {
+    const e = evs[i];
+    if (i > start && gainAt[e.id] && gainAt[e.id][itemId] && gainAt[e.id][itemId] !== ownerId) {
+      transferEventId = e.id; // someone else takes it here
+      break;
+    }
+    if (i > start && loseAt[e.id] && loseAt[e.id][itemId] === ownerId) {
+      rows.push({ event: e, owner: null, kind: "lose" }); // dropped → ownerless
+      break;
+    }
+    rows.push({ event: e, owner: ownerId, kind: i === start ? "gain" : "carry" });
+  }
+  return { rows, transferEventId };
 }
 
 // Opens the event in the editor and scrolls the left list to it. draggable is
@@ -725,10 +906,9 @@ function bindControls() {
 
   el("add-person-btn").addEventListener("click", (e) =>
     openDropdown(e.currentTarget, availableOptions(state.persons, draftIds("persons")), (id) => addAppearance("persons", id)));
-  el("add-item-btn").addEventListener("click", (e) =>
-    openDropdown(e.currentTarget, availableOptions(state.items, draftIds("items")), (id) => addAppearance("items", id)));
 
   el("subject-select").addEventListener("change", (e) => { state.subjectKey = e.target.value; renderSubjectEvents(); });
+  el("show-carried").addEventListener("change", (e) => { state.showCarried = e.target.checked; renderSubjectEvents(); });
 
   const subjectList = el("subject-events");
   subjectList.addEventListener("dragover", onListDragOver);
