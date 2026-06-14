@@ -45,6 +45,9 @@ persons:
 - id: jonas_kahnwald
   name: Jonas Kahnwald
   aliases: []
+- id: katharina_nielsen
+  name: Katharina Nielsen
+  aliases: []
 - id: mads_nielsen
   name: Mads Nielsen
   aliases: []

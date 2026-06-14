@@ -301,13 +301,16 @@ events:
   when:
     kind: date
     date: '1986-11-05'
-    order: zk
+    order: zzzs
   persons:
   - id: mikkel_nielsen
     order: J
   - id: ulrich_nielsen
     order: '3'
     confirmed_age: 15
+  - id: katharina_nielsen
+    order: F
+    confirmed_age: 16
   implied: false
   missing_details: false
 - id: ev-0024
@@ -622,5 +625,232 @@ events:
   - id: yasin_friese
     order: V
     confirmed_age: 9
+  implied: false
+  missing_details: false
+- id: ev-0044
+  season: 1
+  episode: 5
+  timestamp: '08:10'
+  title: Noah ruft Bartosz auf Eriks Smartphone an
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: k
+  persons:
+  - id: noah
+    order: V
+  - id: bartosz_tiedemann
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0045
+  season: 1
+  episode: 5
+  timestamp: '11:40'
+  title: Erwachsener Jonas schickt Paket an sich selbst
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: s
+  persons:
+  - id: regina_tiedemann
+    order: k
+  - id: jonas_kahnwald
+    order: q
+    loses:
+    - brief_an_jonas
+  implied: false
+  missing_details: false
+- id: ev-0046
+  season: 1
+  episode: 5
+  timestamp: '14:20'
+  title: Noah spricht mit Mikkel im Krankenhaus
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: V
+  persons:
+  - id: noah
+    order: k
+  - id: mikkel_nielsen
+    order: Jw
+  implied: false
+  missing_details: false
+- id: ev-0047
+  season: 1
+  episode: 5
+  timestamp: '16:00'
+  title: Ulrich bricht die Affäre mit Hannah ab
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: w
+  persons:
+  - id: ulrich_nielsen
+    order: k
+  - id: hannah_kahnwald
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0048
+  season: 1
+  episode: 5
+  timestamp: '22:50'
+  title: Jonas spricht mit sich selbst
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: "y"
+  persons:
+  - id: jonas_kahnwald
+    order: Kk
+  - id: jonas_kahnwald
+    order: x
+  implied: false
+  missing_details: false
+- id: ev-0049
+  season: 1
+  episode: 5
+  timestamp: '25:20'
+  title: Hannah spricht Mikkel an
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: k
+  persons:
+  - id: hannah_kahnwald
+    order: F
+    confirmed_age: 14
+  - id: mikkel_nielsen
+    order: Jy
+  implied: false
+  missing_details: false
+- id: ev-0050
+  season: 1
+  episode: 5
+  timestamp: '29:00'
+  title: Hannah beobachted Ulrich und Katharina
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: s
+  persons:
+  - id: hannah_kahnwald
+    order: "N"
+  - id: ulrich_nielsen
+    order: '6'
+  - id: katharina_nielsen
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0051
+  season: 1
+  episode: 5
+  timestamp: '32:00'
+  title: Jonas küsst Martha Backstage
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: z
+  persons:
+  - id: jonas_kahnwald
+    order: Ks
+  - id: martha_nielsen
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0052
+  season: 1
+  episode: 5
+  timestamp: '32:40'
+  title: Bartosz wird von Jonas versetzt und trifft Noah allein
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: zV
+  persons:
+  - id: bartosz_tiedemann
+    order: s
+  - id: noah
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0053
+  season: 1
+  episode: 5
+  timestamp: '36:00'
+  title: Hannah macht eine falsche Aussage über Ulrich
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: w
+  persons:
+  - id: hannah_kahnwald
+    order: R
+  - id: egon_tiedemann
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0054
+  season: 1
+  episode: 5
+  timestamp: '36:50'
+  title: Ulrich wird verhaftet
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: "y"
+  persons:
+  - id: ulrich_nielsen
+    order: 6V
+  implied: false
+  missing_details: false
+- id: ev-0055
+  season: 1
+  episode: 5
+  timestamp: '28:10'
+  title: Erwachsener Jonas geht nach 1986
+  when:
+    kind: time_travel
+    from: '2019-11-07'
+    to: '1986-11-07'
+    from_order: zs
+    to_order: zk
+  persons:
+  - id: jonas_kahnwald
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0056
+  season: 1
+  episode: 5
+  timestamp: '38:30'
+  title: Jonas öffnet das Paket und liest den Brief
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: zk
+  persons:
+  - id: jonas_kahnwald
+    order: Kw
+    gains:
+    - brief_an_jonas
+  implied: false
+  missing_details: false
+- id: ev-0057
+  season: 1
+  episode: 5
+  timestamp: '42:00'
+  title: Erwachsener Jonas trifft H.G. Tannhaus
+  when:
+    kind: date
+    date: '1986-11-07'
+    order: zV
+  persons:
+  - id: jonas_kahnwald
+    order: z
+  - id: h_g_tannhaus
+    order: k
   implied: false
   missing_details: false
