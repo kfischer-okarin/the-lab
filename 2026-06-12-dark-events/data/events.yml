@@ -7,7 +7,7 @@ events:
   when:
     kind: date
     date: '2019-06-21'
-    order: K
+    order: p
   persons:
   - id: mikkel_nielsen
     order: M
@@ -15,6 +15,7 @@ events:
     loses:
     - brief_an_jonas
   missing_details: false
+  timestamp: '01:55'
 - id: ev-0002
   season: 1
   episode: 1
@@ -22,13 +23,14 @@ events:
   when:
     kind: date
     date: '2019-06-21'
-    order: A
+    order: f
   persons:
   - id: mikkel_nielsen
     order: K
     gains:
     - brief_an_jonas
   missing_details: false
+  timestamp: '01:40'
 - id: ev-0003
   season: 1
   episode: 1
@@ -36,11 +38,14 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: A
+    order: x
   persons:
   - id: jonas_kahnwald
     order: A
+  - id: bartosz_tiedemann
+    order: F
   missing_details: false
+  timestamp: '12:50'
 - id: ev-0004
   season: 1
   episode: 1
@@ -53,6 +58,7 @@ events:
   - id: erik_obendorf
     order: K
   missing_details: false
+  timestamp: '13:50'
 - id: ev-0005
   season: 1
   episode: 1
@@ -61,11 +67,12 @@ events:
     kind: time_travel
     from:
     to: '2019-11-04'
-    to_order: K
+    to_order: "y"
   persons:
   - id: jonas_kahnwald
     order: L
   missing_details: true
+  timestamp: '15:10'
 - id: ev-0006
   season: 1
   episode: 1
@@ -73,7 +80,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: U
+    order: z
   persons:
   - id: jana_nielsen
     order: V
@@ -82,6 +89,7 @@ events:
   - id: ulrich_nielsen
     order: F
   missing_details: false
+  timestamp: '21:40'
 - id: ev-0007
   season: 1
   episode: 1
@@ -89,7 +97,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: e
+    order: zV
   persons:
   - id: jonas_kahnwald
     order: K
@@ -105,19 +113,7 @@ events:
   - id: franziska_doppler
     order: V
   missing_details: false
-- id: ev-0008
-  season: 1
-  episode: 1
-  title: Jonas kommt um Mikkel zu holen?
-  when:
-    kind: time_travel
-    from:
-    to: '2019-11-04'
-    to_order: p
-  persons:
-  - id: jonas_kahnwald
-    order: KV
-  missing_details: true
+  timestamp: '37:30'
 - id: ev-0009
   season: 1
   episode: 1
@@ -126,12 +122,13 @@ events:
     kind: time_travel
     from: '2019-11-05'
     to: '1986-11-05'
-    to_order: F
-    from_order: C
+    from_order: t
+    to_order: r
   persons:
   - id: mikkel_nielsen
     order: I
   missing_details: false
+  timestamp: '41:10'
 - id: ev-0010
   season: 1
   episode: 1
@@ -140,13 +137,14 @@ events:
     kind: time_travel
     from: '1986-11-05'
     to: '2019-11-05'
-    from_order: U
-    to_order: O
+    to_order: w
+    from_order: v
   persons:
   - id: mads_nielsen
     order: K
     death: true
   missing_details: false
+  timestamp: '45:30'
 - id: ev-0011
   season: 1
   episode: 1
@@ -154,7 +152,7 @@ events:
   when:
     kind: date
     date: '2019-11-05'
-    order: a
+    order: "y"
   persons:
   - id: mads_nielsen
     order: e
@@ -163,6 +161,7 @@ events:
   - id: charlotte_doppler
     order: V
   missing_details: false
+  timestamp: '46:00'
 - id: ev-0012
   season: 1
   episode: 1
@@ -171,13 +170,14 @@ events:
     kind: time_travel
     from: '1986-11-05'
     to: '1953-11-05'
-    to_order: k
-    from_order: j
+    from_order: x
+    to_order: V
   persons:
   - id: erik_obendorf
     order: e
     death: true
   missing_details: false
+  timestamp: '47:50'
 - id: ev-0013
   season: 1
   episode: 2
@@ -191,4 +191,19 @@ events:
     order: P
   - id: regina_tiedemann
     order: V
+  missing_details: false
+- id: ev-0014
+  season: 1
+  episode: 1
+  timestamp: '09:50'
+  title: Ines Kahnwald hat den Brief an Jonas
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: zk
+  persons:
+  - id: ines_kahnwald
+    order: V
+    gains:
+    - brief_an_jonas
   missing_details: false

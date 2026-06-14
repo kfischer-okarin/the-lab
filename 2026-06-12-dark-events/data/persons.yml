@@ -12,6 +12,9 @@ persons:
 - id: franziska_doppler
   name: Franziska Doppler
   aliases: []
+- id: ines_kahnwald
+  name: Ines Kahnwald
+  aliases: []
 - id: jana_nielsen
   name: Jana Nielsen
   aliases: []
