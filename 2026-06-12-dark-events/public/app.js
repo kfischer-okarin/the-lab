@@ -113,6 +113,7 @@ function episodeGroupNode(group) {
 function eventRowNode(event) {
   const row = document.createElement("div");
   row.className = "event-row" + (event.id === state.selectedId ? " selected" : "");
+  row.dataset.eventId = event.id;
   row.onclick = () => selectEvent(event.id);
 
   const title = document.createElement("div");
@@ -485,9 +486,25 @@ function subjectRowNode(row, index, age, showAge) {
     li.appendChild(death);
   }
   li.appendChild(span("ev-when", whenLabel(row.event.when)));
+  li.appendChild(openButton(row.event.id));
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragend", onDragEnd);
   return li;
+}
+
+// Opens the event in the editor and scrolls the left list to it. draggable is
+// disabled and mousedown is stopped so clicking it never starts a row drag.
+function openButton(eventId) {
+  const btn = iconButton("↗", "Im Editor öffnen", (e) => { e.stopPropagation(); openEvent(eventId); });
+  btn.draggable = false;
+  btn.addEventListener("mousedown", (e) => e.stopPropagation());
+  return btn;
+}
+
+function openEvent(id) {
+  selectEvent(id);
+  const row = document.querySelector(`#events .event-row[data-event-id="${id}"]`);
+  if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
 }
 
 function ageBadge(row, age) {
