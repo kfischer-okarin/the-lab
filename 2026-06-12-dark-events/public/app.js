@@ -71,6 +71,35 @@ function whenLabel(when) {
   return `${when.from || "?"} → ${when.to || "?"}`;
 }
 
+// A clickable rendering of a `when`: each concrete date jumps to that date's
+// world chronology. Mirrors whenLabel's text, with the dates as links.
+function whenLabelNode(when) {
+  const wrap = span("ev-when", "");
+  if (!when || when.kind === "unknown") { wrap.textContent = "?"; return wrap; }
+  if (when.kind === "date") { wrap.appendChild(dateJump(when.date)); return wrap; }
+  wrap.appendChild(dateJump(when.from));
+  wrap.appendChild(document.createTextNode(" → "));
+  wrap.appendChild(dateJump(when.to));
+  return wrap;
+}
+
+function dateJump(dateStr) {
+  if (!dateStr) return document.createTextNode("?");
+  const link = span("date-link", dateStr);
+  link.title = "Chronologie zu diesem Datum";
+  link.onclick = (e) => { e.stopPropagation(); jumpToDate(dateStr); };
+  return link;
+}
+
+// The single date a `when` jumps to from a compact badge (time travel: the
+// departure point), or null when there is no concrete date.
+function primaryDate(when) {
+  if (!when) return null;
+  if (when.kind === "date") return when.date || null;
+  if (when.kind === "time_travel") return when.from || when.to || null;
+  return null;
+}
+
 // --- event list -------------------------------------------------------------
 
 function renderEventList() {
@@ -146,7 +175,7 @@ function eventRowNode(event) {
 
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.appendChild(badge(whenLabel(event.when), event.when && event.when.kind === "time_travel" ? "tt" : ""));
+  meta.appendChild(whenBadge(event));
   if ((event.persons || []).length) meta.appendChild(badge(`${event.persons.length}P`));
   if ((event.items || []).length) meta.appendChild(badge(`${event.items.length}G`));
   if ((event.persons || []).some((p) => p.death)) meta.appendChild(badge("✝", "death"));
@@ -163,6 +192,20 @@ function badge(text, cls = "") {
   return span;
 }
 
+// The date/time-travel badge in the event list; clickable when it has a concrete
+// date, jumping to that date's world chronology instead of selecting the event.
+function whenBadge(event) {
+  const when = event.when;
+  const b = badge(whenLabel(when), when && when.kind === "time_travel" ? "tt" : "");
+  const date = primaryDate(when);
+  if (date) {
+    b.classList.add("clickable");
+    b.title = "Chronologie zu diesem Datum";
+    b.onclick = (e) => { e.stopPropagation(); jumpToDate(date); };
+  }
+  return b;
+}
+
 // --- editor -----------------------------------------------------------------
 
 function selectEvent(id) {
@@ -173,17 +216,33 @@ function selectEvent(id) {
 }
 
 function newEvent() {
+  const latest = latestEvent();
   state.selectedId = null;
   state.draft = {
-    id: null, season: lastSeason(), episode: lastEpisode(), timestamp: "00:00", title: "",
-    when: { kind: "date", date: "" }, persons: [],
+    id: null,
+    season: (latest && latest.season) || 1,
+    episode: (latest && latest.episode) || 1,
+    timestamp: "00:00", title: "",
+    when: defaultWhen(latest), persons: [],
     implied: false, missing_details: false
   };
   renderEditor();
 }
 
-const lastSeason = () => (state.events.at(-1) || {}).season || 1;
-const lastEpisode = () => (state.events.at(-1) || {}).episode || 1;
+// The latest event in episode chronology (season, episode, then timestamp),
+// whose season/episode/date seed a new event so consecutive entries share them.
+function latestEvent() {
+  return state.events.slice().sort(compareEvents).at(-1) || null;
+}
+
+// Seed the new event's date from the latest event: its date, or a time-travel
+// arrival (falling back to departure), else an empty date field.
+function defaultWhen(latest) {
+  const w = (latest && latest.when) || {};
+  if (w.kind === "date" && w.date) return { kind: "date", date: w.date };
+  if (w.kind === "time_travel") return { kind: "date", date: w.to || w.from || "" };
+  return { kind: "date", date: "" };
+}
 
 function renderEditor() {
   const form = el("editor-form");
@@ -506,6 +565,21 @@ function jumpToTimeline(type, id) {
   renderSubjectEvents();
 }
 
+// Open the world chronology for a date and select it in the Chronologie tab.
+// Only saved dates have a chronology, so an unsaved draft date just reports back.
+function jumpToDate(dateStr) {
+  if (!dateStr) return;
+  switchTab("date");
+  if (!distinctDates().includes(dateStr)) {
+    flash("Kein gespeichertes Ereignis an diesem Datum");
+    return;
+  }
+  state.dateKey = dateStr;
+  renderDateSelect();
+  el("date-select").value = dateStr;
+  renderDateTimeline();
+}
+
 function renderSubjectSelect() {
   const select = el("subject-select");
   const previous = state.subjectKey;
@@ -577,7 +651,7 @@ function rowBody(index, event, tags) {
   const head = document.createElement("div");
   head.className = "row-head";
   head.appendChild(span("seq", String(index + 1)));
-  head.appendChild(span("ev-when", whenLabel(event.when)));
+  head.appendChild(whenLabelNode(event.when));
   head.appendChild(episodeTag(event));
   body.appendChild(head);
 
@@ -1092,6 +1166,9 @@ function bindControls() {
   el("editor-form").addEventListener("submit", saveEvent);
   el("delete-event").addEventListener("click", deleteEvent);
   el("editor-form").elements.when_kind.addEventListener("change", syncWhenRows);
+
+  document.querySelectorAll(".jump-date").forEach((btn) =>
+    btn.addEventListener("click", () => jumpToDate(el("editor-form").elements[btn.dataset.dateField].value)));
 
   el("add-person-btn").addEventListener("click", (e) =>
     openDropdown(e.currentTarget, availableOptions(state.persons, draftIds("persons")), (id) => addAppearance("persons", id)));

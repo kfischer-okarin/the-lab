@@ -48,11 +48,27 @@
             </label>
           </div>
           <div class="row" data-when="date">
-            <label>Datum<input name="date" type="date"></label>
+            <label>Datum
+              <span class="field-with-jump">
+                <input name="date" type="date">
+                <button type="button" class="icon-btn jump-date" data-date-field="date" title="Chronologie zu diesem Datum öffnen">📅</button>
+              </span>
+            </label>
           </div>
           <div class="row split" data-when="time_travel">
-            <label>Von<input name="from" type="date"><small>leer = unbekannt</small></label>
-            <label>Nach<input name="to" type="date"></label>
+            <label>Von
+              <span class="field-with-jump">
+                <input name="from" type="date">
+                <button type="button" class="icon-btn jump-date" data-date-field="from" title="Chronologie zu diesem Datum öffnen">📅</button>
+              </span>
+              <small>leer = unbekannt</small>
+            </label>
+            <label>Nach
+              <span class="field-with-jump">
+                <input name="to" type="date">
+                <button type="button" class="icon-btn jump-date" data-date-field="to" title="Chronologie zu diesem Datum öffnen">📅</button>
+              </span>
+            </label>
           </div>
         </fieldset>
 
