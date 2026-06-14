@@ -7,6 +7,7 @@ events:
   when:
     kind: date
     date: '2019-06-21'
+    order: K
   persons:
   - id: mikkel_nielsen
     order: M
@@ -21,6 +22,7 @@ events:
   when:
     kind: date
     date: '2019-06-21'
+    order: A
   persons:
   - id: mikkel_nielsen
     order: K
@@ -34,6 +36,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
+    order: A
   persons:
   - id: jonas_kahnwald
     order: A
@@ -45,6 +48,7 @@ events:
   when:
     kind: date
     date: '2019-10-22'
+    order: V
   persons:
   - id: erik_obendorf
     order: K
@@ -57,6 +61,7 @@ events:
     kind: time_travel
     from:
     to: '2019-11-04'
+    to_order: K
   persons:
   - id: jonas_kahnwald
     order: L
@@ -68,6 +73,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
+    order: U
   persons:
   - id: jana_nielsen
     order: V
@@ -83,6 +89,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
+    order: e
   persons:
   - id: jonas_kahnwald
     order: K
@@ -106,6 +113,7 @@ events:
     kind: time_travel
     from:
     to: '2019-11-04'
+    to_order: p
   persons:
   - id: jonas_kahnwald
     order: KV
@@ -118,6 +126,8 @@ events:
     kind: time_travel
     from: '2019-11-05'
     to: '1986-11-05'
+    to_order: F
+    from_order: C
   persons:
   - id: mikkel_nielsen
     order: I
@@ -130,6 +140,8 @@ events:
     kind: time_travel
     from: '1986-11-05'
     to: '2019-11-05'
+    from_order: U
+    to_order: O
   persons:
   - id: mads_nielsen
     order: K
@@ -142,6 +154,7 @@ events:
   when:
     kind: date
     date: '2019-11-05'
+    order: a
   persons:
   - id: mads_nielsen
     order: e
@@ -158,6 +171,8 @@ events:
     kind: time_travel
     from: '1986-11-05'
     to: '1953-11-05'
+    to_order: k
+    from_order: j
   persons:
   - id: erik_obendorf
     order: e
@@ -170,6 +185,7 @@ events:
   when:
     kind: date
     date: '2019-11-05'
+    order: m
   persons:
   - id: jonas_kahnwald
     order: P

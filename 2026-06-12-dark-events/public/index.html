@@ -71,6 +71,7 @@
     <section id="side" class="pane">
       <div class="tabs">
         <button class="tab active" data-tab="timeline">Subjektive Zeitlinie</button>
+        <button class="tab" data-tab="date">Chronologie</button>
         <button class="tab" data-tab="registry">Register</button>
       </div>
 
@@ -81,6 +82,14 @@
         <label class="check carry-toggle"><input type="checkbox" id="show-carried"> Getragene Ereignisse zeigen (Gegenstände)</label>
         <p class="hint">Personen: ziehen ändert die persönliche Reihenfolge. Gegenstände: Zeitlinie folgt dem Besitzer (abgeleitet).</p>
         <ol id="subject-events" class="reorder"></ol>
+      </div>
+
+      <div id="tab-date" class="tab-body" hidden>
+        <label class="block">Datum
+          <select id="date-select"></select>
+        </label>
+        <p class="hint">Ereignisse an diesem Datum. Ziehen ändert die Reihenfolge innerhalb des Datums.</p>
+        <ol id="date-events" class="reorder"></ol>
       </div>
 
       <div id="tab-registry" class="tab-body" hidden>

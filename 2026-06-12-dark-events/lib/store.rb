@@ -52,16 +52,15 @@ class Store
     id
   end
 
-  # Move a person's appearance to sit between two fractional keys. Only persons
-  # carry an order; item timelines are derived from ownership.
+  # Reorder a person's appearance (subject_type "persons", subject_id = person id)
+  # or a date point (subject_type "date", subject_id = "date"|"from"|"to").
+  # Item timelines are derived from ownership, so items are not reorderable.
   def reorder(subject_type:, subject_id:, event_id:, before_key:, after_key:)
-    return nil unless subject_type == "persons"
-
     new_key = Frac.key_between(before_key, after_key)
     list = events
     event = list.find { |e| e["id"] == event_id } or return nil
-    appearance = (event["persons"] || []).find { |a| a["id"] == subject_id } or return nil
-    appearance["order"] = new_key
+    target = orderable(event, subject_type, subject_id) or return nil
+    target[0][target[1]] = new_key
     save(:events, "events", list)
     new_key
   end
@@ -111,13 +110,84 @@ class Store
     "#{base}_#{suffix}"
   end
 
+  DATE_ORDER_FIELDS = { "date" => "order", "from" => "from_order", "to" => "to_order" }.freeze
+
+  # Returns [hash, key] whose hash[key] holds the fractional order to update.
+  def orderable(event, subject_type, subject_id)
+    if subject_type == "persons"
+      appearance = (event["persons"] || []).find { |a| a["id"] == subject_id } or return nil
+      [appearance, "order"]
+    elsif subject_type == "date"
+      field = DATE_ORDER_FIELDS[subject_id] or return nil
+      [(event["when"] ||= {}), field]
+    end
+  end
+
   def finalize(list, current_id)
     assign_missing_orders(list)
     strip_false_death_flags(list)
     normalize_confirmed_age(list)
     enforce_single_confirmed_age(list, current_id)
     tidy_transfers(list)
+    tidy_date_orders(list)
+    assign_missing_date_orders(list)
   end
+
+  # Drop order keys for date points that no longer have a date value.
+  def tidy_date_orders(list)
+    list.each do |event|
+      w = event["when"] || {}
+      keep = case w["kind"]
+             when "date" then present?(w["date"]) ? %w[order] : []
+             when "time_travel" then [present?(w["from"]) ? "from_order" : nil, present?(w["to"]) ? "to_order" : nil].compact
+             else []
+             end
+      (%w[order from_order to_order] - keep).each { |f| w.delete(f) }
+    end
+  end
+
+  # Date order keys are scoped per date value: each date has its own keyspace, so
+  # the same key string may recur across dates and reordering can never interleave
+  # or collide across dates. Within a date, missing or duplicate keys are appended;
+  # existing unique keys keep their relative order.
+  def assign_missing_date_orders(list)
+    by_date = Hash.new { |h, k| h[k] = [] }
+    index = 0
+    each_date_point(list) do |w, field, date|
+      by_date[date] << { w: w, field: field, i: index }
+      index += 1
+    end
+    by_date.each_value { |points| renumber_date_points(points) }
+  end
+
+  def renumber_date_points(points)
+    ordered = points.sort_by { |p| key = p[:w][p[:field]].to_s; [key.empty? ? 1 : 0, key, p[:i]] }
+    assigned = {}
+    max = ""
+    ordered.each do |p|
+      key = p[:w][p[:field]].to_s
+      if key.empty? || assigned[key]
+        key = Frac.key_between(max, nil)
+        p[:w][p[:field]] = key
+      end
+      assigned[key] = true
+      max = key if key > max
+    end
+  end
+
+  def each_date_point(list)
+    list.each do |event|
+      w = event["when"] || {}
+      if w["kind"] == "date"
+        yield w, "order", w["date"] if present?(w["date"])
+      elsif w["kind"] == "time_travel"
+        yield w, "from_order", w["from"] if present?(w["from"])
+        yield w, "to_order", w["to"] if present?(w["to"])
+      end
+    end
+  end
+
+  def present?(value) = !(value.nil? || value.to_s.strip.empty?)
 
   # gains/loses are item-id lists on a person appearance; drop empties and
   # de-duplicate so the YAML stays clean.

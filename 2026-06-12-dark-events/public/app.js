@@ -7,6 +7,7 @@ const state = {
   selectedId: null,
   draft: null,        // working copy of the event being edited
   subjectKey: null,   // "persons:<id>" or "items:<id>"
+  dateKey: null,      // selected date in the Chronologie tab
   filter: "",
   showCarried: false  // item timeline: also show carried (non-transfer) events
 };
@@ -31,6 +32,8 @@ function renderAll() {
   renderEditor();
   renderSubjectSelect();
   renderSubjectEvents();
+  renderDateSelect();
+  renderDateTimeline();
   renderRegistries();
 }
 
@@ -561,14 +564,17 @@ function renderPersonTimeline(list, personId, model) {
   const ages = hasAnchor ? computeAges(rows) : null;
   rows.forEach((row, index) => {
     const owned = model.ownedAt[`${personId}|${row.event.id}`] || [];
-    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, owned));
+    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, owned, personId));
   });
 }
 
-function personRowNode(row, index, age, showAge, ownedItems) {
+function personRowNode(row, index, age, showAge, ownedItems, personId) {
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
+  li.dataset.order = row.order;
+  li.dataset.reorderType = "persons";
+  li.dataset.reorderId = personId;
   li.appendChild(span("grip", "⠿"));
 
   const tags = [];
@@ -606,6 +612,89 @@ function itemRowNode(row, index) {
 
   li.appendChild(openButton(row.event.id));
   return li;
+}
+
+// --- date (world chronology) timeline ---------------------------------------
+
+// All distinct date values across events (ISO strings sort chronologically).
+function distinctDates() {
+  const set = new Set();
+  for (const event of state.events) {
+    const w = event.when || {};
+    if (w.kind === "date" && w.date) set.add(w.date);
+    else if (w.kind === "time_travel") { if (w.from) set.add(w.from); if (w.to) set.add(w.to); }
+  }
+  return [...set].sort();
+}
+
+function renderDateSelect() {
+  const select = el("date-select");
+  const previous = state.dateKey;
+  select.innerHTML = "";
+  for (const date of distinctDates()) {
+    const opt = document.createElement("option");
+    opt.value = date;
+    opt.textContent = date;
+    select.appendChild(opt);
+  }
+  if (previous && [...select.options].some((o) => o.value === previous)) select.value = previous;
+  else state.dateKey = select.value || null;
+}
+
+// Date points (events) occurring on the given date, in their within-date order.
+function datePointsForDate(dateStr) {
+  const points = [];
+  for (const event of state.events) {
+    const w = event.when || {};
+    if (w.kind === "date" && w.date === dateStr) points.push({ event, role: "date", order: w.order });
+    else if (w.kind === "time_travel") {
+      if (w.from === dateStr) points.push({ event, role: "from", order: w.from_order });
+      if (w.to === dateStr) points.push({ event, role: "to", order: w.to_order });
+    }
+  }
+  return points.sort((a, b) => byteCompare(String(a.order), String(b.order)));
+}
+
+function renderDateTimeline() {
+  const list = el("date-events");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!state.dateKey) return;
+  datePointsForDate(state.dateKey).forEach((pt, index) => list.appendChild(datePointNode(pt, index)));
+}
+
+function datePointNode(pt, index) {
+  const li = document.createElement("li");
+  li.draggable = true;
+  li.dataset.eventId = pt.event.id;
+  li.dataset.order = pt.order || "";
+  li.dataset.reorderType = "date";
+  li.dataset.reorderId = pt.role;
+  li.appendChild(span("grip", "⠿"));
+
+  const body = document.createElement("div");
+  body.className = "row-body";
+  const head = document.createElement("div");
+  head.className = "row-head";
+  head.appendChild(span("seq", String(index + 1)));
+  if (pt.role !== "date") head.appendChild(travelTag(pt));
+  body.appendChild(head);
+  body.appendChild(span("ev-title", pt.event.title));
+  li.appendChild(body);
+
+  li.appendChild(openButton(pt.event.id));
+  li.addEventListener("dragstart", onDragStart);
+  li.addEventListener("dragend", onDragEnd);
+  return li;
+}
+
+// For a time-travel event under the selected date, show the other endpoint:
+// arriving here → "von <from>"; departing from here → "nach <to>".
+function travelTag(pt) {
+  const w = pt.event.when || {};
+  return pt.role === "from"
+    ? span("travel-tag nach", `nach ${w.to || "?"}`)
+    : span("travel-tag von", `von ${w.from || "?"}`);
 }
 
 // A tag with a ↗ that jumps to the linked subject's timeline (both directions).
@@ -788,28 +877,27 @@ function span(cls, text) {
   return node;
 }
 
-let dragSourceId = null;
+let dragSourceEl = null;
 let dropIndicator = null;
 
 function onDragStart(e) {
-  dragSourceId = e.currentTarget.dataset.eventId;
-  e.currentTarget.classList.add("dragging");
+  dragSourceEl = e.currentTarget;
+  dragSourceEl.classList.add("dragging");
   e.dataTransfer.effectAllowed = "move";
-  e.dataTransfer.setData("text/plain", dragSourceId); // Firefox requires data
+  e.dataTransfer.setData("text/plain", dragSourceEl.dataset.eventId || ""); // Firefox requires data
 }
 
 function onDragEnd() {
-  dragSourceId = null;
-  document.querySelectorAll("#subject-events li.dragging").forEach((li) => li.classList.remove("dragging"));
+  dragSourceEl = null;
+  document.querySelectorAll(".reorder li.dragging").forEach((li) => li.classList.remove("dragging"));
   removeDropIndicator();
 }
 
 function onListDragOver(e) {
-  if (!dragSourceId) return;
+  if (!dragSourceEl) return;
   e.preventDefault();
   e.dataTransfer.dropEffect = "move";
-  const list = el("subject-events");
-  positionDropIndicator(list, dragAfterElement(list, e.clientY));
+  positionDropIndicator(e.currentTarget, dragAfterElement(e.currentTarget, e.clientY));
 }
 
 // Place the indicator as an absolute overlay at the drop boundary. Keeping it
@@ -823,28 +911,28 @@ function positionDropIndicator(list, after) {
 }
 
 function lastRow(list) {
-  const rows = list.querySelectorAll("li:not(.dragging):not(.drop-indicator)");
+  const rows = list.querySelectorAll("li[data-order]:not(.dragging)");
   return rows[rows.length - 1] || null;
 }
 
 function onListDragLeave(e) {
-  if (!el("subject-events").contains(e.relatedTarget)) removeDropIndicator();
+  if (!e.currentTarget.contains(e.relatedTarget)) removeDropIndicator();
 }
 
 async function onListDrop(e) {
-  if (!dragSourceId) return;
+  if (!dragSourceEl) return;
   e.preventDefault();
-  const after = dragAfterElement(el("subject-events"), e.clientY);
-  const beforeId = after ? after.dataset.eventId : null;
-  const source = dragSourceId;
+  const list = e.currentTarget;
+  const after = dragAfterElement(list, e.clientY);
+  const dragged = dragSourceEl;
   removeDropIndicator();
-  await moveSubjectEvent(source, beforeId);
+  await commitReorder(list, dragged, after);
 }
 
 // The row the dragged item should be inserted *before*, by cursor Y position
-// (null = drop at the end). Ignores the dragged row and the indicator itself.
+// (null = drop at the end). Only orderable rows (data-order) are candidates.
 function dragAfterElement(list, y) {
-  const candidates = [...list.querySelectorAll("li:not(.dragging):not(.drop-indicator)")];
+  const candidates = [...list.querySelectorAll("li[data-order]:not(.dragging):not(.drop-indicator)")];
   let closest = { offset: -Infinity, element: null };
   for (const child of candidates) {
     const box = child.getBoundingClientRect();
@@ -866,33 +954,38 @@ function removeDropIndicator() {
   if (dropIndicator && dropIndicator.parentNode) dropIndicator.remove();
 }
 
-// Move source to sit immediately before beforeId (null = end). Does nothing if
-// that is already its position.
-async function moveSubjectEvent(sourceId, beforeId) {
-  const [type, subjectId] = state.subjectKey.split(":");
-  const ordered = subjectAppearances();
-  const sourceIndex = ordered.findIndex((r) => r.event.id === sourceId);
-  const without = ordered.filter((r) => r.event.id !== sourceId);
-  const insertAt = beforeId ? without.findIndex((r) => r.event.id === beforeId) : without.length;
+// Move the dragged row before afterEl (null = end) using each row's data-order
+// key. No-op if already there. Works for any .reorder list (subject + date).
+async function commitReorder(list, draggedEl, afterEl) {
+  const rows = [...list.querySelectorAll("li[data-order]")];
+  const sourceIndex = rows.indexOf(draggedEl);
+  const without = rows.filter((node) => node !== draggedEl);
+  const insertAt = afterEl ? without.indexOf(afterEl) : without.length;
+  if (sourceIndex === -1 || insertAt === sourceIndex) return; // dropped on its current spot
 
-  if (insertAt === sourceIndex) return; // dropped on its current spot
-
-  const beforeKey = insertAt > 0 ? without[insertAt - 1].order : null;
-  const afterKey = insertAt < without.length ? without[insertAt].order : null;
-
+  const beforeKey = insertAt > 0 ? without[insertAt - 1].dataset.order : null;
+  const afterKey = insertAt < without.length ? without[insertAt].dataset.order : null;
+  const d = draggedEl.dataset;
   const { order } = await api("POST", "/api/reorder", {
-    subject_type: type, subject_id: subjectId, event_id: sourceId,
+    subject_type: d.reorderType, subject_id: d.reorderId, event_id: d.eventId,
     before_key: beforeKey, after_key: afterKey
   });
-  applyNewOrder(type, subjectId, sourceId, order);
+  applyReorderLocally(d, order);
   renderSubjectEvents();
-  if (state.selectedId === sourceId) selectEvent(sourceId);
+  renderDateTimeline();
   flash("Reihenfolge aktualisiert");
 }
 
-function applyNewOrder(type, subjectId, eventId, order) {
-  const event = state.events.find((e) => e.id === eventId);
-  event[type].find((a) => a.id === subjectId).order = order;
+function applyReorderLocally(d, newKey) {
+  const event = state.events.find((e) => e.id === d.eventId);
+  if (!event) return;
+  if (d.reorderType === "persons") {
+    const a = (event.persons || []).find((p) => p.id === d.reorderId);
+    if (a) a.order = newKey;
+  } else if (d.reorderType === "date") {
+    const field = { date: "order", from: "from_order", to: "to_order" }[d.reorderId];
+    (event.when || (event.when = {}))[field] = newKey;
+  }
 }
 
 // --- registries -------------------------------------------------------------
@@ -936,11 +1029,14 @@ function bindControls() {
 
   el("subject-select").addEventListener("change", (e) => { state.subjectKey = e.target.value; renderSubjectEvents(); });
   el("show-carried").addEventListener("change", (e) => { state.showCarried = e.target.checked; renderSubjectEvents(); });
+  el("date-select").addEventListener("change", (e) => { state.dateKey = e.target.value; renderDateTimeline(); });
 
-  const subjectList = el("subject-events");
-  subjectList.addEventListener("dragover", onListDragOver);
-  subjectList.addEventListener("drop", onListDrop);
-  subjectList.addEventListener("dragleave", onListDragLeave);
+  for (const listId of ["subject-events", "date-events"]) {
+    const reorderList = el(listId);
+    reorderList.addEventListener("dragover", onListDragOver);
+    reorderList.addEventListener("drop", onListDrop);
+    reorderList.addEventListener("dragleave", onListDragLeave);
+  }
 
   el("add-person-registry").addEventListener("click", () => addRegistry("persons", "new-person-name"));
   el("add-item-registry").addEventListener("click", () => addRegistry("items", "new-item-name"));
@@ -965,5 +1061,6 @@ async function addRegistry(type, inputId) {
 function switchTab(name) {
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
   el("tab-timeline").hidden = name !== "timeline";
+  el("tab-date").hidden = name !== "date";
   el("tab-registry").hidden = name !== "registry";
 }

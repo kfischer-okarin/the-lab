@@ -206,6 +206,12 @@ button.danger:hover { border-color: var(--danger); }
 .reorder .transfer-mark.gain { color: var(--ok); }
 .reorder .transfer-mark.lose { color: var(--danger); }
 .reorder .ownerless { font-size: 10px; color: var(--muted); font-style: italic; }
+.reorder .travel-tag {
+  font-size: 10px; padding: 1px 7px; border-radius: 10px; white-space: nowrap;
+  border: 1px solid var(--accent-2); color: var(--accent-2);
+}
+.reorder .travel-tag.von { border-color: var(--ok); color: var(--ok); }
+.reorder .travel-tag.nach { border-color: var(--accent); color: var(--accent); }
 .link-tag {
   display: inline-flex; align-items: center; gap: 1px;
   font-size: 10px; padding: 1px 4px 1px 7px; border-radius: 10px;
