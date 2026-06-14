@@ -16,11 +16,13 @@ events:
 - id: ev-0002
   season: 1
   episode: 1
-  title: Brief an Jonas wurde geschrieben
+  title: Michael schreibt Brief an Jonas
   when:
     kind: date
     date: '2019-06-21'
-  persons: []
+  persons:
+  - id: mikkel_nielsen
+    order: K
   items:
   - id: brief_an_jonas
     order: V
