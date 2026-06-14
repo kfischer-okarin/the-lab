@@ -42,8 +42,11 @@ lets you drag to reorder; the server assigns the keys.
 (either bound may be null = unknown), or `{kind: unknown}`. `missing_details:
 true` flags an event that still needs research.
 
-## Migration
+A dying character is marked with `death: true` on their appearance:
 
-`scripts/migrate.rb` converts the original flat `events.yml` (sparse integer
-indices) into the normalized `data/` files, preserving each subject's order.
-Already run; kept for reference.
+```yaml
+persons:
+- id: mads_nielsen
+  order: K
+  death: true
+```
