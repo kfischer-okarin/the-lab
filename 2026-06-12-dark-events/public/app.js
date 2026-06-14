@@ -426,6 +426,11 @@ function addSubjectGroup(select, label, type, list) {
   select.appendChild(group);
 }
 
+// Ordinal string comparison (UTF-16 code units = byte order for these keys).
+function byteCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function subjectAppearances() {
   if (!state.subjectKey) return [];
   const [type, id] = state.subjectKey.split(":");
@@ -434,7 +439,10 @@ function subjectAppearances() {
     const appearance = (event[type] || []).find((a) => a.id === id);
     if (appearance) rows.push({ event, order: appearance.order });
   }
-  return rows.sort((a, b) => String(a.order).localeCompare(b.order));
+  // Sort by byte/ordinal order to match the fractional keys (and the server),
+  // NOT localeCompare — that is case-insensitive/linguistic ("e" < "K") and
+  // would disagree with the keys' byte order ("K" < "e").
+  return rows.sort((a, b) => byteCompare(String(a.order), String(b.order)));
 }
 
 function renderSubjectEvents() {
