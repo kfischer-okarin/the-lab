@@ -261,14 +261,15 @@ class Store
 
   def blank_event(id)
     {
-      "id" => id, "season" => nil, "episode" => nil, "title" => "(neues Ereignis)",
-      "when" => { "kind" => "unknown" }, "persons" => [], "missing_details" => false
+      "id" => id, "season" => nil, "episode" => nil, "timestamp" => "00:00",
+      "title" => "(neues Ereignis)", "when" => { "kind" => "unknown" },
+      "persons" => [], "missing_details" => false
     }
   end
 
   def sanitize_event(attrs)
     out = {}
-    %w[season episode title when persons missing_details].each do |k|
+    %w[season episode timestamp title when persons missing_details].each do |k|
       out[k] = attrs[k] if attrs.key?(k)
     end
     out

@@ -76,9 +76,21 @@ function whenLabel(when) {
 function renderEventList() {
   const container = el("events");
   container.innerHTML = "";
-  const matches = state.events.filter(matchesFilter);
+  const matches = state.events.filter(matchesFilter).sort(compareEvents);
   el("event-count").textContent = `(${matches.length})`;
   for (const group of groupByEpisode(matches)) container.appendChild(episodeGroupNode(group));
+}
+
+// Order by episode then in-episode timestamp, breaking ties by event id.
+function compareEvents(a, b) {
+  return (a.season || 0) - (b.season || 0)
+    || (a.episode || 0) - (b.episode || 0)
+    || byteCompare(String(a.timestamp || "00:00"), String(b.timestamp || "00:00"))
+    || byteCompare(a.id, b.id);
+}
+
+function episodeTag(event) {
+  return span("episode-tag", `S${event.season || "?"}E${event.episode || "?"}`);
 }
 
 function matchesFilter(event) {
@@ -155,7 +167,7 @@ function selectEvent(id) {
 function newEvent() {
   state.selectedId = null;
   state.draft = {
-    id: null, season: lastSeason(), episode: lastEpisode(), title: "",
+    id: null, season: lastSeason(), episode: lastEpisode(), timestamp: "00:00", title: "",
     when: { kind: "date", date: "" }, persons: [],
     missing_details: false
   };
@@ -183,6 +195,7 @@ function renderEditor() {
   f.title.value = d.title || "";
   f.season.value = d.season || "";
   f.episode.value = d.episode || "";
+  f.timestamp.value = d.timestamp || "00:00";
   f.missing_details.checked = !!d.missing_details;
   f.when_kind.value = (d.when || {}).kind || "unknown";
   f.date.value = (d.when || {}).date || "";
@@ -347,6 +360,7 @@ function collectDraftFromForm() {
   d.title = f.title.value.trim();
   d.season = f.season.value ? Number(f.season.value) : null;
   d.episode = f.episode.value ? Number(f.episode.value) : null;
+  d.timestamp = f.timestamp.value || "00:00";
   d.missing_details = f.missing_details.checked;
   d.when = buildWhen(f);
 }
@@ -545,6 +559,7 @@ function rowBody(index, event, tags) {
   head.className = "row-head";
   head.appendChild(span("seq", String(index + 1)));
   head.appendChild(span("ev-when", whenLabel(event.when)));
+  head.appendChild(episodeTag(event));
   body.appendChild(head);
 
   body.appendChild(span("ev-title", event.title));
@@ -677,6 +692,7 @@ function datePointNode(pt, index) {
   const head = document.createElement("div");
   head.className = "row-head";
   head.appendChild(span("seq", String(index + 1)));
+  head.appendChild(episodeTag(pt.event));
   if (pt.role !== "date") head.appendChild(travelTag(pt));
   body.appendChild(head);
   body.appendChild(span("ev-title", pt.event.title));
