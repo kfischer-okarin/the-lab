@@ -1,0 +1,106 @@
+#!/usr/bin/env node
+"use strict";
+
+// Headless inspector for the timeline calculations. Prints the same logical
+// structures the browser renders (timelineCalculations.js), so a view can be
+// followed without the UI. Data is read through the Ruby Store — the one place
+// that parses the YAML — so the CLI and server never disagree on the input.
+//
+//   bin/timeline events                episode chronology (left list)
+//   bin/timeline person <id>           a person's subjective timeline
+//   bin/timeline item <id>             an item's derived ownership timeline
+//   bin/timeline date <YYYY-MM-DD>     the events on a date, in within-date order
+//   bin/timeline persons | items       list known ids
+
+const path = require("path");
+const { execFileSync } = require("child_process");
+const Timeline = require("../public/timelineCalculations.js");
+
+const ROOT = path.resolve(__dirname, "..");
+
+function main(argv) {
+  const [command, arg] = argv;
+  const data = loadData();
+  const view = VIEWS[command];
+  if (!view) return usage();
+  print(view(data, arg));
+}
+
+const VIEWS = {
+  events: (data) => eventLines(Timeline.eventsInEpisodeChronology(data.events)),
+  person: (data, id) => personLines(data, id),
+  item: (data, id) => itemLines(data, id),
+  date: (data, date) => dateLines(data, date),
+  persons: (data) => data.persons.map((p) => `${p.id}  ${p.name}`),
+  items: (data) => data.items.map((i) => `${i.id}  ${i.name}`)
+};
+
+function personLines(data, personId) {
+  const rows = Timeline.subjectiveEventsForPerson(data.events, personId);
+  return rows.map((row, i) => {
+    const age = row.confirmedAge != null ? `🔒${row.confirmedAge}` : row.age != null ? `${row.age}` : "?";
+    const items = row.items.map((t) => itemMark(t) + itemName(data, t.item)).join(", ");
+    const death = row.death ? " ✝" : "";
+    return `${seq(i)} [${pad(row.order, 3)}] (${pad(age, 4)})${death}  ${eventLabel(row.event)}` + (items ? `  {${items}}` : "");
+  });
+}
+
+function itemLines(data, itemId) {
+  const rows = Timeline.itemEvents(data.events, itemId);
+  return rows.map((row, i) => {
+    const owner = row.owner
+      ? `${personName(data, row.owner)}${row.ownerAge != null ? ` (${row.ownerAge})` : ""}`
+      : "herrenlos";
+    return `${seq(i)} ${pad(KIND_MARK[row.kind], 2)} ${pad(owner, 22)}  ${eventLabel(row.event)}`;
+  });
+}
+
+function dateLines(data, date) {
+  const points = Timeline.eventsForDate(data.events, date);
+  return points.map((pt, i) => `${seq(i)} [${pad(pt.order, 3)}] ${pad(pt.role, 4)}  ${eventLabel(pt.event)}`);
+}
+
+function eventLines(events) {
+  return events.map((e, i) => `${seq(i)}  ${eventLabel(e)}`);
+}
+
+const KIND_MARK = { gain: "＋", has: "＋?", lose: "－", carry: "·" };
+
+function itemMark(t) {
+  if (t.gain) return "＋";
+  if (t.lose) return "－";
+  if (t.warn) return "⚠️";
+  return "";
+}
+
+function eventLabel(event) {
+  return `S${event.season || "?"}E${event.episode || "?"} ${pad(event.timestamp, 5)} [${whenLabel(event.when)}] ${event.title}`;
+}
+
+function whenLabel(when) {
+  if (!when || when.kind === "unknown") return "?";
+  if (when.kind === "date") return when.date || "?";
+  return `${when.from || "?"} → ${when.to || "?"}`;
+}
+
+const itemName = (data, id) => (data.items.find((i) => i.id === id) || {}).name || id;
+const personName = (data, id) => (data.persons.find((p) => p.id === id) || {}).name || id;
+
+const seq = (i) => pad(String(i + 1), 3);
+const pad = (s, n) => String(s == null ? "" : s).padEnd(n);
+
+function loadData() {
+  const ruby = "require './lib/store'; require 'json'; print Store.new('data').all.to_json";
+  return JSON.parse(execFileSync("ruby", ["-e", ruby], { cwd: ROOT, encoding: "utf8" }));
+}
+
+function print(lines) {
+  for (const line of lines) console.log(line);
+}
+
+function usage() {
+  console.error("usage: bin/timeline <events|person <id>|item <id>|date <YYYY-MM-DD>|persons|items>");
+  process.exitCode = 2;
+}
+
+main(process.argv.slice(2));

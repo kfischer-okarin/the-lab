@@ -2,13 +2,24 @@
 
 A small local editor for authoring the timeline of events in the *Dark* Netflix
 series. The server (Sinatra) only reads and writes plain, diffable YAML in
-`data/`; all the editing and derivation happens in the browser UI.
+`data/`; the editing UI lives in the browser, and the timeline logic behind each
+view is a pure, shared module (see [Derived views](#derived-views-publictimelinecalculationsjs)).
 
 ## Run
 
 ```sh
 bundle install
 bin/dev            # → http://127.0.0.1:4567
+```
+
+Inspect the derived views without the browser, and run the tests for them:
+
+```sh
+bin/timeline item brief_an_jonas   # an item's ownership timeline
+bin/timeline person jonas_kahnwald # a person's subjective timeline
+bin/timeline date 2019-11-04       # the events on a date
+bin/timeline events                # episode chronology (the left list)
+node --test                        # tests for the derived views
 ```
 
 ## Data model (`data/`)
@@ -105,8 +116,38 @@ persons:
 - Only explicit `gains` by another person counts as a transfer; a `has` by
   someone else does not yank the item away.
 
+An item's full timeline is stitched from these holding runs. A transfer links one
+owner's run to the next (they share the hand-off event), so a linked chain keeps
+its **hand-off order** even when a transfer carries the item *back* in time. But
+when an item is dropped and later picked up by an unrelated owner, those runs are
+disconnected: in the gap the item just sits in the world. Disconnected runs are
+ordered by the **world date** at which the next owner picks the item up. (Michael
+writes the letter and dies in June; Ines is later seen with it in November,
+before Jonas gains it days after — so Ines precedes Jonas, not the reverse.)
+
 The "Subjektive Zeitlinie" tab shows, for a person, item tags on the events they
 own; for an item, the ownership chain (owner per event). The "Getragene
 Ereignisse" checkbox (items only) toggles the carried in-between events vs. just
 the gain/lose/has points. Item and owner tags carry ↗ links that jump between the
 two timelines.
+
+### Derived views (`public/timelineCalculations.js`)
+
+The logic behind every timeline view is a single DOM-free module, so the browser
+UI (`public/app.js`) and the `bin/timeline` CLI always agree on what the data
+means. Each function takes the raw `events` array (plus an id) and returns the
+structure behind one view — nothing else is exported:
+
+- `eventsInEpisodeChronology(events)` → events sorted for the main list
+  `(season, episode, timestamp, id)`.
+- `subjectiveEventsForPerson(events, personId)` → the person's appearances in
+  their subjective order, each with the biological `age` at that point and the
+  `items` held (tagged gain / lose / observed-but-unexplained).
+- `itemEvents(events, itemId)` → the item's ownership chain, one row per event,
+  each marked `gain` / `has` / `lose` / `carry` with the `owner` (and their age).
+- `eventsForDate(events, date)` → the events on a date in their within-date order,
+  each carrying the `role` (`date` / `from` / `to`) that placed it there.
+
+`bin/timeline` prints these views from the YAML (read through the Ruby `Store`,
+the one place that parses it). `test/timelineCalculations.test.js` covers them
+with hand-built fixtures; run `node --test`.

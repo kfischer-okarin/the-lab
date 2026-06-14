@@ -12,6 +12,9 @@ const state = {
   showCarried: false  // item timeline: also show carried (non-transfer) events
 };
 
+// Pure view models (DOM-free, shared with bin/timeline); see timelineCalculations.js.
+const { eventsInEpisodeChronology, subjectiveEventsForPerson, itemEvents, eventsForDate } = TimelineCalculations;
+
 const el = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", init);
@@ -105,24 +108,9 @@ function primaryDate(when) {
 function renderEventList() {
   const container = el("events");
   container.innerHTML = "";
-  const matches = state.events.filter(matchesFilter).sort(compareEvents);
+  const matches = eventsInEpisodeChronology(state.events.filter(matchesFilter));
   el("event-count").textContent = `(${matches.length})`;
   for (const group of groupByEpisode(matches)) container.appendChild(episodeGroupNode(group));
-}
-
-// Order by episode then in-episode timestamp, breaking ties by event id.
-function compareEvents(a, b) {
-  return (a.season || 0) - (b.season || 0)
-    || (a.episode || 0) - (b.episode || 0)
-    || timestampSeconds(a.timestamp) - timestampSeconds(b.timestamp)
-    || byteCompare(a.id, b.id);
-}
-
-// Episode timestamp is MM:SS (minutes can exceed 59), so compare by total
-// seconds, not lexically.
-function timestampSeconds(ts) {
-  const [m, s] = String(ts || "00:00").split(":").map(Number);
-  return (m || 0) * 60 + (s || 0);
 }
 
 function episodeTag(event) {
@@ -232,7 +220,7 @@ function newEvent() {
 // The latest event in episode chronology (season, episode, then timestamp),
 // whose season/episode/date seed a new event so consecutive entries share them.
 function latestEvent() {
-  return state.events.slice().sort(compareEvents).at(-1) || null;
+  return eventsInEpisodeChronology(state.events).at(-1) || null;
 }
 
 // Seed the new event's date from the latest event: its date, or a time-travel
@@ -438,7 +426,9 @@ function setConfirmedAge(a, value) {
 function appearanceAge(a) {
   if (Number.isInteger(a.confirmed_age)) return { value: a.confirmed_age, confirmed: true };
   if (!state.draft || !state.draft.id || !a.order) return { value: null, confirmed: false };
-  return { value: ageOnTimeline(a.id, state.draft.id, (r) => String(r.order) === String(a.order)), confirmed: false };
+  const age = TimelineCalculations.ageOnTimeline(state.events, a.id,
+    (r) => r.event.id === state.draft.id && String(r.order) === String(a.order));
+  return { value: age, confirmed: false };
 }
 
 // Checkbox toggling whether this person dies in this event. Mutates the draft
@@ -656,38 +646,6 @@ function addSubjectGroup(select, label, type, list) {
   select.appendChild(group);
 }
 
-// Ordinal string comparison (UTF-16 code units = byte order for these keys).
-function byteCompare(a, b) {
-  return a < b ? -1 : a > b ? 1 : 0;
-}
-
-function subjectAppearances() {
-  if (!state.subjectKey) return [];
-  const [type, id] = state.subjectKey.split(":");
-  return appearancesFor(type, id);
-}
-
-// Every appearance of a subject across all events, one row each. A person can
-// appear more than once in an event (younger/older self), so each row also
-// carries its `index` (position in the event's persons array) to disambiguate.
-function appearancesFor(type, id) {
-  const rows = [];
-  for (const event of state.events) {
-    (event[type] || []).forEach((appearance, index) => {
-      if (appearance.id !== id) return;
-      rows.push({
-        event, index, order: appearance.order, death: appearance.death === true,
-        confirmedAge: appearance.confirmed_age, gains: appearance.gains || [],
-        loses: appearance.loses || [], has: appearance.has || []
-      });
-    });
-  }
-  // Sort by byte/ordinal order to match the fractional keys (and the server),
-  // NOT localeCompare — that is case-insensitive/linguistic ("e" < "K") and
-  // would disagree with the keys' byte order ("K" < "e").
-  return rows.sort((a, b) => byteCompare(String(a.order), String(b.order)));
-}
-
 function renderSubjectEvents() {
   const list = el("subject-events");
   list.innerHTML = "";
@@ -696,9 +654,8 @@ function renderSubjectEvents() {
   // would override the UA [hidden]{display:none} rule. Only items carry events.
   document.querySelector(".carry-toggle").style.display = type === "items" ? "" : "none";
   if (!state.subjectKey) return;
-  const model = ownershipModel();
-  if (type === "persons") renderPersonTimeline(list, id, model);
-  else renderItemTimeline(list, id, model);
+  if (type === "persons") renderPersonTimeline(list, id);
+  else renderItemTimeline(list, id);
 }
 
 // Shared row scaffold: a small date headline, the title, then a tags line.
@@ -724,30 +681,11 @@ function rowBody(index, event, tags) {
   return body;
 }
 
-function renderPersonTimeline(list, personId, model) {
-  const rows = subjectAppearances();
+function renderPersonTimeline(list, personId) {
+  const rows = subjectiveEventsForPerson(state.events, personId);
   const hasAnchor = rows.some((r) => Number.isInteger(r.confirmedAge));
-  const ages = hasAnchor ? computeAges(rows) : null;
-
-  // Earliest order at which this person gains each item (rows are sorted asc).
-  const firstGain = {};
-  for (const r of rows) for (const it of r.gains) if (!(it in firstGain)) firstGain[it] = r.order;
-
   rows.forEach((row, index) => {
-    const owned = model.ownedAt[`${personId}#${row.index}|${row.event.id}`] || [];
-    // Items shown at this event = owned (incl. via `has` runs) ∪ observed ∪
-    // gained/lost here. gains/loses are marked explicitly (＋/－) so a hand-off
-    // reads as lost-here and gained-here at its two slots; an observed item warns
-    // until a gains of it exists earlier in this timeline.
-    const items = [...new Set([...owned, ...row.has, ...row.gains, ...row.loses])];
-    const itemTags = items.map((it) => ({
-      item: it,
-      gain: row.gains.includes(it),
-      lose: row.loses.includes(it),
-      warn: !row.gains.includes(it) && !row.loses.includes(it) && row.has.includes(it)
-        && !(it in firstGain && byteCompare(firstGain[it], row.order) < 0)
-    }));
-    list.appendChild(personRowNode(row, index, ages ? ages[index] : null, hasAnchor, itemTags, personId));
+    list.appendChild(personRowNode(row, index, row.age, hasAnchor, row.items, personId));
   });
 }
 
@@ -776,8 +714,8 @@ function personRowNode(row, index, age, showAge, itemTags, personId) {
   return li;
 }
 
-function renderItemTimeline(list, itemId, model) {
-  let rows = model.chains[itemId] || [];
+function renderItemTimeline(list, itemId) {
+  let rows = itemEvents(state.events, itemId);
   if (!state.showCarried) rows = rows.filter((r) => r.kind !== "carry"); // keep gain/has/lose
   rows.forEach((row, index) => list.appendChild(itemRowNode(row, index)));
 }
@@ -792,7 +730,7 @@ function itemRowNode(row, index) {
   if (row.kind === "has") tags.push(span("transfer-mark has", "＋?")); // acquisition unknown
   if (row.kind === "lose") tags.push(span("transfer-mark lose", "－"));
   tags.push(row.owner
-    ? ownerTag(row.owner, ageOnTimeline(row.owner, row.event.id, (r) => r.index === row.index))
+    ? ownerTag(row.owner, row.ownerAge)
     : span("ownerless", "herrenlos"));
   li.appendChild(rowBody(index, row.event, tags));
 
@@ -827,26 +765,12 @@ function renderDateSelect() {
   else state.dateKey = select.value || null;
 }
 
-// Date points (events) occurring on the given date, in their within-date order.
-function datePointsForDate(dateStr) {
-  const points = [];
-  for (const event of state.events) {
-    const w = event.when || {};
-    if (w.kind === "date" && w.date === dateStr) points.push({ event, role: "date", order: w.order });
-    else if (w.kind === "time_travel") {
-      if (w.from === dateStr) points.push({ event, role: "from", order: w.from_order });
-      if (w.to === dateStr) points.push({ event, role: "to", order: w.to_order });
-    }
-  }
-  return points.sort((a, b) => byteCompare(String(a.order), String(b.order)));
-}
-
 function renderDateTimeline() {
   const list = el("date-events");
   if (!list) return;
   list.innerHTML = "";
   if (!state.dateKey) return;
-  datePointsForDate(state.dateKey).forEach((pt, index) => list.appendChild(datePointNode(pt, index)));
+  eventsForDate(state.events, state.dateKey).forEach((pt, index) => list.appendChild(datePointNode(pt, index)));
 }
 
 function datePointNode(pt, index) {
@@ -914,16 +838,6 @@ function ownerTag(personId, age) {
   return linkTag("owner-tag", label, "Zur Personen-Zeitlinie", () => jumpToTimeline("persons", personId));
 }
 
-// The age a person has at the appearance matching `pick` along their subjective
-// timeline, or null when no confirmed-age anchor lets us compute one.
-function ageOnTimeline(personId, eventId, pick) {
-  const rows = appearancesFor("persons", personId);
-  if (!rows.some((r) => Number.isInteger(r.confirmedAge))) return null;
-  const ages = computeAges(rows);
-  const i = rows.findIndex((r) => r.event.id === eventId && pick(r));
-  return i >= 0 ? ages[i] : null;
-}
-
 // Observed possession; the ⚠️ flags it as unexplained (no earlier gains).
 const hasTag = (itemId, warn) => linkTag(
   `has-tag${warn ? " warn" : ""}`,
@@ -931,99 +845,6 @@ const hasTag = (itemId, warn) => linkTag(
   "Zur Gegenstand-Zeitlinie",
   () => jumpToTimeline("items", itemId)
 );
-
-// --- ownership derivation ---------------------------------------------------
-
-// Item timelines are derived from ownership. Returns each item's ordered chain
-// of rows and a map of which items a person owns at a given event. Both `gains`
-// (explicit) and `has` (observed) acquire the item; only explicit gains by
-// another person counts as a transfer that ends the current owner's run.
-function ownershipModel() {
-  const personEvents = personEventOrder();
-  const gainerAt = {}; // `${eventId}|${itemId}` -> personId (explicit gains only)
-  const itemIds = new Set();
-  for (const event of state.events) {
-    for (const p of event.persons || []) {
-      for (const it of p.gains || []) { gainerAt[`${event.id}|${it}`] = p.id; itemIds.add(it); }
-      for (const it of p.has || []) itemIds.add(it);
-      for (const it of p.loses || []) itemIds.add(it);
-    }
-  }
-  const ownedAt = {};
-  const chains = {};
-  for (const itemId of itemIds) chains[itemId] = buildItemChain(itemId, personEvents, gainerAt, ownedAt);
-  return { chains, ownedAt };
-}
-
-// Each person's appearances in their own subjective order. A person can appear
-// twice in one event (younger/older self), so entries carry the array `index`
-// to disambiguate, and the appearance itself so its transfers read correctly.
-function personEventOrder() {
-  const map = {};
-  for (const event of state.events) {
-    (event.persons || []).forEach((appearance, index) => {
-      (map[appearance.id] ||= []).push({ event, index, appearance, order: appearance.order });
-    });
-  }
-  for (const id of Object.keys(map)) {
-    map[id].sort((a, b) => byteCompare(String(a.order), String(b.order)));
-  }
-  return map;
-}
-
-// Collect every person's holding runs for the item, then stitch them into one
-// ordered chain, linking each run that ends in a transfer to the receiver's run.
-function buildItemChain(itemId, personEvents, gainerAt, ownedAt) {
-  const runs = [];
-  for (const personId of Object.keys(personEvents)) {
-    for (const run of buildRuns(personId, itemId, personEvents[personId], gainerAt)) runs.push(run);
-  }
-  const byAcquire = {};
-  for (const run of runs) byAcquire[run.acquireEventId] = run;
-  const transferTargets = new Set(runs.map((r) => r.transferEventId).filter(Boolean));
-  let startId = runs.map((r) => r.acquireEventId).find((eid) => !transferTargets.has(eid));
-  if (startId === undefined) startId = runs.length ? runs[0].acquireEventId : null;
-
-  const rows = [];
-  const visited = new Set();
-  for (let cur = startId; cur && byAcquire[cur] && !visited.has(cur); cur = byAcquire[cur].transferEventId) {
-    visited.add(cur);
-    rows.push(...byAcquire[cur].rows);
-  }
-  for (const run of runs) {
-    if (!visited.has(run.acquireEventId)) { rows.push(...run.rows); visited.add(run.acquireEventId); } // disconnected
-  }
-  for (const r of rows) if (r.owner) (ownedAt[`${r.owner}#${r.index}|${r.event.id}`] ||= []).push(itemId);
-  return rows;
-}
-
-// A holding run for one person: from an acquisition (explicit `gains` or observed
-// `has`) through their events until they lose it (inclusive, → ownerless) or
-// another person explicitly gains it (exclusive transfer out).
-function buildRuns(personId, itemId, entries, gainerAt) {
-  const runs = [];
-  let run = null;
-  for (const { event: e, index, appearance: a } of entries) {
-    const gains = (a.gains || []).includes(itemId);
-    const observed = (a.has || []).includes(itemId);
-    const loses = (a.loses || []).includes(itemId);
-    const takenByOther = gainerAt[`${e.id}|${itemId}`] && gainerAt[`${e.id}|${itemId}`] !== personId;
-
-    if (run && takenByOther) {
-      run.transferEventId = e.id;
-      runs.push(run);
-      run = null;
-    } else if (!run && (gains || observed)) {
-      run = { owner: personId, acquireEventId: e.id, transferEventId: null,
-              rows: [{ event: e, owner: personId, index, kind: gains ? "gain" : "has" }] };
-    } else if (run) {
-      if (loses) { run.rows.push({ event: e, owner: null, index, kind: "lose" }); runs.push(run); run = null; }
-      else run.rows.push({ event: e, owner: personId, index, kind: "carry" });
-    }
-  }
-  if (run) runs.push(run);
-  return runs;
-}
 
 // Opens the event in the editor and scrolls the left list to it. draggable is
 // disabled and mousedown is stopped so clicking it never starts a row drag.
@@ -1054,56 +875,6 @@ function ageBadge(row, age) {
   const b = span("age-badge unknown", "?");
   b.title = "Alter unbekannt — unsicheres/fehlendes Datum";
   return b;
-}
-
-// Biological age along the subjective timeline. Age accumulates between
-// consecutive events by their world-year difference; time travel uses the
-// event's `from` as its own timestamp and `to` as the hand-off to the next.
-function computeAges(rows) {
-  const ages = rows.map(() => null);
-  const anchor = rows.findIndex((r) => Number.isInteger(r.confirmedAge));
-  if (anchor === -1) return ages;
-
-  ages[anchor] = rows[anchor].confirmedAge;
-  for (let j = anchor + 1; j < rows.length; j++) {
-    const d = edgeDelta(rows[j - 1].event, rows[j].event);
-    if (ages[j - 1] !== null && d !== null) ages[j] = ages[j - 1] + d;
-  }
-  for (let j = anchor - 1; j >= 0; j--) {
-    const d = edgeDelta(rows[j].event, rows[j + 1].event);
-    if (ages[j + 1] !== null && d !== null) ages[j] = ages[j + 1] - d;
-  }
-  return ages;
-}
-
-// Biological years between a preceding event and the next one, or null if a
-// needed date is missing (which breaks the chain past that point).
-function edgeDelta(prevEvent, nextEvent) {
-  const out = outYear(prevEvent);
-  const inn = inYear(nextEvent);
-  return out === null || inn === null ? null : inn - out;
-}
-
-// When the person experiences an event: `from` for a time-travel event.
-function inYear(event) {
-  const w = event.when || {};
-  if (w.kind === "date") return yearOf(w.date);
-  if (w.kind === "time_travel") return yearOf(w.from);
-  return null;
-}
-
-// When the person leaves an event toward the next: `to` for a time-travel event.
-function outYear(event) {
-  const w = event.when || {};
-  if (w.kind === "date") return yearOf(w.date);
-  if (w.kind === "time_travel") return yearOf(w.to);
-  return null;
-}
-
-function yearOf(dateStr) {
-  if (!dateStr) return null;
-  const year = parseInt(String(dateStr).slice(0, 4), 10);
-  return Number.isNaN(year) ? null : year;
 }
 
 function span(cls, text) {
