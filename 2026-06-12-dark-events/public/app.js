@@ -85,8 +85,15 @@ function renderEventList() {
 function compareEvents(a, b) {
   return (a.season || 0) - (b.season || 0)
     || (a.episode || 0) - (b.episode || 0)
-    || byteCompare(String(a.timestamp || "00:00"), String(b.timestamp || "00:00"))
+    || timestampSeconds(a.timestamp) - timestampSeconds(b.timestamp)
     || byteCompare(a.id, b.id);
+}
+
+// Episode timestamp is MM:SS (minutes can exceed 59), so compare by total
+// seconds, not lexically.
+function timestampSeconds(ts) {
+  const [m, s] = String(ts || "00:00").split(":").map(Number);
+  return (m || 0) * 60 + (s || 0);
 }
 
 function episodeTag(event) {
