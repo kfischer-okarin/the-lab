@@ -2,6 +2,8 @@
 items:
 - id: brief_an_jonas
   name: Brief von Michael an Jonas
+- id: pistole
+  name: Pistole
 - id: raider
   name: Raider Verpackung
 - id: zeitmaschine

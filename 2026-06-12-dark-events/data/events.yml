@@ -38,7 +38,7 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: zzV
+    order: v
   persons:
   - id: jonas_kahnwald
     order: A
@@ -48,6 +48,7 @@ events:
     confirmed_age: 16
   missing_details: false
   timestamp: '12:50'
+  implied: false
 - id: ev-0004
   season: 1
   episode: 1
@@ -60,7 +61,8 @@ events:
   - id: erik_obendorf
     order: K
   missing_details: false
-  timestamp: '13:50'
+  timestamp: '07:40'
+  implied: false
 - id: ev-0005
   season: 1
   episode: 1
@@ -69,14 +71,15 @@ events:
     kind: time_travel
     from:
     to: '2019-11-04'
-    to_order: zs
+    to_order: x
   persons:
   - id: jonas_kahnwald
     order: L
-    gains:
+    has:
     - zeitmaschine
   missing_details: true
   timestamp: '15:10'
+  implied: false
 - id: ev-0006
   season: 1
   episode: 1
@@ -115,7 +118,6 @@ events:
     confirmed_age: 16
   - id: mikkel_nielsen
     order: F
-    confirmed_age: 11
   - id: franziska_doppler
     order: V
     confirmed_age: 16
@@ -129,13 +131,14 @@ events:
     kind: time_travel
     from: '2019-11-05'
     to: '1986-11-05'
-    from_order: t
-    to_order: r
+    from_order: z
+    to_order: "y"
   persons:
   - id: mikkel_nielsen
     order: I
   missing_details: false
   timestamp: '41:10'
+  implied: true
 - id: ev-0010
   season: 1
   episode: 1
@@ -144,14 +147,16 @@ events:
     kind: time_travel
     from: '1986-11-05'
     to: '2019-11-05'
-    to_order: w
-    from_order: v
+    to_order: zs
+    from_order: z
   persons:
   - id: mads_nielsen
     order: K
     death: true
+    confirmed_age: 12
   missing_details: false
   timestamp: '45:30'
+  implied: true
 - id: ev-0011
   season: 1
   episode: 1
@@ -159,7 +164,7 @@ events:
   when:
     kind: date
     date: '2019-11-05'
-    order: "y"
+    order: zu
   persons:
   - id: mads_nielsen
     order: e
@@ -171,20 +176,21 @@ events:
   timestamp: '46:00'
 - id: ev-0012
   season: 1
-  episode: 1
+  episode: 2
   title: Erik reist mithilfe des Stuhls und stirbt
   when:
     kind: time_travel
     from: '1986-11-05'
     to: '1953-11-05'
-    from_order: x
+    from_order: zV
     to_order: V
   persons:
   - id: erik_obendorf
     order: e
     death: true
   missing_details: false
-  timestamp: '47:50'
+  timestamp: '22:20'
+  implied: false
 - id: ev-0013
   season: 1
   episode: 2
@@ -192,13 +198,17 @@ events:
   when:
     kind: date
     date: '2019-11-05'
-    order: m
+    order: zv
   persons:
   - id: jonas_kahnwald
     order: P
+    has:
+    - pistole
   - id: regina_tiedemann
     order: V
   missing_details: false
+  implied: false
+  timestamp: '14:00'
 - id: ev-0014
   season: 1
   episode: 1
@@ -207,10 +217,114 @@ events:
   when:
     kind: date
     date: '2019-11-04'
-    order: zk
+    order: "n"
   persons:
   - id: ines_kahnwald
     order: V
-    gains:
+    has:
     - brief_an_jonas
+  missing_details: false
+  implied: false
+- id: ev-0015
+  season: 1
+  episode: 2
+  timestamp: '16:40'
+  title: Helge kommt nach 2019
+  when:
+    kind: time_travel
+    from:
+    to: '2019-11-05'
+    to_order: zw
+  persons:
+  - id: helge_doppler
+    order: V
+  implied: false
+  missing_details: true
+- id: ev-0016
+  season: 1
+  episode: 2
+  timestamp: '37:20'
+  title: Jemand reist durch die Passage (Lichter flickern)
+  when:
+    kind: date
+    date: '2019-11-05'
+    order: zz
+  persons: []
+  implied: false
+  missing_details: false
+- id: ev-0018
+  season: 1
+  episode: 1
+  timestamp: '05:30'
+  title: Ulrich und Hannah haben eine Affäre
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: U
+  persons:
+  - id: ulrich_nielsen
+    order: '7'
+  - id: hannah_kahnwald
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0019
+  season: 1
+  episode: 1
+  timestamp: '08:10'
+  title: Jemand benutzt die Passage (laute Geräusche)
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: j
+  persons: []
+  implied: true
+  missing_details: true
+- id: ev-0021
+  season: 1
+  episode: 1
+  timestamp: '12:20'
+  title: Mikkel zeigt Ulrich seinen Zaubertrick
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: r
+  persons:
+  - id: mikkel_nielsen
+    order: '7'
+    confirmed_age: 11
+  - id: ulrich_nielsen
+    order: B
+  implied: false
+  missing_details: false
+- id: ev-0022
+  season: 1
+  episode: 1
+  timestamp: '22:50'
+  title: Der alte Helge "Es passiert wieder"
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: zyV
+  persons:
+  - id: helge_doppler
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0023
+  season: 1
+  episode: 2
+  timestamp: '40:40'
+  title: Mikkel trifft seine Eltern als Teenager
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zk
+  persons:
+  - id: mikkel_nielsen
+    order: J
+  - id: ulrich_nielsen
+    order: '3'
+    confirmed_age: 15
+  implied: false
   missing_details: false

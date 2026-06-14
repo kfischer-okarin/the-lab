@@ -12,6 +12,12 @@ persons:
 - id: franziska_doppler
   name: Franziska Doppler
   aliases: []
+- id: hannah_kahnwald
+  name: Hannah Kahnwald
+  aliases: []
+- id: helge_doppler
+  name: Helge Doppler
+  aliases: []
 - id: ines_kahnwald
   name: Ines Kahnwald
   aliases: []
@@ -32,6 +38,9 @@ persons:
   aliases: []
 - id: mikkel_nielsen
   name: Mikkel Nielsen
+  aliases: []
+- id: peter_doppler
+  name: Peter Doppler
   aliases: []
 - id: regina_tiedemann
   name: Regina Tiedemann
