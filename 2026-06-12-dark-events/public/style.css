@@ -148,15 +148,20 @@ button.danger:hover { border-color: var(--danger); }
 .block { margin-bottom: 8px; }
 .hint { font-size: 11px; color: var(--muted); margin: 6px 0 12px; }
 
-.reorder { list-style: none; padding: 0; margin: 0; }
+.reorder { list-style: none; padding: 0; margin: 0; position: relative; }
 .reorder li {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px; margin-bottom: 6px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
   cursor: grab;
 }
-.reorder li.dragging { opacity: 0.4; border-color: var(--accent); }
-.reorder li.over { border-color: var(--accent-2); }
+.reorder li.dragging { opacity: 0.35; border-style: dashed; border-color: var(--accent); }
+.reorder li.drop-indicator {
+  position: absolute; left: 0; right: 0; height: 0; margin: 0; padding: 0;
+  background: none; border: none; border-top: 3px solid var(--accent);
+  border-radius: 2px; box-shadow: 0 0 8px var(--accent);
+  cursor: default; pointer-events: none; transform: translateY(-2px);
+}
 .reorder .grip { color: var(--muted); cursor: grab; }
 .reorder .seq { color: var(--accent); font-family: ui-monospace, monospace; font-size: 11px; min-width: 20px; }
 .reorder .ev-title { flex: 1; }

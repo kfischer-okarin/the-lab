@@ -452,10 +452,7 @@ function subjectRowNode(row, index) {
   li.appendChild(span("ev-title", row.event.title));
   li.appendChild(span("ev-when", whenLabel(row.event.when)));
   li.addEventListener("dragstart", onDragStart);
-  li.addEventListener("dragover", onDragOver);
-  li.addEventListener("dragleave", () => li.classList.remove("over"));
-  li.addEventListener("drop", onDrop);
-  li.addEventListener("dragend", clearDragMarkers);
+  li.addEventListener("dragend", onDragEnd);
   return li;
 }
 
@@ -467,37 +464,96 @@ function span(cls, text) {
 }
 
 let dragSourceId = null;
+let dropIndicator = null;
 
 function onDragStart(e) {
   dragSourceId = e.currentTarget.dataset.eventId;
   e.currentTarget.classList.add("dragging");
   e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", dragSourceId); // Firefox requires data
 }
 
-function onDragOver(e) {
+function onDragEnd() {
+  dragSourceId = null;
+  document.querySelectorAll("#subject-events li.dragging").forEach((li) => li.classList.remove("dragging"));
+  removeDropIndicator();
+}
+
+function onListDragOver(e) {
+  if (!dragSourceId) return;
   e.preventDefault();
-  e.currentTarget.classList.add("over");
+  e.dataTransfer.dropEffect = "move";
+  const list = el("subject-events");
+  positionDropIndicator(list, dragAfterElement(list, e.clientY));
 }
 
-function clearDragMarkers() {
-  document.querySelectorAll("#subject-events li").forEach((li) => li.classList.remove("over", "dragging"));
+// Place the indicator as an absolute overlay at the drop boundary. Keeping it
+// out of normal flow means it never shifts the rows, which would otherwise make
+// the boundary flip back and forth (worst with only a couple of rows).
+function positionDropIndicator(list, after) {
+  const indicator = ensureDropIndicator();
+  if (indicator.parentNode !== list) list.appendChild(indicator);
+  const last = lastRow(list);
+  indicator.style.top = `${after ? after.offsetTop : (last ? last.offsetTop + last.offsetHeight : 0)}px`;
 }
 
-async function onDrop(e) {
+function lastRow(list) {
+  const rows = list.querySelectorAll("li:not(.dragging):not(.drop-indicator)");
+  return rows[rows.length - 1] || null;
+}
+
+function onListDragLeave(e) {
+  if (!el("subject-events").contains(e.relatedTarget)) removeDropIndicator();
+}
+
+async function onListDrop(e) {
+  if (!dragSourceId) return;
   e.preventDefault();
-  const targetId = e.currentTarget.dataset.eventId;
-  clearDragMarkers();
-  if (!dragSourceId || dragSourceId === targetId) return;
-  await moveSubjectEvent(dragSourceId, targetId);
+  const after = dragAfterElement(el("subject-events"), e.clientY);
+  const beforeId = after ? after.dataset.eventId : null;
+  const source = dragSourceId;
+  removeDropIndicator();
+  await moveSubjectEvent(source, beforeId);
 }
 
-// Move dragged event to the position just before the drop target.
-async function moveSubjectEvent(sourceId, targetId) {
+// The row the dragged item should be inserted *before*, by cursor Y position
+// (null = drop at the end). Ignores the dragged row and the indicator itself.
+function dragAfterElement(list, y) {
+  const candidates = [...list.querySelectorAll("li:not(.dragging):not(.drop-indicator)")];
+  let closest = { offset: -Infinity, element: null };
+  for (const child of candidates) {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) closest = { offset, element: child };
+  }
+  return closest.element;
+}
+
+function ensureDropIndicator() {
+  if (!dropIndicator) {
+    dropIndicator = document.createElement("li");
+    dropIndicator.className = "drop-indicator";
+  }
+  return dropIndicator;
+}
+
+function removeDropIndicator() {
+  if (dropIndicator && dropIndicator.parentNode) dropIndicator.remove();
+}
+
+// Move source to sit immediately before beforeId (null = end). Does nothing if
+// that is already its position.
+async function moveSubjectEvent(sourceId, beforeId) {
   const [type, subjectId] = state.subjectKey.split(":");
-  const ordered = subjectAppearances().filter((r) => r.event.id !== sourceId);
-  const targetIndex = ordered.findIndex((r) => r.event.id === targetId);
-  const beforeKey = targetIndex > 0 ? ordered[targetIndex - 1].order : null;
-  const afterKey = ordered[targetIndex] ? ordered[targetIndex].order : null;
+  const ordered = subjectAppearances();
+  const sourceIndex = ordered.findIndex((r) => r.event.id === sourceId);
+  const without = ordered.filter((r) => r.event.id !== sourceId);
+  const insertAt = beforeId ? without.findIndex((r) => r.event.id === beforeId) : without.length;
+
+  if (insertAt === sourceIndex) return; // dropped on its current spot
+
+  const beforeKey = insertAt > 0 ? without[insertAt - 1].order : null;
+  const afterKey = insertAt < without.length ? without[insertAt].order : null;
 
   const { order } = await api("POST", "/api/reorder", {
     subject_type: type, subject_id: subjectId, event_id: sourceId,
@@ -558,6 +614,11 @@ function bindControls() {
     openDropdown(e.currentTarget, availableOptions(state.persons, state.draft ? state.draft.deaths : []), addDeath));
 
   el("subject-select").addEventListener("change", (e) => { state.subjectKey = e.target.value; renderSubjectEvents(); });
+
+  const subjectList = el("subject-events");
+  subjectList.addEventListener("dragover", onListDragOver);
+  subjectList.addEventListener("drop", onListDrop);
+  subjectList.addEventListener("dragleave", onListDragLeave);
 
   el("add-person-registry").addEventListener("click", () => addRegistry("persons", "new-person-name"));
   el("add-item-registry").addEventListener("click", () => addRegistry("items", "new-item-name"));
