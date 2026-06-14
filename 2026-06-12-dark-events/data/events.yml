@@ -854,3 +854,99 @@ events:
     order: k
   implied: false
   missing_details: false
+- id: ev-0058
+  season: 1
+  episode: 6
+  timestamp: '10:30'
+  title: Ulrich fragt Tronte wo er war als die Kinder verschwanden
+  when:
+    kind: date
+    date: '2019-11-08'
+    order: V
+  persons:
+  - id: ulrich_nielsen
+    order: s
+  - id: tronte_nielsen
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0059
+  season: 1
+  episode: 6
+  timestamp: '21:30'
+  title: Ulrich fragt Regina über das letzte Mal dass sie Mads gesehen hat
+  when:
+    kind: date
+    date: '2019-11-08'
+    order: w
+  persons:
+  - id: ulrich_nielsen
+    order: w
+  - id: regina_tiedemann
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0060
+  season: 1
+  episode: 6
+  timestamp: '28:20'
+  title: Ulrich konfrontiert Hannah mit der falschen Aussage
+  when:
+    kind: date
+    date: '2019-11-08'
+    order: s
+  persons:
+  - id: ulrich_nielsen
+    order: "y"
+  - id: hannah_kahnwald
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0061
+  season: 1
+  episode: 6
+  timestamp: '36:50'
+  title: Jonas geht das erste Mal durch die Passage
+  when:
+    kind: time_travel
+    from: '2019-11-08'
+    to: '1986-11-08'
+    from_order: "y"
+    to_order: V
+  persons:
+  - id: jonas_kahnwald
+    order: Ky
+  implied: false
+  missing_details: false
+- id: ev-0062
+  season: 1
+  episode: 6
+  timestamp: '46:10'
+  title: Jonas trifft Hannah und ihren Vater auf der Straße
+  when:
+    kind: date
+    date: '1986-11-08'
+    order: k
+  persons:
+  - id: hannah_kahnwald
+    order: T
+  - id: jonas_kahnwald
+    order: Kz
+  implied: false
+  missing_details: false
+- id: ev-0063
+  season: 1
+  episode: 6
+  timestamp: '47:10'
+  title: Ulrich identifiert die Leiche als Mads
+  when:
+    kind: date
+    date: '2019-11-08'
+    order: z
+  persons:
+  - id: ulrich_nielsen
+    order: z
+  - id: mads_nielsen
+    order: p
+  implied: false
+  missing_details: false
