@@ -166,6 +166,7 @@ button.danger:hover { border-color: var(--danger); }
 .reorder .seq { color: var(--accent); font-family: ui-monospace, monospace; font-size: 11px; min-width: 20px; }
 .reorder .ev-title { flex: 1; }
 .reorder .ev-when { font-size: 10px; color: var(--muted); }
+.reorder .ev-death { color: var(--danger); font-size: 13px; }
 
 .registry { list-style: none; padding: 0; margin: 0; }
 .registry li { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--line); }

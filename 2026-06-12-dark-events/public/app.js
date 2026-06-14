@@ -452,12 +452,18 @@ function renderSubjectEvents() {
 }
 
 function subjectRowNode(row, index) {
+  const [type, id] = (state.subjectKey || ":").split(":");
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
   li.appendChild(span("grip", "⠿"));
   li.appendChild(span("seq", String(index + 1)));
   li.appendChild(span("ev-title", row.event.title));
+  if (type === "persons" && (row.event.deaths || []).includes(id)) {
+    const death = span("ev-death", "✝");
+    death.title = "Tod";
+    li.appendChild(death);
+  }
   li.appendChild(span("ev-when", whenLabel(row.event.when)));
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragend", onDragEnd);
