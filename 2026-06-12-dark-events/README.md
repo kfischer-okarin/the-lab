@@ -116,14 +116,22 @@ persons:
 - Only explicit `gains` by another person counts as a transfer; a `has` by
   someone else does not yank the item away.
 
-An item's full timeline is stitched from these holding runs. A transfer links one
-owner's run to the next (they share the hand-off event), so a linked chain keeps
-its **hand-off order** even when a transfer carries the item *back* in time. But
-when an item is dropped and later picked up by an unrelated owner, those runs are
-disconnected: in the gap the item just sits in the world. Disconnected runs are
-ordered by the **world date** at which the next owner picks the item up. (Michael
-writes the letter and dies in June; Ines is later seen with it in November,
-before Jonas gains it days after — so Ines precedes Jonas, not the reverse.)
+An item's full timeline is stitched from these holding runs under two rules:
+
+- **While the item is held, it follows its holder's subjective order** — the
+  object goes where its owner goes, in the order they live it. So a carry always
+  follows its gain, even across a time-travel loop (young Jonas reads the letter,
+  keeps it for life, sends it as an adult: read → carry → send, not the reverse).
+  A direct hand-off (one owner `loses` and the next `gains` at a shared event) is
+  held the whole time, so it too keeps **custody order**, even when the transfer
+  carries the item *back* in time.
+- **While the item is ownerless, ordering falls back to world time.** When an
+  item is dropped and later picked up by an unrelated owner, those holdings are
+  disconnected; in the gap it just sits in the world. Disconnected holdings are
+  ordered by the **world time** (date, then that date's order key) at which the
+  next owner picks the item up — the same chronology as the Chronologie tab.
+  (Michael writes the letter and dies in June; Ines is seen with it in November,
+  before Jonas gains it days after — so Ines precedes Jonas, not the reverse.)
 
 The "Subjektive Zeitlinie" tab shows, for a person, item tags on the events they
 own; for an item, the ownership chain (owner per event). The "Getragene

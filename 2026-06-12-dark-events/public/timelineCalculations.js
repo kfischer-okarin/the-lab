@@ -165,8 +165,11 @@
     return { chains, ownedAt };
   }
 
-  // Collect every person's holding runs for the item, group transfer-linked runs
-  // into segments, then order the segments by world chronology.
+  // Collect every person's holding runs for the item, link transfer-linked runs
+  // into segments, then order the segments by world time. A segment keeps the
+  // holder's subjective order internally (the item is carried where they go, so a
+  // carry always follows its gain — even across a time-travel loop). Only the
+  // gaps *between* holdings, where the item is ownerless, are world-time ordered.
   function buildItemChain(itemId, personEvents, gainerAt, ownedAt) {
     const runs = [];
     for (const personId of Object.keys(personEvents)) {
@@ -174,12 +177,9 @@
     }
     const segments = stitchSegments(runs);
 
-    // Between two segments the item is ownerless, sitting in the world until the
-    // next owner picks it up — so order disconnected segments by that pickup's
-    // world date (the segment's first acquisition). Within a segment, the
-    // hand-off order is kept as-is, since a transfer can carry the item back in
-    // time and must not be re-sorted by date.
-    segments.sort((a, b) => byteCompare(segmentDate(a), segmentDate(b)));
+    // Not carried between segments: order each holding by the world instant at
+    // which its first owner picks the item up (the earliest gain in world time).
+    segments.sort((a, b) => byteCompare(acquireInstant(a), acquireInstant(b)));
 
     const rows = segments.flatMap((seg) => seg.flatMap((run) => run.rows));
     for (const r of rows) if (r.owner) (ownedAt[`${r.owner}#${r.index}|${r.event.id}`] ||= []).push(itemId);
@@ -187,8 +187,9 @@
   }
 
   // A segment is a maximal transfer-linked sequence of runs: one owner hands the
-  // item to the next at a shared event. Roots are runs nobody transferred into;
-  // any runs left unvisited (e.g. a transfer cycle) become their own segments.
+  // item to the next at a shared event, so the chain stays in hand-off order even
+  // when a transfer carries the item back in time. Roots are runs nobody
+  // transferred into; any left unvisited (e.g. a cycle) become their own segment.
   function stitchSegments(runs) {
     const byAcquire = {};
     for (const run of runs) byAcquire[run.acquireEventId] = run;
@@ -213,10 +214,17 @@
     return seg;
   }
 
-  // The world date at which a segment's first owner acquires the item. A missing
-  // date sorts last so dated segments keep a stable chronological order.
-  function segmentDate(seg) {
-    return inDate(seg[0].rows[0].event) || "9999-99-99";
+  // The world instant at which a segment's first owner acquires the item: its
+  // world date paired with that date's order key (the same key the Chronologie
+  // tab orders by). A missing date sorts last.
+  function acquireInstant(seg) {
+    const event = seg[0].rows[0].event;
+    const w = event.when || {};
+    if (w.kind === "date") return `${w.date || "9999-99-99"}|${w.order || ""}`;
+    if (w.kind === "time_travel") {
+      return w.from ? `${w.from}|${w.from_order || ""}` : `${w.to || "9999-99-99"}|${w.to_order || ""}`;
+    }
+    return "9999-99-99|";
   }
 
   // A holding run for one person: from an acquisition (explicit `gains` or
@@ -236,7 +244,7 @@
         runs.push(run);
         run = null;
       } else if (!run && (gains || observed)) {
-        run = { owner: personId, acquireEventId: e.id, transferEventId: null,
+        run = { acquireEventId: e.id, transferEventId: null,
                 rows: [{ event: e, owner: personId, index, kind: gains ? "gain" : "has" }] };
       } else if (run) {
         if (loses) { run.rows.push({ event: e, owner: null, index, kind: "lose" }); runs.push(run); run = null; }
