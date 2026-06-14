@@ -153,7 +153,6 @@ events:
   - id: mads_nielsen
     order: K
     death: true
-    confirmed_age: 12
   missing_details: false
   timestamp: '45:30'
   implied: true
@@ -326,5 +325,177 @@ events:
   - id: ulrich_nielsen
     order: '3'
     confirmed_age: 15
+  implied: false
+  missing_details: false
+- id: ev-0024
+  season: 1
+  episode: 3
+  timestamp: '01:20'
+  title: Mikkel trifft verzweifelte Jana Nielsen
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zs
+  persons:
+  - id: mikkel_nielsen
+    order: JV
+  - id: jana_nielsen
+    order: F
+  implied: false
+  missing_details: false
+- id: ev-0025
+  season: 1
+  episode: 3
+  timestamp: '04:20'
+  title: Charlotte findet einen toten Vogel
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zw
+  persons:
+  - id: charlotte_doppler
+    order: F
+    confirmed_age: 15
+  implied: false
+  missing_details: false
+- id: ev-0026
+  season: 1
+  episode: 2
+  timestamp: '37:50'
+  title: Charlotte sieht tote Vögel vom Himmel fallen
+  when:
+    kind: date
+    date: '2019-11-05'
+    order: zzV
+  persons:
+  - id: charlotte_doppler
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0027
+  season: 1
+  episode: 3
+  timestamp: '05:10'
+  title: Mads verschwindet
+  when:
+    kind: date
+    date: '1986-10-10'
+    order: V
+  persons:
+  - id: mads_nielsen
+    order: A
+    confirmed_age: 12
+  implied: false
+  missing_details: false
+- id: ev-0028
+  season: 1
+  episode: 3
+  timestamp: '08:30'
+  title: Helge schenkt Claude "Eine Reise durch die Zeit"
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzV
+  persons:
+  - id: claudia_tiedemann
+    order: V
+  - id: helge_doppler
+    order: F
+  implied: false
+  missing_details: false
+- id: ev-0029
+  season: 1
+  episode: 3
+  timestamp: '16:40'
+  title: Ines nimmt Mikkel mit zum Krankenhaus
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzk
+  persons:
+  - id: mikkel_nielsen
+    order: Jk
+  - id: ines_kahnwald
+    order: F
+  implied: false
+  missing_details: false
+- id: ev-0030
+  season: 1
+  episode: 3
+  timestamp: '11:50'
+  title: Mikkel fragt bei der Polizei nach Ulrich
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzc
+  persons:
+  - id: mikkel_nielsen
+    order: Jc
+  - id: egon_tiedemann
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0031
+  season: 1
+  episode: 3
+  timestamp: '18:30'
+  title: Egon konfrontiert Ulrich mit Death Metal
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzw
+  persons:
+  - id: egon_tiedemann
+    order: k
+  - id: ulrich_nielsen
+    order: '5'
+  implied: false
+  missing_details: false
+- id: ev-0032
+  season: 1
+  episode: 3
+  timestamp: '27:30'
+  title: Claude lässt sich die Höhlen des AKW zeigen und findet Atommüll
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzzV
+  persons:
+  - id: claudia_tiedemann
+    order: k
+  - id: bernd_doppler
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0033
+  season: 1
+  episode: 3
+  timestamp: '29:10'
+  title: Mikkel sagt er komme aus der Zukunft
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzz
+  persons:
+  - id: mikkel_nielsen
+    order: Js
+  - id: ines_kahnwald
+    order: "N"
+  implied: false
+  missing_details: false
+- id: ev-0034
+  season: 1
+  episode: 3
+  timestamp: '41:50'
+  title: Tannhaus stellt die Zeitmaschine fertig
+  when:
+    kind: date
+    date: '1986-11-05'
+    order: zzzk
+  persons:
+  - id: h_g_tannhaus
+    order: V
+    has:
+    - zeitmaschine
   implied: false
   missing_details: false

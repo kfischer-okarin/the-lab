@@ -3,14 +3,26 @@ persons:
 - id: bartosz_tiedemann
   name: Bartosz Tiedemann
   aliases: []
+- id: bernd_doppler
+  name: Bernd Doppler
+  aliases: []
 - id: charlotte_doppler
   name: Charlotte Doppler
+  aliases: []
+- id: claudia_tiedemann
+  name: Claudia Tiedemann
+  aliases: []
+- id: egon_tiedemann
+  name: Egon Tiedemann
   aliases: []
 - id: erik_obendorf
   name: Erik Obendorf
   aliases: []
 - id: franziska_doppler
   name: Franziska Doppler
+  aliases: []
+- id: h_g_tannhaus
+  name: H. G. Tannhaus
   aliases: []
 - id: hannah_kahnwald
   name: Hannah Kahnwald
