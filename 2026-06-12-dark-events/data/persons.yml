@@ -3,6 +3,9 @@ persons:
 - id: bartosz_tiedemann
   name: Bartosz Tiedemann
   aliases: []
+- id: bernadette_woeller
+  name: Bernadette Wöller
+  aliases: []
 - id: bernd_doppler
   name: Bernd Doppler
   aliases: []
@@ -14,6 +17,9 @@ persons:
   aliases: []
 - id: egon_tiedemann
   name: Egon Tiedemann
+  aliases: []
+- id: elisabeth_doppler
+  name: Elisabeth Doppler
   aliases: []
 - id: erik_obendorf
   name: Erik Obendorf
@@ -51,6 +57,9 @@ persons:
 - id: mikkel_nielsen
   name: Mikkel Nielsen
   aliases: []
+- id: noah
+  name: Noah
+  aliases: []
 - id: peter_doppler
   name: Peter Doppler
   aliases: []
@@ -59,4 +68,7 @@ persons:
   aliases: []
 - id: ulrich_nielsen
   name: Ulrich Nielsen
+  aliases: []
+- id: yasin_friese
+  name: Yasin Friese
   aliases: []

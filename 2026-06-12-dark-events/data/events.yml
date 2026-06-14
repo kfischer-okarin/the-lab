@@ -80,23 +80,6 @@ events:
   missing_details: true
   timestamp: '15:10'
   implied: false
-- id: ev-0006
-  season: 1
-  episode: 1
-  title: Jana Nielsen hat eine Raider Verpackung gefunden
-  when:
-    kind: date
-    date: '2019-11-04'
-    order: zy
-  persons:
-  - id: jana_nielsen
-    order: V
-    gains:
-    - raider
-  - id: ulrich_nielsen
-    order: F
-  missing_details: false
-  timestamp: '21:40'
 - id: ev-0007
   season: 1
   episode: 1
@@ -497,5 +480,147 @@ events:
     order: V
     has:
     - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0035
+  season: 1
+  episode: 4
+  timestamp: '05:40'
+  title: Helge sagt dass er "es ihm sagen muss - es muss aufhören"
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: V
+  persons:
+  - id: helge_doppler
+    order: s
+  - id: peter_doppler
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0036
+  season: 1
+  episode: 4
+  timestamp: '16:20'
+  title: Charlotte findet heraus dass Peter am Abend des Verschwindens unterwegs war
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: k
+  persons:
+  - id: charlotte_doppler
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0037
+  season: 1
+  episode: 4
+  timestamp: '08:20'
+  title: Jonas erkundet die Höhlen zum ersten Mal
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: c
+  persons:
+  - id: jonas_kahnwald
+    order: KV
+  implied: false
+  missing_details: false
+- id: ev-0038
+  season: 1
+  episode: 4
+  timestamp: '19:30'
+  title: Charlotte frage Bernadette wo Peter am Abend des Verschwindens war
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: s
+  persons:
+  - id: charlotte_doppler
+    order: w
+  - id: bernadette_woeller
+    order: V
+  implied: false
+  missing_details: false
+- id: ev-0039
+  season: 1
+  episode: 4
+  timestamp: '28:00'
+  title: Charlotte findet den Bunker
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: w
+  persons:
+  - id: charlotte_doppler
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0040
+  season: 1
+  episode: 4
+  timestamp: '32:00'
+  title: Elisabeth verschwindet
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: "y"
+  persons:
+  - id: elisabeth_doppler
+    order: V
+    confirmed_age: 8
+  implied: false
+  missing_details: false
+- id: ev-0041
+  season: 1
+  episode: 4
+  timestamp: '40:20'
+  title: Elisabeth kommt wieder nach Hause nachdem sie Noah traf
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: z
+  persons:
+  - id: elisabeth_doppler
+    order: k
+    gains:
+    - taschenuhr_fuer_charlotte
+  - id: charlotte_doppler
+    order: z
+  - id: peter_doppler
+    order: k
+  - id: franziska_doppler
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0042
+  season: 1
+  episode: 4
+  timestamp: '42:30'
+  title: Erwachsener Jonas schreibt Hinweis in die Höhlenkarte
+  when:
+    kind: date
+    date: '2019-11-06'
+    order: zV
+  persons:
+  - id: jonas_kahnwald
+    order: h
+  implied: false
+  missing_details: false
+- id: ev-0043
+  season: 1
+  episode: 4
+  timestamp: '43:30'
+  title: Helge entführt Yasin
+  when:
+    kind: date
+    date: '2019-11-07'
+    order: V
+  persons:
+  - id: helge_doppler
+    order: c
+  - id: yasin_friese
+    order: V
+    confirmed_age: 9
   implied: false
   missing_details: false
