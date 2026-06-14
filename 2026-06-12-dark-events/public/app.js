@@ -523,11 +523,36 @@ function subjectAppearances() {
 function renderSubjectEvents() {
   const list = el("subject-events");
   list.innerHTML = "";
+  const [type, id] = (state.subjectKey || ":").split(":");
+  // Inline display (not the `hidden` attr) because the label's display:flex
+  // would override the UA [hidden]{display:none} rule. Only items carry events.
+  document.querySelector(".carry-toggle").style.display = type === "items" ? "" : "none";
   if (!state.subjectKey) return;
-  const [type, id] = state.subjectKey.split(":");
   const model = ownershipModel();
   if (type === "persons") renderPersonTimeline(list, id, model);
   else renderItemTimeline(list, id, model);
+}
+
+// Shared row scaffold: a small date headline, the title, then a tags line.
+function rowBody(index, event, tags) {
+  const body = document.createElement("div");
+  body.className = "row-body";
+
+  const head = document.createElement("div");
+  head.className = "row-head";
+  head.appendChild(span("seq", String(index + 1)));
+  head.appendChild(span("ev-when", whenLabel(event.when)));
+  body.appendChild(head);
+
+  body.appendChild(span("ev-title", event.title));
+
+  if (tags.length) {
+    const tagRow = document.createElement("div");
+    tagRow.className = "row-tags";
+    tags.forEach((t) => tagRow.appendChild(t));
+    body.appendChild(tagRow);
+  }
+  return body;
 }
 
 function renderPersonTimeline(list, personId, model) {
@@ -545,16 +570,17 @@ function personRowNode(row, index, age, showAge, ownedItems) {
   li.draggable = true;
   li.dataset.eventId = row.event.id;
   li.appendChild(span("grip", "⠿"));
-  li.appendChild(span("seq", String(index + 1)));
-  li.appendChild(span("ev-title", row.event.title));
-  if (showAge) li.appendChild(ageBadge(row, age));
+
+  const tags = [];
+  if (showAge) tags.push(ageBadge(row, age));
   if (row.death) {
     const death = span("ev-death", "✝");
     death.title = "Tod";
-    li.appendChild(death);
+    tags.push(death);
   }
-  for (const itemId of ownedItems) li.appendChild(itemTag(itemId));
-  li.appendChild(span("ev-when", whenLabel(row.event.when)));
+  for (const itemId of ownedItems) tags.push(itemTag(itemId));
+  li.appendChild(rowBody(index, row.event, tags));
+
   li.appendChild(openButton(row.event.id));
   li.addEventListener("dragstart", onDragStart);
   li.addEventListener("dragend", onDragEnd);
@@ -571,12 +597,13 @@ function itemRowNode(row, index) {
   const li = document.createElement("li");
   li.className = "item-row";
   li.dataset.eventId = row.event.id;
-  li.appendChild(span("seq", String(index + 1)));
-  li.appendChild(span("ev-title", row.event.title));
-  if (row.kind === "gain") li.appendChild(span("transfer-mark gain", "＋"));
-  if (row.kind === "lose") li.appendChild(span("transfer-mark lose", "－"));
-  li.appendChild(row.owner ? ownerTag(row.owner) : span("ownerless", "herrenlos"));
-  li.appendChild(span("ev-when", whenLabel(row.event.when)));
+
+  const tags = [];
+  if (row.kind === "gain") tags.push(span("transfer-mark gain", "＋"));
+  if (row.kind === "lose") tags.push(span("transfer-mark lose", "－"));
+  tags.push(row.owner ? ownerTag(row.owner) : span("ownerless", "herrenlos"));
+  li.appendChild(rowBody(index, row.event, tags));
+
   li.appendChild(openButton(row.event.id));
   return li;
 }
