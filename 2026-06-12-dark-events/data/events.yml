@@ -10,9 +10,8 @@ events:
   persons:
   - id: mikkel_nielsen
     order: M
+    death: true
   items: []
-  deaths:
-  - mikkel_nielsen
   missing_details: false
 - id: ev-0002
   season: 1
@@ -25,7 +24,6 @@ events:
   items:
   - id: brief_an_jonas
     order: V
-  deaths: []
   missing_details: false
 - id: ev-0003
   season: 1
@@ -38,7 +36,6 @@ events:
   - id: jonas_kahnwald
     order: A
   items: []
-  deaths: []
   missing_details: false
 - id: ev-0004
   season: 1
@@ -51,7 +48,6 @@ events:
   - id: erik_obendorf
     order: K
   items: []
-  deaths: []
   missing_details: false
 - id: ev-0005
   season: 1
@@ -65,7 +61,6 @@ events:
   - id: jonas_kahnwald
     order: L
   items: []
-  deaths: []
   missing_details: true
 - id: ev-0006
   season: 1
@@ -82,7 +77,6 @@ events:
   items:
   - id: raider
     order: V
-  deaths: []
   missing_details: false
 - id: ev-0007
   season: 1
@@ -105,7 +99,6 @@ events:
   - id: franziska_doppler
     order: V
   items: []
-  deaths: []
   missing_details: false
 - id: ev-0008
   season: 1
@@ -119,7 +112,6 @@ events:
   - id: jonas_kahnwald
     order: KV
   items: []
-  deaths: []
   missing_details: true
 - id: ev-0009
   season: 1
@@ -133,7 +125,6 @@ events:
   - id: mikkel_nielsen
     order: I
   items: []
-  deaths: []
   missing_details: false
 - id: ev-0010
   season: 1
@@ -146,9 +137,8 @@ events:
   persons:
   - id: mads_nielsen
     order: K
+    death: true
   items: []
-  deaths:
-  - mads_nielsen
   missing_details: false
 - id: ev-0011
   season: 1
@@ -165,7 +155,6 @@ events:
   - id: charlotte_doppler
     order: V
   items: []
-  deaths: []
   missing_details: false
 - id: ev-0012
   season: 1
@@ -178,9 +167,8 @@ events:
   persons:
   - id: erik_obendorf
     order: e
+    death: true
   items: []
-  deaths:
-  - erik_obendorf
   missing_details: false
 - id: ev-0013
   season: 1
@@ -195,5 +183,4 @@ events:
   - id: regina_tiedemann
     order: V
   items: []
-  deaths: []
   missing_details: false

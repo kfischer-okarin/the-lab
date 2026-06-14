@@ -125,7 +125,7 @@ function eventRowNode(event) {
   meta.appendChild(badge(whenLabel(event.when), event.when && event.when.kind === "time_travel" ? "tt" : ""));
   if ((event.persons || []).length) meta.appendChild(badge(`${event.persons.length}P`));
   if ((event.items || []).length) meta.appendChild(badge(`${event.items.length}G`));
-  if ((event.deaths || []).length) meta.appendChild(badge("✝", "death"));
+  if ((event.persons || []).some((p) => p.death)) meta.appendChild(badge("✝", "death"));
   if (event.missing_details) meta.appendChild(badge("Details fehlen", "missing"));
   row.appendChild(meta);
   return row;
@@ -151,7 +151,7 @@ function newEvent() {
   state.selectedId = null;
   state.draft = {
     id: null, season: lastSeason(), episode: lastEpisode(), title: "",
-    when: { kind: "date", date: "" }, persons: [], items: [], deaths: [],
+    when: { kind: "date", date: "" }, persons: [], items: [],
     missing_details: false
   };
   renderEditor();
@@ -187,7 +187,6 @@ function renderEditor() {
 
   renderAppearances("event-persons", d.persons, "persons", personName);
   renderAppearances("event-items", d.items, "items", itemName);
-  renderDeaths();
   el("delete-event").hidden = !d.id;
 }
 
@@ -218,10 +217,26 @@ function appearanceNode(a, type, nameFn) {
 
   const actions = document.createElement("span");
   actions.className = "actions";
+  if (type === "persons") actions.appendChild(deathToggle(a));
   actions.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline(type, a.id)));
   actions.appendChild(iconButton("×", "Entfernen", () => removeFrom(type, a.id), "remove"));
   node.appendChild(actions);
   return node;
+}
+
+// Checkbox toggling whether this person dies in this event. Mutates the draft
+// appearance directly, so it is captured on the next save.
+function deathToggle(a) {
+  const label = document.createElement("label");
+  label.className = "death-toggle";
+  label.title = "Stirbt hier";
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.checked = a.death === true;
+  cb.onchange = () => { a.death = cb.checked; };
+  label.appendChild(cb);
+  label.appendChild(document.createTextNode("✝"));
+  return label;
 }
 
 function iconButton(glyph, title, onClick, cls = "") {
@@ -232,22 +247,6 @@ function iconButton(glyph, title, onClick, cls = "") {
   btn.title = title;
   btn.onclick = onClick;
   return btn;
-}
-
-function renderDeaths() {
-  const container = el("event-deaths");
-  container.innerHTML = "";
-  for (const id of state.draft.deaths) {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    chip.textContent = personName(id);
-    chip.appendChild(iconButton("📈", "Zeitlinie zeigen", () => jumpToTimeline("persons", id)));
-    chip.appendChild(iconButton("×", "Entfernen", () => {
-      state.draft.deaths = state.draft.deaths.filter((x) => x !== id);
-      renderDeaths();
-    }, "remove"));
-    container.appendChild(chip);
-  }
 }
 
 function removeFrom(field, id) {
@@ -304,13 +303,6 @@ function addAppearance(field, id) {
   if (state.draft[field].some((a) => a.id === id)) return;
   collectDraftFromForm();
   state.draft[field].push({ id, order: "" }); // server assigns the order key on save
-  renderEditor();
-}
-
-function addDeath(id) {
-  if (!id || !state.draft || state.draft.deaths.includes(id)) return;
-  collectDraftFromForm();
-  state.draft.deaths.push(id);
   renderEditor();
 }
 
@@ -437,7 +429,7 @@ function subjectAppearances() {
   const rows = [];
   for (const event of state.events) {
     const appearance = (event[type] || []).find((a) => a.id === id);
-    if (appearance) rows.push({ event, order: appearance.order });
+    if (appearance) rows.push({ event, order: appearance.order, death: appearance.death === true });
   }
   // Sort by byte/ordinal order to match the fractional keys (and the server),
   // NOT localeCompare — that is case-insensitive/linguistic ("e" < "K") and
@@ -452,14 +444,14 @@ function renderSubjectEvents() {
 }
 
 function subjectRowNode(row, index) {
-  const [type, id] = (state.subjectKey || ":").split(":");
+  const [type] = (state.subjectKey || ":").split(":");
   const li = document.createElement("li");
   li.draggable = true;
   li.dataset.eventId = row.event.id;
   li.appendChild(span("grip", "⠿"));
   li.appendChild(span("seq", String(index + 1)));
   li.appendChild(span("ev-title", row.event.title));
-  if (type === "persons" && (row.event.deaths || []).includes(id)) {
+  if (type === "persons" && row.death) {
     const death = span("ev-death", "✝");
     death.title = "Tod";
     li.appendChild(death);
@@ -624,8 +616,6 @@ function bindControls() {
     openDropdown(e.currentTarget, availableOptions(state.persons, draftIds("persons")), (id) => addAppearance("persons", id)));
   el("add-item-btn").addEventListener("click", (e) =>
     openDropdown(e.currentTarget, availableOptions(state.items, draftIds("items")), (id) => addAppearance("items", id)));
-  el("add-death-btn").addEventListener("click", (e) =>
-    openDropdown(e.currentTarget, availableOptions(state.persons, state.draft ? state.draft.deaths : []), addDeath));
 
   el("subject-select").addEventListener("change", (e) => { state.subjectKey = e.target.value; renderSubjectEvents(); });
 

@@ -29,7 +29,7 @@ class Store
     list = events
     event = blank_event(next_event_id(list)).merge(sanitize_event(attrs))
     list << event
-    assign_missing_orders(list)
+    finalize(list)
     save(:events, "events", list)
     event
   end
@@ -38,7 +38,7 @@ class Store
     list = events
     index = list.index { |e| e["id"] == id } or return nil
     list[index] = list[index].merge(sanitize_event(attrs)).merge("id" => id)
-    assign_missing_orders(list)
+    finalize(list)
     save(:events, "events", list)
     list[index]
   end
@@ -109,6 +109,19 @@ class Store
     "#{base}_#{suffix}"
   end
 
+  def finalize(list)
+    assign_missing_orders(list)
+    strip_false_death_flags(list)
+  end
+
+  # Death is a flag on a person appearance; keep only the truthy ones so the
+  # YAML stays uncluttered.
+  def strip_false_death_flags(list)
+    list.each do |event|
+      (event["persons"] || []).each { |a| a.delete("death") unless a["death"] == true }
+    end
+  end
+
   # Any persons/items appearance added without an order key is appended to the
   # end of that subject's subjective sequence, so the UI never has to mint keys.
   def assign_missing_orders(list)
@@ -134,13 +147,13 @@ class Store
     {
       "id" => id, "season" => nil, "episode" => nil, "title" => "(neues Ereignis)",
       "when" => { "kind" => "unknown" }, "persons" => [], "items" => [],
-      "deaths" => [], "missing_details" => false
+      "missing_details" => false
     }
   end
 
   def sanitize_event(attrs)
     out = {}
-    %w[season episode title when persons items deaths missing_details].each do |k|
+    %w[season episode title when persons items missing_details].each do |k|
       out[k] = attrs[k] if attrs.key?(k)
     end
     out
