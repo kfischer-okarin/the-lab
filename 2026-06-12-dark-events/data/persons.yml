@@ -1,5 +1,8 @@
 ---
 persons:
+- id: agnes_nielsen
+  name: Agnes Nielsen
+  aliases: []
 - id: bartosz_tiedemann
   name: Bartosz Tiedemann
   aliases: []
@@ -14,6 +17,9 @@ persons:
   aliases: []
 - id: claudia_tiedemann
   name: Claudia Tiedemann
+  aliases: []
+- id: doris_tiedemann
+  name: Doris Tiedemann
   aliases: []
 - id: egon_tiedemann
   name: Egon Tiedemann

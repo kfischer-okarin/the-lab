@@ -60,6 +60,7 @@ events:
   persons:
   - id: erik_obendorf
     order: K
+    confirmed_age: 15
   missing_details: false
   timestamp: '07:40'
   implied: false
@@ -211,17 +212,18 @@ events:
   season: 1
   episode: 2
   timestamp: '16:40'
-  title: Helge kommt nach 2019
+  title: Helge kommt nach 2019 um Yasin zu holen
   when:
     kind: time_travel
-    from:
+    from: '1986-11-05'
     to: '2019-11-05'
-    to_order: zw
+    to_order: zzk
+    from_order: zzzw
   persons:
   - id: helge_doppler
-    order: V
+    order: J
   implied: false
-  missing_details: true
+  missing_details: false
 - id: ev-0016
   season: 1
   episode: 2
@@ -621,7 +623,7 @@ events:
     order: V
   persons:
   - id: helge_doppler
-    order: c
+    order: L
   - id: yasin_friese
     order: V
     confirmed_age: 9
@@ -1045,14 +1047,14 @@ events:
   when:
     kind: date
     date: '2019-11-09'
-    order: F
+    order: "y"
   persons:
   - id: jana_nielsen
     order: c
   - id: helge_doppler
-    order: g
+    order: M
   implied: true
-  missing_details: false
+  missing_details: true
 - id: ev-0070
   season: 1
   episode: 7
@@ -1112,7 +1114,7 @@ events:
     order: w
   persons:
   - id: helge_doppler
-    order: i
+    order: Ls
   - id: yasin_friese
     order: k
   implied: false
@@ -1147,7 +1149,7 @@ events:
     to_order: zs
   persons:
   - id: helge_doppler
-    order: h
+    order: LV
   - id: yasin_friese
     order: "Y"
   implied: true
@@ -1165,6 +1167,242 @@ events:
     to_order: s
   persons:
   - id: helge_doppler
-    order: hV
+    order: Lk
   implied: true
+  missing_details: false
+- id: ev-0077
+  season: 1
+  episode: 8
+  timestamp: '01:20'
+  title: Zwei Jungen werden auf der Baustelle gefunden
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: V
+  persons:
+  - id: egon_tiedemann
+    order: "y"
+  - id: helge_doppler
+    order: '3'
+    confirmed_age: 9
+  - id: erik_obendorf
+    order: p
+  - id: yasin_friese
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0078
+  season: 1
+  episode: 2
+  timestamp: '22:20'
+  title: Helge bringt Erik zum Stuhl
+  when:
+    kind: time_travel
+    from: '2019-10-22'
+    to: '1986-10-22'
+    from_order: k
+    to_order: V
+  persons:
+  - id: helge_doppler
+    order: D
+  - id: erik_obendorf
+    order: U
+  implied: true
+  missing_details: false
+- id: ev-0079
+  season: 1
+  episode: 2
+  timestamp: '22:20'
+  title: Helge kommt nach 2019 um Erik holen
+  when:
+    kind: time_travel
+    from: '1986-10-22'
+    to: '2019-10-22'
+    to_order: s
+    from_order: k
+  persons:
+  - id: helge_doppler
+    order: A
+  implied: true
+  missing_details: false
+- id: ev-0080
+  season: 1
+  episode: 8
+  timestamp: '03:40'
+  title: Erwachsener Jonas diskutiert mit H.G.Tannhaus
+  when:
+    kind: date
+    date: '1986-11-10'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: zs
+  - id: h_g_tannhaus
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0081
+  season: 1
+  episode: 8
+  timestamp: '06:10'
+  title: Ulrich geht durch die Passage
+  when:
+    kind: time_travel
+    from: '2019-11-09'
+    to: '1953-11-09'
+    from_order: z
+    to_order: "y"
+  persons:
+  - id: ulrich_nielsen
+    order: zs
+  implied: false
+  missing_details: false
+- id: ev-0082
+  season: 1
+  episode: 8
+  timestamp: '05:00'
+  title: Der alte Helge geht nach 1986
+  when:
+    kind: time_travel
+    from: '2019-11-09'
+    to: '1986-11-09'
+    to_order: zV
+    from_order: yV
+  persons:
+  - id: helge_doppler
+    order: z
+  implied: true
+  missing_details: false
+- id: ev-0083
+  season: 1
+  episode: 8
+  timestamp: '15:40'
+  title: Ulrich hilft Helge gegen Mobber
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: k
+  persons:
+  - id: ulrich_nielsen
+    order: zw
+  - id: helge_doppler
+    order: '5'
+  implied: false
+  missing_details: false
+- id: ev-0084
+  season: 1
+  episode: 8
+  timestamp: '17:40'
+  title: Ulrich trifft Agnes und Tronte
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: s
+  persons:
+  - id: ulrich_nielsen
+    order: zy
+  - id: agnes_nielsen
+    order: V
+  - id: tronte_nielsen
+    order: F
+    confirmed_age: 12
+  implied: false
+  missing_details: false
+- id: ev-0085
+  season: 1
+  episode: 8
+  timestamp: '20:20'
+  title: Ulrich trifft H.G. Tannhaus
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: zV
+  persons:
+  - id: ulrich_nielsen
+    order: zz
+  - id: h_g_tannhaus
+    order: F
+    confirmed_age: 40
+  implied: false
+  missing_details: false
+- id: ev-0086
+  season: 1
+  episode: 8
+  timestamp: '22:50'
+  title: Agnes und Tronte ziehen bei Tiedemanns ein
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: "y"
+  persons:
+  - id: agnes_nielsen
+    order: k
+  - id: tronte_nielsen
+    order: "N"
+  - id: doris_tiedemann
+    order: V
+  - id: claudia_tiedemann
+    order: F
+    confirmed_age: 11
+  - id: helge_doppler
+    order: '6'
+  implied: false
+  missing_details: false
+- id: ev-0087
+  season: 1
+  episode: 8
+  timestamp: '24:00'
+  title: Jana und Ines erzählen Tannhaus von den beiden Jungen
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: z
+  persons:
+  - id: ines_kahnwald
+    order: '7'
+    confirmed_age: 13
+  - id: jana_nielsen
+    order: '3'
+    confirmed_age: 11
+  - id: ulrich_nielsen
+    order: zzV
+  - id: h_g_tannhaus
+    order: "N"
+  implied: false
+  missing_details: false
+- id: ev-0088
+  season: 1
+  episode: 8
+  timestamp: '33:50'
+  title: Ulrich versucht Helge zu töten
+  when:
+    kind: date
+    date: '1953-11-10'
+    order: zk
+  persons:
+  - id: ulrich_nielsen
+    order: zzk
+  - id: helge_doppler
+    order: 6V
+  implied: false
+  missing_details: false
+- id: ev-0089
+  season: 1
+  episode: 8
+  timestamp: '42:40'
+  title: Erwachsener Jonas möchte die Zeitmaschine von H.G. Tannhaus reparieren lassen
+  when:
+    kind: date
+    date: '1986-11-10'
+    order: k
+  persons:
+  - id: jonas_kahnwald
+    order: zw
+    loses:
+    - zeitmaschine
+  - id: h_g_tannhaus
+    order: w
+    has:
+    - zeitmaschine
+  implied: false
   missing_details: false
