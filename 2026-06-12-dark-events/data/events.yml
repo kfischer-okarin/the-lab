@@ -950,3 +950,221 @@ events:
     order: p
   implied: false
   missing_details: false
+- id: ev-0064
+  season: 1
+  episode: 7
+  timestamp: '06:10'
+  title: Jonas frag Regina nach Jahr und Michael
+  when:
+    kind: date
+    date: '1986-11-09'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: KzV
+  - id: regina_tiedemann
+    order: F
+    confirmed_age: 15
+  implied: false
+  missing_details: false
+- id: ev-0065
+  season: 1
+  episode: 7
+  timestamp: '09:00'
+  title: Egon frag Helge was er gemacht hat als Mads verschwand
+  when:
+    kind: date
+    date: '1986-11-09'
+    order: k
+  persons:
+  - id: egon_tiedemann
+    order: w
+  - id: helge_doppler
+    order: "N"
+  implied: false
+  missing_details: false
+- id: ev-0066
+  season: 1
+  episode: 7
+  timestamp: '21:00'
+  title: Ulrich befragt den alten Helge
+  when:
+    kind: date
+    date: '2019-11-09'
+    order: V
+  persons:
+  - id: ulrich_nielsen
+    order: zV
+  - id: helge_doppler
+    order: w
+  implied: false
+  missing_details: false
+- id: ev-0067
+  season: 1
+  episode: 7
+  timestamp: '22:00'
+  title: Erwachsener Jonas stoppt sich selbst Mikkel zurückzuholen
+  when:
+    kind: date
+    date: '1986-11-09'
+    order: s
+  persons:
+  - id: jonas_kahnwald
+    order: Kzk
+  - id: jonas_kahnwald
+    order: zk
+  - id: mikkel_nielsen
+    order: Jz
+  - id: ines_kahnwald
+    order: R
+  implied: false
+  missing_details: false
+- id: ev-0068
+  season: 1
+  episode: 7
+  timestamp: '34:20'
+  title: Jana sieht wie Noah und Helge sich streiten
+  when:
+    kind: date
+    date: '1986-10-03'
+    order: V
+  persons:
+  - id: noah
+    order: w
+  - id: helge_doppler
+    order: '7'
+  - id: jana_nielsen
+    order: '7'
+  implied: true
+  missing_details: false
+- id: ev-0069
+  season: 1
+  episode: 7
+  timestamp: '34:20'
+  title: Jana sieht und erkennt Helge von vor 33 Jahren
+  when:
+    kind: date
+    date: '2019-11-09'
+    order: F
+  persons:
+  - id: jana_nielsen
+    order: c
+  - id: helge_doppler
+    order: g
+  implied: true
+  missing_details: false
+- id: ev-0070
+  season: 1
+  episode: 7
+  timestamp: '39:20'
+  title: Jonas reist zurück nach 2019
+  when:
+    kind: time_travel
+    from: '1986-11-09'
+    to: '2019-11-09'
+    from_order: w
+    to_order: s
+  persons:
+  - id: jonas_kahnwald
+    order: Kzs
+  implied: false
+  missing_details: false
+- id: ev-0071
+  season: 1
+  episode: 7
+  timestamp: '42:50'
+  title: Jonas verbrennt den Brief
+  when:
+    kind: date
+    date: '2019-11-10'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: Kzw
+    loses:
+    - brief_an_jonas
+  implied: false
+  missing_details: false
+- id: ev-0072
+  season: 1
+  episode: 7
+  timestamp: '44:20'
+  title: Ulrich folgt dem alten Helge durch den Wald und hinterlässt Nachricht für Charlotte
+  when:
+    kind: date
+    date: '2019-11-09'
+    order: w
+  persons:
+  - id: ulrich_nielsen
+    order: zk
+  - id: helge_doppler
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0073
+  season: 1
+  episode: 7
+  timestamp: '46:20'
+  title: Helge schleppt den toten Yasin aus dem Bunker
+  when:
+    kind: date
+    date: '1953-11-09'
+    order: w
+  persons:
+  - id: helge_doppler
+    order: i
+  - id: yasin_friese
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0074
+  season: 1
+  episode: 7
+  timestamp: '46:20'
+  title: Yasin reist mit dem Stuhl und stirbt
+  when:
+    kind: time_travel
+    from: '1986-11-09'
+    to: '1953-11-09'
+    from_order: "y"
+    to_order: k
+  persons:
+  - id: yasin_friese
+    order: c
+    death: true
+  implied: true
+  missing_details: false
+- id: ev-0075
+  season: 1
+  episode: 7
+  timestamp: '46:20'
+  title: Helge bringt Yasin zum Stuhl
+  when:
+    kind: time_travel
+    from: '2019-11-07'
+    to: '1986-11-07'
+    from_order: zw
+    to_order: zs
+  persons:
+  - id: helge_doppler
+    order: h
+  - id: yasin_friese
+    order: "Y"
+  implied: true
+  missing_details: false
+- id: ev-0076
+  season: 1
+  episode: 7
+  timestamp: '46:20'
+  title: Helge reist nach 1953 um Yasin zu holen
+  when:
+    kind: time_travel
+    from: '1986-11-09'
+    to: '1953-11-09'
+    from_order: z
+    to_order: s
+  persons:
+  - id: helge_doppler
+    order: hV
+  implied: true
+  missing_details: false
