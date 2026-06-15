@@ -3,6 +3,9 @@ persons:
 - id: agnes_nielsen
   name: Agnes Nielsen
   aliases: []
+- id: aleksandar_koehler
+  name: Aleksander Köhler
+  aliases: []
 - id: bartosz_tiedemann
   name: Bartosz Tiedemann
   aliases: []
@@ -32,6 +35,9 @@ persons:
   aliases: []
 - id: franziska_doppler
   name: Franziska Doppler
+  aliases: []
+- id: greta_doppler
+  name: Greta Doppler
   aliases: []
 - id: h_g_tannhaus
   name: H. G. Tannhaus

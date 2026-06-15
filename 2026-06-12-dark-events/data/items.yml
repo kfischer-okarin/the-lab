@@ -8,3 +8,5 @@ items:
   name: Taschenuhr für Charlotte
 - id: zeitmaschine
   name: Zeitmaschine
+- id: zeitmaschinenplaene
+  name: Zeitmaschinenpläne

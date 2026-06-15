@@ -388,7 +388,7 @@ events:
   - id: claudia_tiedemann
     order: V
   - id: helge_doppler
-    order: F
+    order: 6k
   implied: false
   missing_details: false
 - id: ev-0029
@@ -479,11 +479,11 @@ events:
   when:
     kind: date
     date: '1986-11-05'
-    order: zzzk
+    order: zzzy
   persons:
   - id: h_g_tannhaus
     order: V
-    has:
+    gains:
     - zeitmaschine
   implied: false
   missing_details: false
@@ -1181,7 +1181,7 @@ events:
     order: V
   persons:
   - id: egon_tiedemann
-    order: "y"
+    order: F
   - id: helge_doppler
     order: '3'
     confirmed_age: 9
@@ -1404,5 +1404,284 @@ events:
     order: w
     has:
     - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0090
+  season: 1
+  episode: 9
+  timestamp: '08:00'
+  title: Greta sucht Seelsorge bei Noah
+  when:
+    kind: date
+    date: '1953-11-11'
+    order: V
+  persons:
+  - id: greta_doppler
+    order: V
+  - id: noah
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0091
+  season: 1
+  episode: 9
+  timestamp: '10:00'
+  title: Ulrich wird verhaftet wegen Kindesentführung oder Mord
+  when:
+    kind: date
+    date: '1953-11-11'
+    order: k
+  persons:
+  - id: ulrich_nielsen
+    order: zzs
+  - id: egon_tiedemann
+    order: "N"
+  implied: false
+  missing_details: false
+- id: ev-0092
+  season: 1
+  episode: 9
+  timestamp: '13:00'
+  title: Hannah hetzt Katharina gegen Regina auf
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: V
+  persons:
+  - id: hannah_kahnwald
+    order: TV
+  - id: katharina_nielsen
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0093
+  season: 1
+  episode: 9
+  timestamp: '14:30'
+  title: Ulrich wird freigelassen
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: k
+  persons:
+  - id: egon_tiedemann
+    order: "y"
+  - id: ulrich_nielsen
+    order: 6k
+  - id: jana_nielsen
+    order: Q
+  implied: false
+  missing_details: false
+- id: ev-0094
+  season: 1
+  episode: 9
+  timestamp: '18:10'
+  title: Aleksandar hilft Regina gegen Ulrich und Katharina
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: s
+  persons:
+  - id: ulrich_nielsen
+    order: 6s
+  - id: katharina_nielsen
+    order: s
+  - id: regina_tiedemann
+    order: "N"
+  - id: aleksandar_koehler
+    order: V
+    confirmed_age: 20
+    has:
+    - pistole
+  implied: false
+  missing_details: false
+- id: ev-0095
+  season: 1
+  episode: 9
+  timestamp: '22:20'
+  title: Der alte Helge beobachtet sich selbst
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: w
+  persons:
+  - id: helge_doppler
+    order: "Y"
+  - id: helge_doppler
+    order: zk
+  implied: false
+  missing_details: false
+- id: ev-0096
+  season: 1
+  episode: 9
+  timestamp: '24:00'
+  title: Egon sucht nach Helge bei dessen Hütte
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: "y"
+  persons:
+  - id: egon_tiedemann
+    order: z
+  - id: helge_doppler
+    order: e
+  implied: false
+  missing_details: false
+- id: ev-0097
+  season: 1
+  episode: 9
+  timestamp: '25:40'
+  title: Aleksander vergräbt Pass und Pistole
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: z
+  persons:
+  - id: aleksandar_koehler
+    order: k
+    loses:
+    - pistole
+  implied: false
+  missing_details: false
+- id: ev-0098
+  season: 1
+  episode: 9
+  timestamp: '31:10'
+  title: Hannah stiehlt Pass und Pistole
+  when:
+    kind: date
+    date: '1986-11-11'
+    order: zV
+  persons:
+  - id: hannah_kahnwald
+    order: U
+    gains:
+    - pistole
+  implied: true
+  missing_details: false
+- id: ev-0099
+  season: 1
+  episode: 9
+  timestamp: '38:40'
+  title: Die alte Claudia besucht Bartosz
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: V
+  persons:
+  - id: claudia_tiedemann
+    order: s
+  - id: bartosz_tiedemann
+    order: w
+  implied: false
+  missing_details: false
+- id: ev-0100
+  season: 1
+  episode: 9
+  timestamp: '41:20'
+  title: Hannah erpresst Aleksandar, Ulrich fertigzumachen
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: k
+  persons:
+  - id: hannah_kahnwald
+    order: w
+  - id: aleksandar_koehler
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0101
+  season: 1
+  episode: 9
+  timestamp: '43:20'
+  title: Martha stellt Jonas zur Rede und küsst ihn
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: s
+  persons:
+  - id: martha_nielsen
+    order: s
+  - id: jonas_kahnwald
+    order: Kzy
+  implied: false
+  missing_details: false
+- id: ev-0102
+  season: 1
+  episode: 9
+  timestamp: '47:10'
+  title: Regina sieht das Hotelzimmer vom erwachsenen Jonas
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: w
+  persons:
+  - id: regina_tiedemann
+    order: w
+  implied: false
+  missing_details: false
+- id: ev-0103
+  season: 1
+  episode: 9
+  timestamp: '48:20'
+  title: Bartosz trifft wieder Noah und bestätigt die Vorhersagen
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: "y"
+  persons:
+  - id: bartosz_tiedemann
+    order: "y"
+  - id: noah
+    order: z
+  implied: false
+  missing_details: false
+- id: ev-0104
+  season: 1
+  episode: 9
+  timestamp: '50:40'
+  title: Erwachsener Jonas holt sich dunkle Materie
+  when:
+    kind: date
+    date: '2019-11-11'
+    order: z
+  persons:
+  - id: jonas_kahnwald
+    order: zy
+  implied: false
+  missing_details: false
+- id: ev-0105
+  season: 1
+  episode: 9
+  timestamp: '50:40'
+  title: Erwachsener Jonas reist nach 2019 für die Materie
+  when:
+    kind: time_travel
+    from: '1986-11-11'
+    to: '2019-11-11'
+    from_order: zk
+    to_order: yV
+  persons:
+  - id: jonas_kahnwald
+    order: zx
+  implied: false
+  missing_details: false
+- id: ev-0106
+  season: 1
+  episode: 9
+  timestamp: '51:10'
+  title: Claudia gibt H.G. Tannhaus die Zeitmaschinenpläne und beauftragt die Konstruktion
+  when:
+    kind: date
+    date: '1953-11-11'
+    order: s
+  persons:
+  - id: claudia_tiedemann
+    order: w
+  - id: h_g_tannhaus
+    order: R
+    gains:
+    - zeitmaschinenplaene
   implied: false
   missing_details: false
