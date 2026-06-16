@@ -129,10 +129,10 @@ events:
   title: Mads reist mithilfe des Stuhls und stirbt
   when:
     kind: time_travel
-    from: '1986-11-05'
-    to: '2019-11-05'
-    to_order: zs
-    from_order: z
+    from: '1986-11-04'
+    to: '2019-11-04'
+    to_order: zzV
+    from_order: V
   persons:
   - id: mads_nielsen
     order: K
@@ -1032,7 +1032,7 @@ events:
     order: V
   persons:
   - id: noah
-    order: w
+    order: F
   - id: helge_doppler
     order: '7'
   - id: jana_nielsen
@@ -1683,5 +1683,254 @@ events:
     order: R
     gains:
     - zeitmaschinenplaene
+  implied: false
+  missing_details: false
+- id: ev-0107
+  season: 1
+  episode: 10
+  timestamp: '01:40'
+  title: Peter, Tronte finden Mads im Bunker und Claude kommt und erklärt
+  when:
+    kind: date
+    date: '2019-11-04'
+    order: zzk
+  persons:
+  - id: peter_doppler
+    order: F
+  - id: tronte_nielsen
+    order: R
+  - id: mads_nielsen
+    order: U
+  - id: claudia_tiedemann
+    order: o
+  implied: false
+  missing_details: false
+- id: ev-0108
+  season: 1
+  episode: 10
+  timestamp: '10:20'
+  title: Jonas frage Ines nach Michaels Hintergrund und bekommt den Brief
+  when:
+    kind: date
+    date: '2019-11-12'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: Kzz
+    gains:
+    - brief_an_jonas
+  - id: ines_kahnwald
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0109
+  season: 1
+  episode: 10
+  timestamp: '17:50'
+  title: Jonas bekommt die fertiggestellte Zeitmaschine von H.G. Tannhaus
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: zz
+    gains:
+    - zeitmaschine
+  - id: h_g_tannhaus
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0110
+  season: 1
+  episode: 10
+  timestamp: '17:40'
+  title: Jonas reist nach 86 um die Zeitmaschine abzuholen
+  when:
+    kind: time_travel
+    from: '2019-11-12'
+    to: '1986-11-12'
+    from_order: k
+    to_order: k
+  persons:
+  - id: jonas_kahnwald
+    order: zyV
+  implied: true
+  missing_details: false
+- id: ev-0111
+  season: 1
+  episode: 10
+  timestamp: '22:20'
+  title: Der alte Helge konfrontiert sich selbst an der Hütte
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: s
+  persons:
+  - id: helge_doppler
+    order: b
+  - id: helge_doppler
+    order: zw
+  implied: false
+  missing_details: false
+- id: ev-0112
+  season: 1
+  episode: 10
+  timestamp: '29:30'
+  title: Jonas reist nach 1986 um Mikkel zu holen
+  when:
+    kind: time_travel
+    from: '2019-11-12'
+    to: '1986-11-12'
+    from_order: s
+    to_order: w
+  persons:
+  - id: jonas_kahnwald
+    order: KzzV
+  implied: false
+  missing_details: false
+- id: ev-0113
+  season: 1
+  episode: 10
+  timestamp: '32:10'
+  title: Charlotte findet Ulrichs Foto in den Archiven
+  when:
+    kind: date
+    date: '2019-11-12'
+    order: w
+  persons:
+  - id: charlotte_doppler
+    order: zV
+  implied: false
+  missing_details: false
+- id: ev-0114
+  season: 1
+  episode: 10
+  timestamp: '34:10'
+  title: Jonas läuft in die Falle im Krankenhaus und wird entführt
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: "y"
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzk
+  - id: mikkel_nielsen
+    order: JzV
+  - id: noah
+    order: zV
+  - id: helge_doppler
+    order: h
+  implied: false
+  missing_details: false
+- id: ev-0115
+  season: 1
+  episode: 10
+  timestamp: '34:50'
+  title: Erwachsener Jonas gibt sich selber zu erkennen
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: z
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzs
+  - id: jonas_kahnwald
+    order: zzk
+  implied: false
+  missing_details: false
+- id: ev-0116
+  season: 1
+  episode: 10
+  timestamp: '38:40'
+  title: Der alte Helge fährt mit dem Auto in sein jüngeres Ich und stirbt
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: zV
+  persons:
+  - id: helge_doppler
+    order: i
+  - id: helge_doppler
+    order: zz
+    death: true
+  implied: false
+  missing_details: false
+- id: ev-0117
+  season: 1
+  episode: 10
+  timestamp: '41:00'
+  title: Noah erzählt Bartosz was der erwachsene Jonas tun will
+  when:
+    kind: date
+    date: '2019-11-12'
+    order: "y"
+  persons:
+  - id: noah
+    order: zk
+  - id: bartosz_tiedemann
+    order: z
+  implied: false
+  missing_details: false
+- id: ev-0118
+  season: 1
+  episode: 10
+  timestamp: '44:30'
+  title: Der erwachsene Jonas schließt die Passage
+  when:
+    kind: date
+    date: '1986-11-12'
+    order: zk
+  persons:
+  - id: jonas_kahnwald
+    order: zzs
+  implied: false
+  missing_details: false
+- id: ev-0119
+  season: 1
+  episode: 10
+  timestamp: '49:50'
+  title: Helge wird durch das Zeitloch nach 86 transportiert
+  when:
+    kind: time_travel
+    from: '1953-11-13'
+    to: '1986-11-13'
+    from_order: V
+    to_order: V
+  persons:
+  - id: helge_doppler
+    order: 6c
+  implied: false
+  missing_details: false
+- id: ev-0120
+  season: 1
+  episode: 10
+  timestamp: '50:30'
+  title: Jonas wird durch das Zeitloch in die Zukunft transportiert
+  when:
+    kind: time_travel
+    from: '1986-11-13'
+    to: '2053-11-13'
+    from_order: k
+    to_order: V
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzw
+  implied: false
+  missing_details: false
+- id: ev-0121
+  season: 1
+  episode: 10
+  timestamp: '53:50'
+  title: Willkommen in der Zukunft
+  when:
+    kind: date
+    date: '2053-11-13'
+    order: k
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzy
+  - id: silja_tiedemann
+    order: V
   implied: false
   missing_details: false

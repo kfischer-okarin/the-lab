@@ -81,6 +81,9 @@ persons:
 - id: regina_tiedemann
   name: Regina Tiedemann
   aliases: []
+- id: silja_tiedemann
+  name: Silja Tiedemann
+  aliases: []
 - id: tronte_nielsen
   name: Tronte Nielsen
   aliases: []
