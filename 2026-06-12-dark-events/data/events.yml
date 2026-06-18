@@ -1910,9 +1910,9 @@ events:
   when:
     kind: time_travel
     from: '1986-11-13'
-    to: '2053-11-13'
+    to: '2052-11-13'
     from_order: k
-    to_order: V
+    to_order: k
   persons:
   - id: jonas_kahnwald
     order: Kzzw
@@ -1925,12 +1925,185 @@ events:
   title: Willkommen in der Zukunft
   when:
     kind: date
-    date: '2053-11-13'
-    order: k
+    date: '2052-11-13'
+    order: V
   persons:
   - id: jonas_kahnwald
     order: Kzzy
   - id: silja_tiedemann
     order: V
+  implied: false
+  missing_details: false
+- id: ev-0122
+  season: 2
+  episode: 1
+  timestamp: '03:40'
+  title: Erwachsener Bartosz wird von jungem Noah getötet
+  when:
+    kind: date
+    date: '1921-06-21'
+    order: V
+  persons:
+  - id: bartosz_tiedemann
+    order: zV
+  - id: noah
+    order: '7'
+    confirmed_age: 17
+  implied: false
+  missing_details: false
+- id: ev-0123
+  season: 2
+  episode: 1
+  timestamp: '06:40'
+  title: Jonas sucht Materialien in der Zukunft und hört Claudias Tonbänder
+  when:
+    kind: date
+    date: '2053-06-21'
+    order: V
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzz
+  implied: false
+  missing_details: false
+- id: ev-0124
+  season: 2
+  episode: 1
+  timestamp: '11:30'
+  title: Clausen kommt nach Winden
+  when:
+    kind: date
+    date: '2020-06-21'
+    order: V
+  persons: []
+  implied: false
+  missing_details: false
+- id: ev-0125
+  season: 2
+  episode: 1
+  timestamp: '22:00'
+  title: Erwachsener Jonas geht in sein Haus und trifft Hannah
+  when:
+    kind: date
+    date: '2020-06-21'
+    order: k
+  persons:
+  - id: jonas_kahnwald
+    order: zzw
+  - id: hannah_kahnwald
+    order: "y"
+  implied: false
+  missing_details: false
+- id: ev-0126
+  season: 2
+  episode: 1
+  timestamp: '24:40'
+  title: Noah tröstet sein jüngeres Ich
+  when:
+    kind: date
+    date: '1921-06-21'
+    order: k
+  persons:
+  - id: noah
+    order: B
+  - id: noah
+    order: zw
+  implied: false
+  missing_details: false
+- id: ev-0127
+  season: 2
+  episode: 1
+  timestamp: '26:40'
+  title: Elisabeth richtet Eindringlinge hin
+  when:
+    kind: date
+    date: '2053-06-21'
+    order: k
+  persons:
+  - id: elisabeth_doppler
+    order: s
+  - id: jonas_kahnwald
+    order: KzzzV
+  - id: silja_tiedemann
+    order: k
+  implied: false
+  missing_details: false
+- id: ev-0128
+  season: 2
+  episode: 1
+  timestamp: '28:50'
+  title: Elisabeth und Peter finden ein Sic Mundus Foto im Laden von H.G. Tannhaus
+  when:
+    kind: date
+    date: '2020-06-21'
+    order: s
+  persons:
+  - id: elisabeth_doppler
+    order: c
+  - id: peter_doppler
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0129
+  season: 2
+  episode: 1
+  timestamp: '33:40'
+  title: Adam beauftragt Noah die fehlenden Seiten des Buchs zu finden
+  when:
+    kind: date
+    date: '1921-06-21'
+    order: s
+  persons:
+  - id: jonas_kahnwald
+    order: zzy
+  - id: noah
+    order: zy
+  - id: franziska_doppler
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0130
+  season: 2
+  episode: 1
+  timestamp: '39:40'
+  title: Noah geht los um die Seiten zu finden
+  when:
+    kind: date
+    date: '1921-06-21'
+    order: w
+  persons:
+  - id: noah
+    order: zz
+    has:
+    - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0131
+  season: 2
+  episode: 1
+  timestamp: '42:30'
+  title: Noah reist nach 2019 um Bartosz abzuholen
+  when:
+    kind: time_travel
+    from: '1921-06-21'
+    to: '2019-06-21'
+    to_order: u
+    from_order: "y"
+  persons:
+  - id: noah
+    order: zzV
+  implied: false
+  missing_details: false
+- id: ev-0132
+  season: 2
+  episode: 1
+  timestamp: '49:50'
+  title: Jonas findet die Dunkle Materie
+  when:
+    kind: date
+    date: '2053-06-21'
+    order: s
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzzk
   implied: false
   missing_details: false
