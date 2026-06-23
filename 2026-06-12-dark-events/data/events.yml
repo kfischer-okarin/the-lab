@@ -2097,13 +2097,199 @@ events:
   season: 2
   episode: 1
   timestamp: '49:50'
-  title: Jonas findet die Dunkle Materie
+  title: Jonas findet das Gottesteilchen
   when:
     kind: date
     date: '2053-06-21'
-    order: s
+    order: zk
   persons:
   - id: jonas_kahnwald
     order: Kzzzk
+  implied: false
+  missing_details: false
+- id: ev-0133
+  season: 2
+  episode: 2
+  timestamp: '13:50'
+  title: Claudia trifft ihr älteres Ich
+  when:
+    kind: date
+    date: '1987-06-21'
+    order: V
+  persons:
+  - id: claudia_tiedemann
+    order: m
+  - id: claudia_tiedemann
+    order: z
+  implied: false
+  missing_details: false
+- id: ev-0134
+  season: 2
+  episode: 2
+  timestamp: '26:00'
+  title: Erwachsener Jonas und Hannah reisen in die Vergangenheit
+  when:
+    kind: time_travel
+    from: '2020-06-21'
+    to: '1987-06-21'
+    from_order: w
+    to_order: k
+  persons:
+  - id: jonas_kahnwald
+    order: zzx
+  - id: hannah_kahnwald
+    order: z
+  implied: false
+  missing_details: false
+- id: ev-0135
+  season: 2
+  episode: 2
+  timestamp: '35:00'
+  title: Jonas wird gehängt weil er in die Todeszone gegangen ist
+  when:
+    kind: date
+    date: '2053-06-21'
+    order: zV
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzzs
+  - id: elisabeth_doppler
+    order: w
+  - id: silja_tiedemann
+    order: s
+  implied: false
+  missing_details: false
+- id: ev-0136
+  season: 2
+  episode: 2
+  timestamp: '39:20'
+  title: Egon spricht mit dem irren Gefangenen
+  when:
+    kind: date
+    date: '1987-06-21'
+    order: s
+  persons:
+  - id: egon_tiedemann
+    order: zV
+  - id: ulrich_nielsen
+    order: zzw
+  implied: false
+  missing_details: false
+- id: ev-0137
+  season: 2
+  episode: 2
+  timestamp: '27:30'
+  title: Mikkel will in die Höhle wird aber von Noah angesprochen
+  when:
+    kind: date
+    date: '1987-06-21'
+    order: w
+  persons:
+  - id: mikkel_nielsen
+    order: Jzk
+  - id: noah
+    order: zzk
+  implied: false
+  missing_details: false
+- id: ev-0138
+  season: 2
+  episode: 2
+  timestamp: '44:30'
+  title: Silja befreit Jonas um die Wahrheit der Todeszone zu erfahren
+  when:
+    kind: date
+    date: '2053-06-21'
+    order: "y"
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzzw
+  - id: silja_tiedemann
+    order: w
+  implied: false
+  missing_details: false
+- id: ev-0139
+  season: 2
+  episode: 2
+  timestamp: '46:10'
+  title: Erwachsener Jonas und Hannah beobachten Mikkel und Ines
+  when:
+    kind: date
+    date: '1987-06-21'
+    order: "y"
+  persons:
+  - id: jonas_kahnwald
+    order: zzxV
+  - id: hannah_kahnwald
+    order: zV
+  - id: ines_kahnwald
+    order: T
+  - id: mikkel_nielsen
+    order: Jzs
+  implied: false
+  missing_details: false
+- id: ev-0140
+  season: 2
+  episode: 2
+  timestamp: '31:30'
+  title: Die alte Claudia reist zurück um die Maschine zu vergraben
+  when:
+    kind: time_travel
+    from: '1987-06-21'
+    to: '1954-06-21'
+    from_order: yV
+    to_order: F
+  persons:
+  - id: claudia_tiedemann
+    order: zk
+    has:
+    - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0141
+  season: 2
+  episode: 2
+  timestamp: '48:20'
+  title: Claudia findet die vergabene Zeitmaschine
+  when:
+    kind: date
+    date: '1987-06-21'
+    order: zV
+  persons:
+  - id: claudia_tiedemann
+    order: "n"
+    gains:
+    - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0142
+  season: 2
+  episode: 2
+  timestamp: '48:50'
+  title: Die alte Claudia vergräbt die Zeitmaschine
+  when:
+    kind: date
+    date: '1954-06-21'
+    order: V
+  persons:
+  - id: claudia_tiedemann
+    order: zs
+    loses:
+    - zeitmaschine
+  implied: false
+  missing_details: false
+- id: ev-0143
+  season: 2
+  episode: 2
+  timestamp: '50:50'
+  title: Jonas geht durch das Gottesteilchen
+  when:
+    kind: time_travel
+    from: '2053-06-21'
+    to: '1921-06-21'
+    to_order: z
+    from_order: z
+  persons:
+  - id: jonas_kahnwald
+    order: Kzzzy
   implied: false
   missing_details: false
